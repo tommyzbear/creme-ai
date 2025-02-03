@@ -1,39 +1,73 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
+import type { Metadata } from "next";
+import localFont from "next/font/local";
 import Providers from "@/components/providers";
 import { Toaster } from "@/components/ui/toaster";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const bricolage = localFont({
+    src: "./fonts/Bricolage.ttf",
+    variable: "--font-bricolage",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const ibm = localFont({
+    src: [
+        {
+            path: "./fonts/IBMPlexMono-ExtraLight.ttf",
+            weight: "200",
+            style: "normal",
+        },
+        {
+            path: "./fonts/IBMPlexMono-ExtraLightItalic.ttf",
+            weight: "200",
+            style: "italic",
+        },
+        {
+            path: "./fonts/IBMPlexMono-Light.ttf",
+            weight: "300",
+            style: "normal",
+        },
+        {
+            path: "./fonts/IBMPlexMono-LightItalic.ttf",
+            weight: "300",
+            style: "italic",
+        },
+        {
+            path: "./fonts/IBMPlexMono-Regular.ttf",
+            weight: "400",
+            style: "normal",
+        },
+        {
+            path: "./fonts/IBMPlexMono-Italic.ttf",
+            weight: "400",
+            style: "italic",
+        },
+        {
+            path: "./fonts/IBMPlexMono-Bold.ttf",
+            weight: "700",
+            style: "normal",
+        },
+        {
+            path: "./fonts/IBMPlexMono-BoldItalic.ttf",
+            weight: "700",
+            style: "italic",
+        },
+    ],
+    variable: "--font-ibm",
 });
 
 export const metadata: Metadata = {
-  title: "Creme AI",
-  description: "Creme AI is a platform for DeFi AI Agents",
+    title: "DeFAI Hero",
+    description: "DeFAI Hero is a platform for DeFi AI Agents",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Providers>
-          {children}
-        </Providers>
-        <Toaster />
-      </body>
-    </html>
-  );
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <html lang="en">
+            <body className={`${ibm.variable} ${bricolage.variable} antialiased`}>
+                <Providers>{children}</Providers>
+                <Toaster />
+            </body>
+        </html>
+    );
 }

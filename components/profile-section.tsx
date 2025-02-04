@@ -13,6 +13,7 @@ interface ProfileSectionProps {
     onOpenChange: (open: boolean) => void
     copyToClipboard: (text: string) => void
     logout: () => Promise<void>
+    onUsernameChange: () => void
 }
 
 export function ProfileSection({
@@ -23,7 +24,8 @@ export function ProfileSection({
     profilePicture,
     onOpenChange,
     copyToClipboard,
-    logout
+    logout,
+    onUsernameChange
 }: ProfileSectionProps) {
 
     return (
@@ -48,9 +50,14 @@ export function ProfileSection({
                                     Joined on {joinedDate ? new Date(joinedDate).toLocaleDateString('en-GB') : ''}
                                 </p>
                             </div>
-                            <Button variant="outline" onClick={() => onOpenChange(true)}>
-                                Change Profile Picture
-                            </Button>
+                            <div className="flex items-center gap-2">
+                                <Button variant="outline" onClick={onUsernameChange}>
+                                    Change Username
+                                </Button>
+                                <Button variant="outline" onClick={() => onOpenChange(true)}>
+                                    Change Profile Picture
+                                </Button>
+                            </div>
                         </div>
 
                         <div className="mt-6 space-y-4">

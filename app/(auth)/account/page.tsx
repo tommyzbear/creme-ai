@@ -8,29 +8,7 @@ import { useEffect, useState } from "react";
 import { UploadProfileImageDialog } from "@/components/dialogs/upload-profile-image-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { redirect } from "next/navigation";
-
-const MOCK_ACCOUNTS = [
-    {
-        type: 'twitter',
-        value: 'TommyZBear',
-        connected: true
-    },
-    {
-        type: 'google',
-        value: '',
-        connected: false
-    },
-    {
-        type: 'email',
-        value: '',
-        connected: false
-    },
-    {
-        type: 'phone',
-        value: '',
-        connected: false
-    }
-]
+import { ChangeUsernameDialog } from "@/components/dialogs/change-username-dialog";
 
 export default function AccountPage() {
     const {
@@ -51,9 +29,10 @@ export default function AccountPage() {
         exportWallet,
         logout } = usePrivy();
     const [dialogOpen, setDialogOpen] = useState(false);
-    const { user: dbUser, error, fetchUser, updateUsername } = useUserStore();
+    const [usernameDialogOpen, setUsernameDialogOpen] = useState(false);
+    const { user: dbUser, fetchUser, updateUsername } = useUserStore();
     const { toast } = useToast()
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     const copyToClipboard = async (text: string) => {
 
@@ -76,13 +55,23 @@ export default function AccountPage() {
     useEffect(() => {
         if (!ready) return;
         if (!user) redirect("/login");
+
         const loadData = async () => {
-            setIsLoading(true);
-            await fetchUser();
-            setIsLoading(false);
+            if (!dbUser) {
+                console.log("Fetching user data");
+                setIsLoading(true);
+                await fetchUser();
+                setIsLoading(false);
+            }
         };
+
         loadData();
-    }, [ready, fetchUser, user]);
+    }, [ready, fetchUser, user, dbUser]);
+
+    const handleLogout = async () => {
+        useUserStore.getState().clearStore();
+        await logout();
+    };
 
     if (isLoading) {
         return (
@@ -121,8 +110,9 @@ export default function AccountPage() {
                 walletAddress={user?.wallet?.address}
                 profilePicture={dbUser?.profile_img}
                 onOpenChange={setDialogOpen}
+                onUsernameChange={() => setUsernameDialogOpen(true)}
                 copyToClipboard={copyToClipboard}
-                logout={logout}
+                logout={handleLogout}
             />
 
             <ConnectedAccounts
@@ -145,6 +135,13 @@ export default function AccountPage() {
             <UploadProfileImageDialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
+            />
+
+            <ChangeUsernameDialog
+                open={usernameDialogOpen}
+                onOpenChange={setUsernameDialogOpen}
+                currentUsername={dbUser?.username}
+                onUpdate={updateUsername}
             />
         </div>
     )

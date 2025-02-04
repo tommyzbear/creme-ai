@@ -3,58 +3,73 @@
 import { ChartPie, Copy, Check } from "lucide-react"
 import { TokensTable } from "@/components/tokens-table"
 import { TransactionsTable } from "@/components/transactions-table"
-import { usePrivy, useWallets } from "@privy-io/react-auth"
+import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth"
 import { useToast } from "@/hooks/use-toast"
 import { useState, useEffect } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getAlchemyChainByChainId } from "@/lib/utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { usePortfolioStore } from "@/store/portfolio-store"
 
-interface TokenData {
-    symbol: string
-    balance: string
-    price: string
-    value: string
-    contractAddress: string
-    logo: string
-}
 
 export default function PortfolioPage() {
+    const {
+        userWalletTokens,
+        userWalletTransactions,
+        managedWalletTokens,
+        managedWalletTransactions,
+        isLoading,
+        fetchPortfolioData,
+        clearStore,
+        selectedWalletAddress,
+        setSelectedWalletAddress
+    } = usePortfolioStore()
     const { user } = usePrivy()
     const { ready: walletReady, wallets } = useWallets()
     const { toast } = useToast()
     const [isCopied, setIsCopied] = useState(false)
-    const [tokens, setTokens] = useState<TokenData[]>([])
-    const [transactions, setTransactions] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
+    const [managedWallet, setManagedWallet] = useState<ConnectedWallet | null>(null)
+    const [fetchAttempted, setFetchAttempted] = useState<Record<string, boolean>>({})
 
     useEffect(() => {
-        async function fetchTokens() {
-            if (!user?.wallet?.address || !walletReady) return
+        if (walletReady) {
+            setManagedWallet(wallets.find(w => w.walletClientType === 'privy') || null)
+        }
+    }, [wallets, walletReady])
 
-            const chain = getAlchemyChainByChainId(wallets[0].chainId)
-            try {
-                setIsLoading(true)
-                const response = await fetch(`/api/portfolio?address=${user.wallet.address}&chain=${chain}`)
-                if (!response.ok) {
-                    throw new Error('Failed to fetch portfolio data')
-                }
-                const data = await response.json()
-                setTokens(data.tokens)
-                setTransactions(data.transactions)
-            } catch (error) {
-                console.error('Error fetching token data:', error)
+    // Determine which tokens and transactions to display
+    const tokens = selectedWalletAddress === user?.wallet?.address
+        ? userWalletTokens
+        : managedWalletTokens;
+
+    const transactions = selectedWalletAddress === user?.wallet?.address
+        ? userWalletTransactions
+        : managedWalletTransactions;
+
+    useEffect(() => {
+        if (!user?.wallet?.address || !walletReady) return;
+
+        const isManaged = selectedWalletAddress !== user?.wallet?.address;
+        const relevantTokens = isManaged ? managedWalletTokens : userWalletTokens;
+        const relevantTransactions = isManaged ? managedWalletTransactions : userWalletTransactions;
+
+        if (relevantTokens.length === 0 && relevantTransactions.length === 0 && !fetchAttempted[selectedWalletAddress]) {
+            console.log("Fetching portfolio data");
+            setFetchAttempted(prev => ({ ...prev, [selectedWalletAddress]: true }));
+            fetchPortfolioData(selectedWalletAddress, wallets[0].chainId, isManaged).catch(() => {
                 toast({
                     variant: "destructive",
                     title: "Error",
                     description: "Failed to fetch token data"
-                })
-            } finally {
-                setIsLoading(false)
-            }
+                });
+            });
         }
+    }, [user?.wallet?.address, walletReady, wallets, fetchPortfolioData, selectedWalletAddress, managedWalletTokens, userWalletTokens, managedWalletTransactions, userWalletTransactions, toast, fetchAttempted]);
 
-        fetchTokens()
-    }, [user?.wallet?.address, walletReady, toast, wallets])
+    useEffect(() => {
+        if (user?.wallet?.address && !selectedWalletAddress) {
+            setSelectedWalletAddress(user.wallet.address);
+        }
+    }, [user?.wallet?.address, setSelectedWalletAddress, selectedWalletAddress]);
 
     const handleBuy = (symbol: string) => {
         // Implement buy logic
@@ -87,6 +102,26 @@ export default function PortfolioPage() {
         }
     }
 
+    const handleWalletChange = (address: string) => {
+        setSelectedWalletAddress(address);
+        const isManaged = selectedWalletAddress !== user?.wallet?.address;
+        const relevantTokens = isManaged ? managedWalletTokens : userWalletTokens;
+        const relevantTransactions = isManaged ? managedWalletTransactions : userWalletTransactions;
+
+        if (relevantTokens.length === 0 && relevantTransactions.length === 0 && !fetchAttempted[address]) {
+            console.log("Fetching portfolio data");
+            setFetchAttempted(prev => ({ ...prev, [address]: true }));
+            fetchPortfolioData(address, wallets[0].chainId, isManaged)
+                .catch(() => {
+                    toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: "Failed to fetch token data"
+                    });
+                });
+        }
+    };
+
     return (
         <div className="max-w-5xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
@@ -114,6 +149,23 @@ export default function PortfolioPage() {
                             </>
                         )}
                     </div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Select value={selectedWalletAddress} onValueChange={handleWalletChange}>
+                        <SelectTrigger className="w-[280px]">
+                            <SelectValue placeholder="Select wallet" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={user?.wallet?.address || "user-wallet"}>
+                                User Connected Wallet
+                            </SelectItem>
+                            {managedWallet && (
+                                <SelectItem value={managedWallet?.address || "managed-wallet"}>
+                                    Creme Managed Wallet
+                                </SelectItem>
+                            )}
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
 

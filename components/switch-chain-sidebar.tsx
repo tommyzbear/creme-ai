@@ -13,7 +13,6 @@ import { useWallets } from "@privy-io/react-auth"
 import { getNetworkByChainId } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { config } from "@/lib/wallet/config"
-
 export function SwitchChainSidebar() {
     const { wallets, ready } = useWallets();
     const { toast } = useToast();
@@ -36,7 +35,7 @@ export function SwitchChainSidebar() {
 
     const getCurrentNetwork = () => {
         if (!ready || !wallets[0]) return "Ethereum";
-        return getNetworkByChainId(wallets[0].chainId);
+        return getNetworkByChainId(wallets[0].chainId);;
     };
 
     return (

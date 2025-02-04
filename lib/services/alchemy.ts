@@ -68,6 +68,7 @@ export async function getWalletTokens(address: string, chain: string): Promise<{
                 })
             }
         )
+
         const balancesData = await balancesResponse.json()
         // Filter out zero balances
         const nonZeroBalances = balancesData.result.tokenBalances.filter(
@@ -95,6 +96,7 @@ export async function getWalletTokens(address: string, chain: string): Promise<{
                     }
                 )
                 const metadata: { result: TokenMetadata } = await metadataResponse.json()
+
                 if (!metadata.result) {
                     // Mark as scam token if metadata is not available
                     await addScamToken(token.contractAddress, chain)

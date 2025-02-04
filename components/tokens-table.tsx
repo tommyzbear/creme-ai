@@ -86,83 +86,85 @@ export function TokensTable({ tokens, onBuy, onSell, isLoading }: TokensTablePro
     }
 
     return (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>Asset</TableHead>
-                    <TableHead className="text-right">Balance</TableHead>
-                    <TableHead className="text-right">Price</TableHead>
-                    <TableHead className="text-right">Value</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody className="max-h-[320px] overflow-y-auto">
-                {isLoading ? (
-                    renderSkeletonRows()
-                ) : tokens.length === 0 ? (
+        <div className="relative max-h-[400px] overflow-y-auto">
+            <Table>
+                <TableHeader>
                     <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8">
-                            No tokens found
-                        </TableCell>
+                        <TableHead>Asset</TableHead>
+                        <TableHead className="text-right">Balance</TableHead>
+                        <TableHead className="text-right">Price</TableHead>
+                        <TableHead className="text-right">Value</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                ) : (
-                    tokens.map((token) => (
-                        <TableRow key={token.symbol}>
-                            <TableCell className="font-medium">
-                                <div className="flex items-center gap-2">
-                                    {token.logo ? (
-                                        <Image
-                                            src={token.logo}
-                                            alt={token.symbol}
-                                            width={24}
-                                            height={24}
-                                            className="rounded-full"
-                                        />
-                                    ) : (
-                                        <Coins className="h-4 w-4" />
-                                    )}
-                                    <span>{token.symbol}</span>
-
-                                    {copiedSymbol === token.symbol ? (
-                                        <Check className="h-4 w-4 text-green-500" />
-                                    ) : (
-                                        <Copy
-                                            className="h-4 w-4 text-black cursor-pointer hover:text-gray-600"
-                                            onClick={() => handleCopy(token.contractAddress, token.symbol)}
-                                        />
-                                    )}
-                                </div>
-                            </TableCell>
-                            <TableCell className="text-right font-mono">
-                                {formatNumber(token.balance)}
-                            </TableCell>
-                            <TableCell className="text-right font-mono">
-                                {formatCurrency(token.price)}
-                            </TableCell>
-                            <TableCell className="text-right font-mono">
-                                {formatCurrency(token.value)}
-                            </TableCell>
-                            <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => onSell(token.symbol)}
-                                    >
-                                        Sell
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        onClick={() => onBuy(token.symbol)}
-                                    >
-                                        Buy
-                                    </Button>
-                                </div>
+                </TableHeader>
+                <TableBody>
+                    {isLoading ? (
+                        renderSkeletonRows()
+                    ) : tokens.length === 0 ? (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center py-8">
+                                No tokens found
                             </TableCell>
                         </TableRow>
-                    ))
-                )}
-            </TableBody>
-        </Table>
+                    ) : (
+                        tokens.map((token) => (
+                            <TableRow key={token.symbol}>
+                                <TableCell className="font-medium">
+                                    <div className="flex items-center gap-2">
+                                        {token.logo ? (
+                                            <Image
+                                                src={token.logo}
+                                                alt={token.symbol}
+                                                width={24}
+                                                height={24}
+                                                className="rounded-full"
+                                            />
+                                        ) : (
+                                            <Coins className="h-4 w-4" />
+                                        )}
+                                        <span>{token.symbol}</span>
+
+                                        {copiedSymbol === token.symbol ? (
+                                            <Check className="h-4 w-4 text-green-500" />
+                                        ) : (
+                                            <Copy
+                                                className="h-4 w-4 text-black cursor-pointer hover:text-gray-600"
+                                                onClick={() => handleCopy(token.contractAddress, token.symbol)}
+                                            />
+                                        )}
+                                    </div>
+                                </TableCell>
+                                <TableCell className="text-right font-mono">
+                                    {formatNumber(token.balance)}
+                                </TableCell>
+                                <TableCell className="text-right font-mono">
+                                    {formatCurrency(token.price)}
+                                </TableCell>
+                                <TableCell className="text-right font-mono">
+                                    {formatCurrency(token.value)}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <div className="flex justify-end gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => onSell(token.symbol)}
+                                        >
+                                            Sell
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            onClick={() => onBuy(token.symbol)}
+                                        >
+                                            Buy
+                                        </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    )}
+                </TableBody>
+            </Table>
+        </div>
     )
 } 

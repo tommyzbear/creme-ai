@@ -69,6 +69,12 @@ export function TransactionsTable({ transactions, isLoading, chainId }: Transact
                         Array.from({ length: 10 }).map((_, index) => (
                             <SkeletonRow key={index} />
                         ))
+                    ) : transactions.length === 0 ? (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center py-8">
+                                No transactions found
+                            </TableCell>
+                        </TableRow>
                     ) : (
                         transactions.map((tx) => (
                             <TableRow key={tx.hash}>

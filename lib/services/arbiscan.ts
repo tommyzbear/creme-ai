@@ -1,4 +1,4 @@
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
+const ARBISCAN_API_KEY = process.env.ARBISCAN_API_KEY
 
 interface TokenBalance {
     contractAddress: string
@@ -22,7 +22,7 @@ export async function getWalletTokens(address: string): Promise<TokenBalance[]> 
     try {
         // First get the list of tokens owned by the wallet
         const response = await fetch(
-            `https://api.etherscan.io/api?module=account&action=tokenlist&address=${address}&apikey=${ETHERSCAN_API_KEY}`
+            `https://api.arbiscan.io/api?module=account&action=tokenlist&address=${address}&apikey=${ARBISCAN_API_KEY}`
         )
         const data = await response.json()
 
@@ -53,9 +53,9 @@ export async function getWalletTokens(address: string): Promise<TokenBalance[]> 
 /**
  * Check if a token is verified on Etherscan
  */
-export async function isVerifiedOnEtherscan(contractAddress: string): Promise<boolean> {
+export async function isVerifiedOnArbiscan(contractAddress: string): Promise<boolean> {
     try {
-        const url = `https://api.etherscan.io/api?module=token&action=tokeninfo&contractaddress=${contractAddress}&apikey=${ETHERSCAN_API_KEY}`;
+        const url = `https://api.arbiscan.io/api?module=token&action=tokeninfo&contractaddress=${contractAddress}&apikey=${ARBISCAN_API_KEY}`;
         const response = await fetch(url);
         const data = await response.json();
         return data.status === "1" && data.result && data.result.length > 0;
@@ -70,7 +70,7 @@ export async function isVerifiedOnEtherscan(contractAddress: string): Promise<bo
  */
 export async function getTokenHolders(contractAddress: string): Promise<number> {
     try {
-        const url = `https://api.etherscan.io/api?module=token&action=tokenholdercount&contractaddress=${contractAddress}&apikey=${ETHERSCAN_API_KEY}`;
+        const url = `https://api.arbiscan.io/api?module=token&action=tokenholdercount&contractaddress=${contractAddress}&apikey=${ARBISCAN_API_KEY}`;
         const response = await fetch(url);
         const data = await response.json();
         return parseInt(data.result || "0");
@@ -80,8 +80,8 @@ export async function getTokenHolders(contractAddress: string): Promise<number> 
     }
 }
 
-export const etherscan = {
-    isVerifiedOnEtherscan,
+export const arbiscan = {
+    isVerifiedOnArbiscan,
     getTokenHolders,
     getWalletTokens
 }

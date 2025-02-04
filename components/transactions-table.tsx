@@ -6,6 +6,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { getExplorerByChainId } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
 interface Transaction {
@@ -21,10 +22,11 @@ interface Transaction {
 interface TransactionsTableProps {
     transactions: Transaction[];
     isLoading: boolean;
+    chainId: string;
 }
 
-export function TransactionsTable({ transactions, isLoading }: TransactionsTableProps) {
-    const formatAddress = (address: string) => `${address.slice(0, 4)}...${address.slice(-4)}`;
+export function TransactionsTable({ transactions, isLoading, chainId }: TransactionsTableProps) {
+    const formatAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`;
 
     const formatValue = (value: number) =>
         value.toLocaleString(undefined, { maximumFractionDigits: 6 });
@@ -75,7 +77,7 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
                                   </TableCell>
                                   <TableCell className="capitalize">
                                       <a
-                                          href={`https://etherscan.io/tx/${tx.hash}`}
+                                          href={`${getExplorerByChainId(chainId)}/tx/${tx.hash}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           className="underline hover:text-blue-500"

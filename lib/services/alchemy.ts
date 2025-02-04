@@ -44,7 +44,7 @@ interface Transfer {
     timestamp: string
 }
 
-export async function getWalletTokens(address: string): Promise<{
+export async function getWalletTokens(address: string, chain: string): Promise<{
     contractAddress: string
     tokenName: string
     symbol: string
@@ -56,7 +56,7 @@ export async function getWalletTokens(address: string): Promise<{
     try {
         // Get token balances
         const balancesResponse = await fetch(
-            `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+            `https://${chain}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -69,7 +69,6 @@ export async function getWalletTokens(address: string): Promise<{
             }
         )
         const balancesData = await balancesResponse.json()
-
         // Filter out zero balances
         const nonZeroBalances = balancesData.result.tokenBalances.filter(
             (token: TokenBalance) => token.tokenBalance !== '0x0000000000000000000000000000000000000000000000000000000000000000'
@@ -79,12 +78,11 @@ export async function getWalletTokens(address: string): Promise<{
         const tokens = await Promise.all(
             nonZeroBalances.map(async (token: TokenBalance) => {
                 // Check if token is already marked as scam
-                if (await isScamToken(token.contractAddress)) {
+                if (await isScamToken(token.contractAddress, chain)) {
                     return null
                 }
-
                 const metadataResponse = await fetch(
-                    `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+                    `https://${chain}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -97,10 +95,9 @@ export async function getWalletTokens(address: string): Promise<{
                     }
                 )
                 const metadata: { result: TokenMetadata } = await metadataResponse.json()
-
                 if (!metadata.result) {
                     // Mark as scam token if metadata is not available
-                    await addScamToken(token.contractAddress)
+                    await addScamToken(token.contractAddress, chain)
                     return null
                 }
 
@@ -123,40 +120,59 @@ export async function getWalletTokens(address: string): Promise<{
     }
 }
 
-export async function getTokenPrices(contractAddresses: string[]): Promise<{ address: string, price: number }[]> {
+export async function getTokenPrices(contractAddresses: string[], chain: string): Promise<{ address: string, price: number }[]> {
     try {
-        const options = {
-            method: 'POST',
-            headers: { accept: 'application/json', 'content-type': 'application/json' },
-            body: JSON.stringify({
-                addresses: contractAddresses.map(address => ({ network: 'eth-mainnet', address }))
+        // Batch addresses into groups of 25
+        const batchSize = 25;
+        const batches = [];
+        for (let i = 0; i < contractAddresses.length; i += batchSize) {
+            batches.push(contractAddresses.slice(i, i + batchSize));
+        }
+
+        // Process each batch
+        const allResults = await Promise.all(
+            batches.map(async (batchAddresses) => {
+                const options = {
+                    method: 'POST',
+                    headers: { accept: 'application/json', 'content-type': 'application/json' },
+                    body: JSON.stringify({
+                        addresses: batchAddresses.map(address => ({ network: chain, address }))
+                    })
+                };
+                const response = await fetch(`https://api.g.alchemy.com/prices/v1/${ALCHEMY_API_KEY}/tokens/by-address`, options);
+                const result = await response.json();
+                return result.data || [];
             })
-        };
-        const response = await fetch(`https://api.g.alchemy.com/prices/v1/${ALCHEMY_API_KEY}/tokens/by-address`, options)
-        const result = await response.json()
+        );
+
+        // Flatten results from all batches
+        const result = { data: allResults.flat() };
 
         if (!result.data || result.data.length === 0) {
-            return []
+            return [];
         }
 
         result.data.filter((token: TokenPrice) => token.error).forEach(async (token: TokenPrice) => {
-            await addScamToken(token.address)
-        })
+            await addScamToken(token.address, chain);
+        });
 
-        return result.data.filter((token: TokenPrice) => !token.error).map((token: TokenPrice) => ({
+        const nonErrorTokens = result.data.filter((token: TokenPrice) => !token.error);
+        const tokens = await Promise.all(nonErrorTokens.filter(async (token: TokenPrice) => isLegitToken(token.address, chain)));
+
+        return tokens.map((token: TokenPrice) => ({
             address: token.address,
             price: token.prices[0].value
-        }))
+        }));
     } catch (error) {
-        console.error('Error fetching token prices:', error)
-        return []
+        console.error('Error fetching token prices:', error);
+        return [];
     }
 }
 
-export async function getRecentTransfers(address: string): Promise<Transfer[]> {
+export async function getRecentTransfers(address: string, chain: string): Promise<Transfer[]> {
     try {
         const response = await fetch(
-            `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+            `https://${chain}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

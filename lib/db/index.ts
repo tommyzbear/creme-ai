@@ -2,11 +2,16 @@ import { JSONFilePreset } from 'lowdb/node'
 import path from 'path'
 
 interface ScamTokenDB {
-    scamTokens: string[]
+    scamTokens: {
+        [key: string]: string[]
+    }
 }
 
 const defaultData: ScamTokenDB = {
-    scamTokens: []
+    scamTokens: {
+        "eth-mainnet": [],
+        "arb-mainnet": []
+    }
 }
 
 export const db = await JSONFilePreset<ScamTokenDB>(

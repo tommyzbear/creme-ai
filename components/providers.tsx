@@ -1,7 +1,7 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
-import { arbitrum, base, mainnet } from 'viem/chains';
+import { arbitrum, base, mainnet, optimism } from 'viem/chains';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     return (
@@ -9,7 +9,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}
             config={{
                 defaultChain: arbitrum,
-                supportedChains: [arbitrum, mainnet, base],
+                supportedChains: [arbitrum, mainnet, base, optimism],
                 // Customize Privy's appearance in your app
                 appearance: {
                     theme: 'light',

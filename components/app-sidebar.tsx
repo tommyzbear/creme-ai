@@ -2,6 +2,7 @@ import { MessageCircle, User, Clock } from "lucide-react"
 import {
     Sidebar,
     SidebarContent,
+    SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarHeader,
@@ -13,6 +14,7 @@ import {
 import Link from "next/link"
 import { Separator } from "./ui/separator"
 import Image from "next/image"
+import { SwitchChainSidebar } from "./switch-chain-sidebar"
 const menuItems = [
     {
         title: "Chat",
@@ -49,7 +51,6 @@ export function AppSidebar() {
                 <Separator />
             </SidebarHeader>
             <SidebarContent>
-
                 <SidebarGroup>
                     <SidebarGroupContent>
                         <SidebarMenu>
@@ -67,6 +68,9 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
+            <SidebarFooter>
+                <SwitchChainSidebar />
+            </SidebarFooter>
             <SidebarRail />
         </Sidebar>
     )

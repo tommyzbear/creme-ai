@@ -78,10 +78,9 @@ export async function getWalletTokens(address: string, chain: string): Promise<{
         const tokens = await Promise.all(
             nonZeroBalances.map(async (token: TokenBalance) => {
                 // Check if token is already marked as scam
-                if (await isScamToken(token.contractAddress)) {
+                if (await isScamToken(token.contractAddress, chain)) {
                     return null
                 }
-
                 const metadataResponse = await fetch(
                     `https://${chain}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
                     {
@@ -98,7 +97,7 @@ export async function getWalletTokens(address: string, chain: string): Promise<{
                 const metadata: { result: TokenMetadata } = await metadataResponse.json()
                 if (!metadata.result) {
                     // Mark as scam token if metadata is not available
-                    await addScamToken(token.contractAddress)
+                    await addScamToken(token.contractAddress, chain)
                     return null
                 }
 
@@ -154,7 +153,7 @@ export async function getTokenPrices(contractAddresses: string[], chain: string)
         }
 
         result.data.filter((token: TokenPrice) => token.error).forEach(async (token: TokenPrice) => {
-            await addScamToken(token.address);
+            await addScamToken(token.address, chain);
         });
 
         const nonErrorTokens = result.data.filter((token: TokenPrice) => !token.error);

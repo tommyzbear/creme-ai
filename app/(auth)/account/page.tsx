@@ -3,7 +3,7 @@
 import { ProfileSection } from "@/components/profile-section"
 import { ConnectedAccounts } from "@/components/connected-accounts"
 import { useUserStore } from "@/stores/use-user-store";
-import { usePrivy } from "@privy-io/react-auth";
+import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 import { UploadProfileImageDialog } from "@/components/dialogs/upload-profile-image-dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -28,8 +28,10 @@ export default function AccountPage() {
         unlinkDiscord,
         exportWallet,
         logout } = usePrivy();
+    const { ready: walletReady, wallets } = useWallets();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [usernameDialogOpen, setUsernameDialogOpen] = useState(false);
+    const [managedWallet, setManagedWallet] = useState<ConnectedWallet | undefined>(undefined)
     const { user: dbUser, fetchUser, updateUsername } = useUserStore();
     const { toast } = useToast()
     const [isLoading, setIsLoading] = useState(false);
@@ -53,8 +55,12 @@ export default function AccountPage() {
     };
 
     useEffect(() => {
-        if (!ready) return;
+        if (!ready || !walletReady) return;
         if (!user) redirect("/login");
+
+        if (wallets.find(w => w.walletClientType === "privy")) {
+            setManagedWallet(wallets.find(w => w.walletClientType === "privy")!);
+        }
 
         const loadData = async () => {
             if (!dbUser) {
@@ -66,7 +72,7 @@ export default function AccountPage() {
         };
 
         loadData();
-    }, [ready, fetchUser, user, dbUser]);
+    }, [ready, fetchUser, user, dbUser, wallets, walletReady]);
 
     const handleLogout = async () => {
         useUserStore.getState().clearStore();
@@ -108,6 +114,7 @@ export default function AccountPage() {
                 joinedDate={dbUser?.created_at}
                 userId={dbUser?.id}
                 walletAddress={user?.wallet?.address}
+                managedWalletAddress={managedWallet?.address}
                 profilePicture={dbUser?.profile_img}
                 onOpenChange={setDialogOpen}
                 onUsernameChange={() => setUsernameDialogOpen(true)}

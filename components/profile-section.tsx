@@ -1,7 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
 import { Copy } from "lucide-react"
 
 interface ProfileSectionProps {
@@ -9,6 +8,7 @@ interface ProfileSectionProps {
     joinedDate: string | null
     userId: string | null
     walletAddress: string | null
+    managedWalletAddress: string | null
     profilePicture: string | null
     onOpenChange: (open: boolean) => void
     copyToClipboard: (text: string) => void
@@ -21,6 +21,7 @@ export function ProfileSection({
     joinedDate,
     userId,
     walletAddress,
+    managedWalletAddress,
     profilePicture,
     onOpenChange,
     copyToClipboard,
@@ -80,6 +81,19 @@ export function ProfileSection({
                                     <Copy
                                         className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
                                         onClick={() => copyToClipboard(walletAddress || "")}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="text-sm font-medium text-muted-foreground">Managed Wallet</h4>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <p className="font-mono text-sm">
+                                        {managedWalletAddress ? `${managedWalletAddress.slice(0, 6)}...${managedWalletAddress.slice(-4)}` : ''}
+                                    </p>
+                                    <Copy
+                                        className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                        onClick={() => copyToClipboard(managedWalletAddress || "")}
                                     />
                                 </div>
                             </div>

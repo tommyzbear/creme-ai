@@ -6,21 +6,13 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { Transfer } from "@/lib/services/alchemy"
 import { getExplorerByChainId } from "@/lib/utils"
 import { formatDistanceToNow } from 'date-fns'
 
-interface Transaction {
-    hash: string
-    from: string
-    to: string
-    value: number
-    asset: string
-    category: string
-    timestamp: number
-}
 
 interface TransactionsTableProps {
-    transactions: Transaction[]
+    transactions: Transfer[]
     isLoading: boolean
     chainId: string
 }

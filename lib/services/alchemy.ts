@@ -34,7 +34,7 @@ interface TokenPrice {
     }
 }
 
-interface Transfer {
+export interface Transfer {
     hash: string
     from: string
     to: string | null

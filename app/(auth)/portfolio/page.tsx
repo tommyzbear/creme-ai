@@ -8,8 +8,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useState, useEffect } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { usePortfolioStore } from "@/store/portfolio-store"
-
+import { TokenData, usePortfolioStore } from "@/store/portfolio-store"
+import { Transfer } from "@/lib/services/alchemy"
 
 export default function PortfolioPage() {
     const {
@@ -29,6 +29,8 @@ export default function PortfolioPage() {
     const [isCopied, setIsCopied] = useState(false)
     const [managedWallet, setManagedWallet] = useState<ConnectedWallet | null>(null)
     const [fetchAttempted, setFetchAttempted] = useState<Record<string, boolean>>({})
+    const [transactions, setTransactions] = useState<Transfer[]>([])
+    const [tokens, setTokens] = useState<TokenData[]>([])
 
     useEffect(() => {
         if (walletReady) {
@@ -36,14 +38,18 @@ export default function PortfolioPage() {
         }
     }, [wallets, walletReady])
 
-    // Determine which tokens and transactions to display
-    const tokens = selectedWalletAddress === user?.wallet?.address
-        ? userWalletTokens
-        : managedWalletTokens;
-
-    const transactions = selectedWalletAddress === user?.wallet?.address
-        ? userWalletTransactions
-        : managedWalletTransactions;
+    useEffect(() => {
+        console.log("selectedWalletAddress", selectedWalletAddress)
+        if (selectedWalletAddress === user?.wallet?.address) {
+            console.log("userWalletTransactions", userWalletTransactions)
+            setTransactions(userWalletTransactions)
+            setTokens(userWalletTokens)
+        } else {
+            console.log("managedWalletTransactions", managedWalletTransactions)
+            setTransactions(managedWalletTransactions)
+            setTokens(managedWalletTokens)
+        }
+    }, [userWalletTransactions, userWalletTokens, managedWalletTransactions, managedWalletTokens, selectedWalletAddress, user?.wallet?.address])
 
     useEffect(() => {
         if (!user?.wallet?.address || !walletReady) return;

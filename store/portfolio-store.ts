@@ -1,8 +1,9 @@
+import { Transfer } from '@/lib/services/alchemy'
 import { getAlchemyChainByChainId } from '@/lib/utils'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-interface TokenData {
+export interface TokenData {
     symbol: string
     balance: string
     price: string
@@ -11,21 +12,11 @@ interface TokenData {
     logo: string
 }
 
-// Define a Transaction type instead of using any
-interface Transaction {
-    hash: string
-    from: string
-    to: string
-    value: string
-    timestamp: number
-    // Add other transaction properties you're using
-}
-
 interface PortfolioState {
     userWalletTokens: TokenData[]
-    userWalletTransactions: Transaction[]
+    userWalletTransactions: Transfer[]
     managedWalletTokens: TokenData[]
-    managedWalletTransactions: Transaction[]
+    managedWalletTransactions: Transfer[]
     isLoading: boolean
     currentAddress: string | null
     selectedWalletAddress: string

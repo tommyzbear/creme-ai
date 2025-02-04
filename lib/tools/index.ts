@@ -1,14 +1,4 @@
-// import { generateImageToolDefinition } from './generateImage'
-// import { redditToolDefinition } from './reddit'
-// import { dadJokeToolDefinition } from './dadJoke'
-
-// export const tools = [
-//   generateImageToolDefinition,
-//   redditToolDefinition,
-//   dadJokeToolDefinition,
-// ]
-import { dexscreenerToolDefinition } from './dexscreener'
-
-export const tools = [
-  dexscreenerToolDefinition,
-]
+export { getTokenPrice } from './getTokenPrice';
+export { getKolActivity } from './getKolActivity';
+export { searchTweets } from './searchTweets';
+export { getAgentByTwitter } from './getAgentByTwitter'; 

@@ -5,20 +5,21 @@ export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url)
         const address = searchParams.get('address')
+        const chain = searchParams.get('chain')
 
-        if (!address) {
+        if (!address || !chain) {
             return NextResponse.json(
-                { error: 'Wallet address is required' },
+                { error: 'Wallet address and chain are required' },
                 { status: 400 }
             )
         }
 
         const [walletTokens, transfers] = await Promise.all([
-            getWalletTokens(address),
-            getRecentTransfers(address)
+            getWalletTokens(address, chain),
+            getRecentTransfers(address, chain)
         ])
 
-        const prices = await getTokenPrices(walletTokens.map(t => t.contractAddress))
+        const prices = await getTokenPrices(walletTokens.map(t => t.contractAddress), chain)
 
         const tokenData = walletTokens.map(token => {
             const price = prices.find(p => p.address === token.contractAddress)?.price || 0

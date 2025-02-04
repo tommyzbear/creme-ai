@@ -17,6 +17,9 @@ export default function ChatPage() {
                 title: "Error",
                 description: error.message || "Failed to process your request"
             })
+        },
+        onToolCall: (toolCall) => {
+            console.log("toolCall", toolCall)
         }
     })
     const { toast } = useToast()

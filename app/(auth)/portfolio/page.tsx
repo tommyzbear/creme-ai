@@ -3,10 +3,11 @@
 import { ChartPie, Copy, Check } from "lucide-react"
 import { TokensTable } from "@/components/tokens-table"
 import { TransactionsTable } from "@/components/transactions-table"
-import { usePrivy } from "@privy-io/react-auth"
+import { usePrivy, useWallets } from "@privy-io/react-auth"
 import { useToast } from "@/hooks/use-toast"
 import { useState, useEffect } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { getAlchemyChainByChainId } from "@/lib/utils"
 
 interface TokenData {
     symbol: string
@@ -19,6 +20,7 @@ interface TokenData {
 
 export default function PortfolioPage() {
     const { user } = usePrivy()
+    const { ready: walletReady, wallets } = useWallets()
     const { toast } = useToast()
     const [isCopied, setIsCopied] = useState(false)
     const [tokens, setTokens] = useState<TokenData[]>([])
@@ -27,11 +29,12 @@ export default function PortfolioPage() {
 
     useEffect(() => {
         async function fetchTokens() {
-            if (!user?.wallet?.address) return
+            if (!user?.wallet?.address || !walletReady) return
 
+            const chain = getAlchemyChainByChainId(wallets[0].chainId)
             try {
                 setIsLoading(true)
-                const response = await fetch(`/api/portfolio?address=${user.wallet.address}`)
+                const response = await fetch(`/api/portfolio?address=${user.wallet.address}&chain=${chain}`)
                 if (!response.ok) {
                     throw new Error('Failed to fetch portfolio data')
                 }
@@ -51,7 +54,7 @@ export default function PortfolioPage() {
         }
 
         fetchTokens()
-    }, [user?.wallet?.address, toast])
+    }, [user?.wallet?.address, walletReady, toast, wallets])
 
     const handleBuy = (symbol: string) => {
         // Implement buy logic
@@ -138,7 +141,7 @@ export default function PortfolioPage() {
                     <h2 className="font-semibold">Transactions</h2>
                 </div>
                 <div className="p-4">
-                    <TransactionsTable transactions={transactions} isLoading={isLoading} />
+                    <TransactionsTable transactions={transactions} isLoading={isLoading || !walletReady} chainId={walletReady ? wallets[0]?.chainId : ""} />
                 </div>
             </div>
         </div>

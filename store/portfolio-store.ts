@@ -1,16 +1,7 @@
-import { Transfer } from '@/lib/services/alchemy'
+import { TokenData, Transfer } from '@/lib/services/alchemy'
 import { getAlchemyChainByChainId } from '@/lib/utils'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-
-export interface TokenData {
-    symbol: string
-    balance: string
-    price: string
-    value: string
-    contractAddress: string
-    logo: string
-}
 
 interface PortfolioState {
     userWalletTokens: TokenData[]
@@ -45,19 +36,6 @@ export const usePortfolioStore = create<PortfolioState>()(
 
             fetchPortfolioData: async (address: string, chainId: string, isManaged: boolean) => {
                 if (!address || !chainId) return;
-
-                // Check if we already have data for this address and chain
-                const state = get();
-                const hasExistingData = isManaged
-                    ? state.managedWalletTokens.length > 0
-                    : state.userWalletTokens.length > 0;
-
-                if (
-                    state.currentAddress === address &&
-                    hasExistingData
-                ) {
-                    return;
-                }
 
                 const chain = getAlchemyChainByChainId(chainId);
                 set({ isLoading: true });

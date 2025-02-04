@@ -1,13 +1,14 @@
 import { isLegitToken } from "@/lib/utils";
 import { addScamToken, isScamToken } from '@/lib/services/scam-token';
-import { Alchemy, AssetTransfersCategory, AssetTransfersWithMetadataResult, Network, SortingOrder } from "alchemy-sdk";
+import { Alchemy, Network } from "alchemy-sdk";
+import { formatEther } from "viem";
 
-const config = {
-    apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
-    network: Network.ETH_MAINNET,
-};
+// const config = {
+//     apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
+//     network: Network.ETH_MAINNET,
+// };
 
-const alchemy = new Alchemy(config);
+// const alchemy = new Alchemy(config);
 
 const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY
 
@@ -32,6 +33,15 @@ interface TokenPrice {
     error?: {
         message: string
     }
+}
+
+export interface TokenData {
+    symbol: string
+    balance: string
+    price: string
+    value: string
+    contractAddress: string
+    logo: string
 }
 
 export interface Transfer {
@@ -209,3 +219,43 @@ export async function getRecentTransfers(address: string, chain: string): Promis
     }
 }
 
+export async function getEthBalance(address: string, chain: string): Promise<TokenData> {
+    const response = await fetch(
+        `https://${chain}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: 1,
+                jsonrpc: "2.0",
+                method: "eth_getBalance",
+                params: [address, "latest"]
+            })
+        }
+    )
+    const data = await response.json();
+    const price = await getPriceBySymbol("ETH");
+
+    const balance = formatEther(BigInt(data.result));
+
+    return {
+        symbol: "ETH",
+        balance: balance,
+        price: price.toString(),
+        value: (price * Number(balance)).toString(),
+        contractAddress: "",
+        logo: "/icons/ethereum-eth-logo.svg"
+    } as TokenData;
+}
+
+export async function getPriceBySymbol(symbol: string): Promise<number> {
+    const response = await fetch(
+        `https://api.g.alchemy.com/prices/v1/${ALCHEMY_API_KEY}/tokens/by-symbol?symbols=${symbol}`,
+        {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        }
+    )
+    const data = await response.json();
+    return data.data[0].prices[0].value;
+}

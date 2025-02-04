@@ -1,6 +1,6 @@
 "use client"
 
-import { ChartPie, Copy, Check } from "lucide-react"
+import { ChartPie, Copy, Check, RefreshCcw } from "lucide-react"
 import { TokensTable } from "@/components/tokens-table"
 import { TransactionsTable } from "@/components/transactions-table"
 import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth"
@@ -8,8 +8,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useState, useEffect } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { TokenData, usePortfolioStore } from "@/store/portfolio-store"
-import { Transfer } from "@/lib/services/alchemy"
+import { usePortfolioStore } from "@/store/portfolio-store"
+import { TokenData, Transfer } from "@/lib/services/alchemy"
 
 export default function PortfolioPage() {
     const {
@@ -152,6 +152,13 @@ export default function PortfolioPage() {
                                         />
                                     )
                                 )}
+                                <RefreshCcw className="w-4 h-4 cursor-pointer hover:text-gray-700" onClick={async () => {
+                                    await fetchPortfolioData(selectedWalletAddress, wallets[0].chainId, selectedWalletAddress !== user?.wallet?.address)
+                                    toast({
+                                        description: "Portfolio data refreshed",
+                                        duration: 2000,
+                                    })
+                                }} />
                             </>
                         )}
                     </div>

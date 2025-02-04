@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Copy } from "lucide-react"
-
+import { type WalletWithMetadata } from "@privy-io/react-auth"
 interface ProfileSectionProps {
     username: string | null
     joinedDate: string | null
@@ -14,6 +14,13 @@ interface ProfileSectionProps {
     copyToClipboard: (text: string) => void
     logout: () => Promise<void>
     onUsernameChange: () => void
+    fundWallet: (address: string) => Promise<void>
+    delegatedWallet: WalletWithMetadata | undefined
+    delegateWallet: ({ address, chainType }: {
+        address: string;
+        chainType: 'solana' | 'ethereum';
+    }) => Promise<void>
+    revokeWallets: () => Promise<void>
 }
 
 export function ProfileSection({
@@ -26,7 +33,11 @@ export function ProfileSection({
     onOpenChange,
     copyToClipboard,
     logout,
-    onUsernameChange
+    onUsernameChange,
+    fundWallet,
+    delegatedWallet,
+    delegateWallet,
+    revokeWallets
 }: ProfileSectionProps) {
 
     return (
@@ -85,17 +96,34 @@ export function ProfileSection({
                                 </div>
                             </div>
 
-                            <div>
-                                <h4 className="text-sm font-medium text-muted-foreground">Managed Wallet</h4>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <p className="font-mono text-sm">
-                                        {managedWalletAddress ? `${managedWalletAddress.slice(0, 6)}...${managedWalletAddress.slice(-4)}` : ''}
-                                    </p>
-                                    <Copy
-                                        className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                        onClick={() => copyToClipboard(managedWalletAddress || "")}
-                                    />
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h4 className="text-sm font-medium text-muted-foreground">Managed Wallet</h4>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <p className="font-mono text-sm">
+                                            {managedWalletAddress ? `${managedWalletAddress.slice(0, 6)}...${managedWalletAddress.slice(-4)}` : ''}
+                                        </p>
+                                        <Copy
+                                            className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
+                                            onClick={() => copyToClipboard(managedWalletAddress || "")}
+                                        />
+                                    </div>
                                 </div>
+                                <div className="flex items-center gap-2">
+                                    <Button variant="outline" onClick={async () => await fundWallet(managedWalletAddress || "")}>
+                                        Fund Wallet
+                                    </Button>
+                                    {delegatedWallet !== undefined ? (
+                                        <Button variant="outline" onClick={async () => await revokeWallets()}>
+                                            Revoke Delegation
+                                        </Button>
+                                    ) : (
+                                        <Button variant="outline" onClick={async () => await delegateWallet({ address: managedWalletAddress || "", chainType: "ethereum" })}>
+                                            Delegate Wallet
+                                        </Button>
+                                    )}
+                                </div>
+
                             </div>
                         </div>
                     </div>

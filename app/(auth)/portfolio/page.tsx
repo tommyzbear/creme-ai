@@ -1,7 +1,7 @@
 "use client";
 
-import { PortfolioDashboard } from "@/components/portfolio-dashboard";
+import { PortfolioContainer } from "@/components/portfolio-container";
 
 export default function PortfolioPage() {
-    return <PortfolioDashboard />;
+    return <PortfolioContainer />;
 }

@@ -75,14 +75,14 @@ export function TokensTable({ tokens, onBuy, onSell, isLoading }: TokensTablePro
     const renderSkeletonRows = () => {
         return Array.from({ length: 5 }).map((_, index) => (
             <TableRow key={`skeleton-${index}`}>
-                <TableCell className="font-medium">
+                <TableCell className="font-medium pl-4">
                     <div className="flex items-center gap-2">
                         <div className="h-6 w-6 rounded-full bg-gray-200 animate-pulse" />
                         <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
                     </div>
                 </TableCell>
-                <TableCell className="text-right">
-                    <div className="h-4 w-20 bg-gray-200 rounded animate-pulse ml-auto" />
+                <TableCell className="text-left">
+                    <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
                 </TableCell>
                 <TableCell className="text-right">
                     <div className="h-4 w-24 bg-gray-200 rounded animate-pulse ml-auto" />
@@ -90,29 +90,36 @@ export function TokensTable({ tokens, onBuy, onSell, isLoading }: TokensTablePro
                 <TableCell className="text-right">
                     <div className="h-4 w-28 bg-gray-200 rounded animate-pulse ml-auto" />
                 </TableCell>
-                <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                        <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
-                        <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
-                    </div>
-                </TableCell>
             </TableRow>
         ));
     };
 
     const displayedTokens = showAll ? tokens : tokens.slice(0, 5);
 
+    const getTableHeight = () => {
+        const baseRowHeight = 40; // Height of one row in pixels
+        const headerHeight = 24; // Height of header in pixels
+        const visibleRows = showAll ? tokens.length : 5;
+        return `${headerHeight + visibleRows * baseRowHeight}px`;
+    };
+
     return (
         <div className="flex flex-col gap-2">
-            <div className="overflow-hidden transition-all duration-200">
+            <div
+                className="overflow-hidden transition-[height_300ms_ease-in-out]"
+                style={{ height: getTableHeight() }}
+            >
                 <Table>
                     <TableHeader>
-                        <TableRow>
-                            <TableHead className="pl-4 w-[150px]">Token</TableHead>
+                        <TableRow className="">
+                            <TableHead className="pl-4 w-[150px] whitespace-nowrap">
+                                Token
+                            </TableHead>
                             <TableHead className="text-left">Price</TableHead>
                             <TableHead className="text-right">Amount</TableHead>
-                            <TableHead className="text-right">Value</TableHead>
-                            {/* <TableHead className="text-right">Actions</TableHead> */}
+                            <TableHead className="text-right whitespace-nowrap pr-4">
+                                Value
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody className="relative">
@@ -125,10 +132,15 @@ export function TokensTable({ tokens, onBuy, onSell, isLoading }: TokensTablePro
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            displayedTokens.map((token) => (
-                                <TableRow key={token.symbol}>
-                                    <TableCell className="font-medium pl-4">
-                                        <div className="flex items-center gap-2">
+                            displayedTokens.map((token, index) => (
+                                <TableRow key={`${token.symbol}-${index}`}>
+                                    <TableCell className="font-medium pl-4 whitespace-nowrap">
+                                        <a
+                                            className="flex items-center gap-2 cursor-pointer"
+                                            onClick={() =>
+                                                handleCopy(token.contractAddress, token.symbol)
+                                            }
+                                        >
                                             {token.logo ? (
                                                 <Image
                                                     src={token.logo}
@@ -145,17 +157,9 @@ export function TokensTable({ tokens, onBuy, onSell, isLoading }: TokensTablePro
                                             {copiedSymbol === token.symbol ? (
                                                 <Check className="h-2 w-2 text-green-500" />
                                             ) : (
-                                                <Copy
-                                                    className="h-2 w-2 text-black cursor-pointer hover:text-gray-600"
-                                                    onClick={() =>
-                                                        handleCopy(
-                                                            token.contractAddress,
-                                                            token.symbol
-                                                        )
-                                                    }
-                                                />
+                                                <Copy className="h-2 w-2 text-black cursor-pointer hover:text-gray-600" />
                                             )}
-                                        </div>
+                                        </a>
                                     </TableCell>
                                     <TableCell className="text-left">
                                         {formatCurrency(token.price).slice(0, 8)}
@@ -163,23 +167,9 @@ export function TokensTable({ tokens, onBuy, onSell, isLoading }: TokensTablePro
                                     <TableCell className="text-right">
                                         {formatNumber(token.balance)}
                                     </TableCell>
-                                    <TableCell className="text-right">
+                                    <TableCell className="text-right whitespace-nowrap pr-4">
                                         {formatValue(token.value)}
                                     </TableCell>
-                                    {/* <TableCell className="text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => onSell(token.symbol)}
-                                            >
-                                                Sell
-                                            </Button>
-                                            <Button size="sm" onClick={() => onBuy(token.symbol)}>
-                                                Buy
-                                            </Button>
-                                        </div>
-                                    </TableCell> */}
                                 </TableRow>
                             ))
                         )}
@@ -189,7 +179,7 @@ export function TokensTable({ tokens, onBuy, onSell, isLoading }: TokensTablePro
             {tokens.length > 5 && (
                 <Button
                     variant="outline"
-                    className="w-full mt-2"
+                    className="w-auto mt-2 mx-auto rounded-xl"
                     onClick={() => setShowAll(!showAll)}
                 >
                     {showAll ? "Show Less" : `Show All (${tokens.length})`}

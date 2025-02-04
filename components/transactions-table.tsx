@@ -24,7 +24,7 @@ interface TransactionsTableProps {
 }
 
 export function TransactionsTable({ transactions, isLoading }: TransactionsTableProps) {
-    const formatAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`;
+    const formatAddress = (address: string) => `${address.slice(0, 4)}...${address.slice(-4)}`;
 
     const formatValue = (value: number) =>
         value.toLocaleString(undefined, { maximumFractionDigits: 6 });
@@ -50,23 +50,25 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
     );
 
     return (
-        <div className="relative max-h-[400px]">
+        <div className="relative">
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="text-left">Time</TableHead>
+                        <TableHead className="text-left whitespace-nowrap pl-4">Time</TableHead>
                         <TableHead>Txn</TableHead>
                         {/* <TableHead>From</TableHead>
-                        <TableHead>To</TableHead> */}
-                        <TableHead className="text-right">Amount</TableHead>
+                            <TableHead>To</TableHead> */}
+                        <TableHead className="text-right pr-4">Amount</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {isLoading
-                        ? Array.from({ length: 10 }).map((_, index) => <SkeletonRow key={index} />)
-                        : transactions.map((tx) => (
-                              <TableRow key={tx.hash}>
-                                  <TableCell>
+                        ? Array.from({ length: 10 }).map((_, index) => (
+                              <SkeletonRow key={`skeleton-${index}`} />
+                          ))
+                        : transactions.map((tx, index) => (
+                              <TableRow key={`${tx.hash}-${index}`}>
+                                  <TableCell className="whitespace-nowrap pl-4">
                                       {formatDistanceToNow(new Date(tx.timestamp), {
                                           addSuffix: true,
                                       })}
@@ -82,14 +84,19 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
                                       </a>
                                   </TableCell>
                                   {/* <TableCell>{formatAddress(tx.from)}</TableCell>
-                                  <TableCell>{formatAddress(tx.to)}</TableCell> */}
-                                  <TableCell className="text-right font-mono">
+                                      <TableCell>{formatAddress(tx.to)}</TableCell> */}
+                                  <TableCell className="text-right font-mono pr-4 max-w-[200px] truncate">
                                       {formatValue(tx.value)} {tx.asset}
                                   </TableCell>
                               </TableRow>
                           ))}
                 </TableBody>
             </Table>
+            <div className="w-full text-center py-4 text-sm">
+                <a href="#" className="hover:underline">
+                    todo: Load transactions from over 30 days ago
+                </a>
+            </div>
         </div>
     );
 }

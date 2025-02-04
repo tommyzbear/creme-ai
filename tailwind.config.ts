@@ -114,6 +114,11 @@ export default {
                 ibm: ["var(--font-ibm)"],
                 bricolage: ["var(--font-bricolage)"],
             },
+            boxShadow: {
+                "b-sm": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+                "b-md": "0 2px 4px -1px rgb(0 0 0 / 0.1)",
+                "b-lg": "0 4px 6px -2px rgb(0 0 0 / 0.1)",
+            },
         },
     },
     plugins: [animate],

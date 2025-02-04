@@ -34,8 +34,12 @@ body {
         --secondary-foreground: 240 5.9% 10%;
         --muted: 240 4.8% 95.9%;
         --muted-foreground: 240 3.8% 46.1%;
-        --accent: 240 4.8% 95.9%;
-        --accent-foreground: 240 5.9% 10%;
+        /* pick accent colour */
+        /* --accent: 243 87% 37%; */
+        /* --accent: 230 100% 42%; */
+        --accent: 255 100% 47%;
+        /* white */
+        --accent-foreground: 0 0% 100%;
         --destructive: 0 84.2% 60.2%;
         --destructive-foreground: 0 0% 98%;
         --border: 240 5.9% 90%;
@@ -110,9 +114,9 @@ body {
             backdrop-saturate-150 
             antialiased
             bg-white/20
-            border-white/20
-            transition-all 
-            duration-1000;
+            border-white/20;
+        transition: width 300ms, height 300ms, backdrop-filter 1000ms, background-color 1000ms,
+            border-color 1000ms, box-shadow 1000ms;
     }
 
     .frosted-glass:is(:hover, :focus-within) {
@@ -127,5 +131,19 @@ body {
     .frosted-glass-active {
         @apply backdrop-brightness-125
             shadow-md border-white/30;
+    }
+}
+
+@layer utilities {
+    .main-gradient {
+        @apply from-white/70 to-transparent pointer-events-none;
+    }
+
+    .top-fade {
+        @apply absolute top-0 left-0 right-0 h-24 bg-gradient-to-b main-gradient;
+    }
+
+    .bottom-fade {
+        @apply absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t main-gradient;
     }
 }

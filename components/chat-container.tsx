@@ -5,7 +5,13 @@ import { useEffect, useRef } from "react";
 import { ChatMessage } from "@/components/chat-message";
 import { ChatInput } from "@/components/chat-input";
 
-export function ChatContainer({ className }: { className?: string }) {
+export function ChatContainer({
+    className,
+    onFocus,
+}: {
+    className?: string;
+    onFocus?: () => void;
+}) {
     const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
         api: "/api/chat",
     });
@@ -21,12 +27,18 @@ export function ChatContainer({ className }: { className?: string }) {
     }, [messages]);
 
     return (
-        <div className={`flex flex-col h-full ${className}`}>
+        <div
+            className={`flex flex-col h-full overflow-hidden ${className}`}
+            onFocus={onFocus}
+            tabIndex={0}
+        >
             <div className="flex-1 overflow-y-auto">
                 <div className="h-full">
                     <div className="space-y-6 p-4">
                         {messages.length === 0 && (
-                            <p className="text-center">No messages yet. Start a conversation!</p>
+                            <p className="text-center text-base select-none">
+                                No messages yet. Start a conversation!
+                            </p>
                         )}
 
                         {messages.map((message) => (
@@ -45,7 +57,9 @@ export function ChatContainer({ className }: { className?: string }) {
                 </div>
             </div>
 
-            <div className="p-6">
+            <div className="bottom-fade" />
+
+            <div className="p-6 relative">
                 <div className="w-full">
                     <ChatInput
                         input={input}

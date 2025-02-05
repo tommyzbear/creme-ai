@@ -4,10 +4,19 @@ import React from "react";
 
 export default function BlurredCursor() {
     const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
+    const [offset, setOffset] = React.useState(0);
 
-    // Calculate offset based on viewport width
-    const offset = React.useMemo(() => {
-        return window.innerWidth * 0.05; // 10vw (half of 20vw)
+    React.useEffect(() => {
+        // Set initial offset
+        setOffset(window.innerWidth * 0.05);
+
+        // Optional: Update offset on window resize
+        const handleResize = () => {
+            setOffset(window.innerWidth * 0.05);
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
     }, []);
 
     React.useEffect(() => {

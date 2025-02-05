@@ -8,6 +8,8 @@ import { ChatContainer } from "@/components/chat-container";
 import { cn } from "@/lib/utils";
 import { PortfolioContainer } from "@/components/portfolio-container";
 import { Suspense, useState } from "react";
+import { PortfolioDashboard } from "@/components/portfolio-dashboard";
+import { SwitchChainSidebar } from "@/components/switch-chain-sidebar";
 
 export default function HomePage() {
     const { ready, authenticated } = usePrivy();
@@ -65,6 +67,8 @@ export default function HomePage() {
                                     {/* <h3 className="text-sm">Core indicator based on cookie api</h3> */}
                                 </div>
                             </Card>
+                            <SwitchChainSidebar />
+
                             <div className="flex flex-row gap-1">
                                 <Card className="px-2 py-0">
                                     <div className="flex items-center gap-2 select-none">
@@ -95,7 +99,7 @@ export default function HomePage() {
                     />
 
                     {/* Portfolio Dashboard*/}
-                    <PortfolioContainer
+                    <PortfolioDashboard
                         className="frosted-glass flex-1 w-full h-full rounded-6xl select-none"
                         onFocus={() => setLastFocusedSection("portfolio")}
                     />

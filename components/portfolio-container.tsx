@@ -1,22 +1,14 @@
 "use client";
 
-import { ChartPie, Copy, Check } from "lucide-react";
+import { ChartPie, Copy, Check, RefreshCcw } from "lucide-react";
 import { TokensTable } from "@/components/tokens-table";
 import { TransactionsTable } from "@/components/transactions-table";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TokenData, Transfer } from "@/lib/services/alchemy";
 import { cn } from "@/lib/utils";
-
-interface TokenData {
-    symbol: string;
-    balance: string;
-    price: string;
-    value: string;
-    contractAddress: string;
-    logo: string;
-}
 
 export function PortfolioContainer({
     className,
@@ -26,15 +18,15 @@ export function PortfolioContainer({
     onFocus?: () => void;
 }) {
     const { user } = usePrivy();
+    const { ready: walletReady, wallets } = useWallets();
     const { toast } = useToast();
     const [isCopied, setIsCopied] = useState(false);
-    const [tokens, setTokens] = useState<TokenData[]>([]);
-    const [transactions, setTransactions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const containerRef = useRef<HTMLDivElement>(null);
+    const [tokens, setTokens] = useState<TokenData[]>([]);
+    const [transactions, setTransactions] = useState<Transfer[]>([]);
 
     useEffect(() => {
-        async function fetchTokens() {
+        async function fetchPortfolioData() {
             if (!user?.wallet?.address) return;
 
             try {

@@ -5,25 +5,15 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
-import { Transfer } from "@/lib/services/alchemy"
-import { getExplorerByChainId } from "@/lib/utils"
-import { formatDistanceToNow } from 'date-fns'
-
-interface Transaction {
-    hash: string;
-    from: string;
-    to: string;
-    value: number;
-    asset: string;
-    category: string;
-    timestamp: number;
-}
+} from "@/components/ui/table";
+import { Transfer } from "@/lib/services/alchemy";
+import { getExplorerByChainId } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
 
 interface TransactionsTableProps {
-    transactions: Transfer[]
-    isLoading: boolean
-    chainId: string
+    transactions: Transfer[];
+    isLoading: boolean;
+    chainId: string;
 }
 
 export function TransactionsTable({ transactions, isLoading, chainId }: TransactionsTableProps) {
@@ -65,40 +55,42 @@ export function TransactionsTable({ transactions, isLoading, chainId }: Transact
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {isLoading
-                        ? Array.from({ length: 10 }).map((_, index) => (
-                              <SkeletonRow key={`skeleton-${index}`} />
-                          ) : transactions.length === 0 ? (
+                    {isLoading ? (
+                        Array.from({ length: 10 }).map((_, index) => (
+                            <SkeletonRow key={`skeleton-${index}`} />
+                        ))
+                    ) : transactions.length === 0 ? (
                         <TableRow>
                             <TableCell colSpan={5} className="text-center py-8">
                                 No transactions found
                             </TableCell>
                         </TableRow>
-                    ))
-                        : transactions.map((tx, index) => (
-                              <TableRow key={`${tx.hash}-${index}`}>
-                                  <TableCell className="whitespace-nowrap pl-4">
-                                      {formatDistanceToNow(new Date(tx.timestamp), {
-                                          addSuffix: true,
-                                      })}
-                                  </TableCell>
-                                  <TableCell className="capitalize">
-                                      <a
-                                          href={`${getExplorerByChainId(chainId)}/tx/${tx.hash}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="underline hover:text-blue-500"
-                                      >
-                                          {formatAddress(tx.hash)}
-                                      </a>
-                                  </TableCell>
-                                  {/* <TableCell>{formatAddress(tx.from)}</TableCell>
+                    ) : (
+                        transactions.map((tx, index) => (
+                            <TableRow key={`${tx.hash}-${index}`}>
+                                <TableCell className="whitespace-nowrap pl-4">
+                                    {formatDistanceToNow(new Date(tx.timestamp), {
+                                        addSuffix: true,
+                                    })}
+                                </TableCell>
+                                <TableCell className="capitalize">
+                                    <a
+                                        href={`${getExplorerByChainId(chainId)}/tx/${tx.hash}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="underline hover:text-blue-500"
+                                    >
+                                        {formatAddress(tx.hash)}
+                                    </a>
+                                </TableCell>
+                                {/* <TableCell>{formatAddress(tx.from)}</TableCell>
                                       <TableCell>{formatAddress(tx.to)}</TableCell> */}
-                                  <TableCell className="text-right font-mono pr-4 max-w-[200px] truncate">
-                                      {formatValue(tx.value)} {tx.asset}
-                                  </TableCell>
-                              </TableRow>
-                          ))}
+                                <TableCell className="text-right font-mono pr-4 max-w-[200px] truncate">
+                                    {formatValue(tx.value)} {tx.asset}
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    )}
                 </TableBody>
             </Table>
             <div className="w-full text-center py-4 text-sm">

@@ -5,9 +5,10 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
-import { getExplorerByChainId } from "@/lib/utils";
-import { formatDistanceToNow } from "date-fns";
+} from "@/components/ui/table"
+import { Transfer } from "@/lib/services/alchemy"
+import { getExplorerByChainId } from "@/lib/utils"
+import { formatDistanceToNow } from 'date-fns'
 
 interface Transaction {
     hash: string;
@@ -20,9 +21,9 @@ interface Transaction {
 }
 
 interface TransactionsTableProps {
-    transactions: Transaction[];
-    isLoading: boolean;
-    chainId: string;
+    transactions: Transfer[]
+    isLoading: boolean
+    chainId: string
 }
 
 export function TransactionsTable({ transactions, isLoading, chainId }: TransactionsTableProps) {
@@ -67,7 +68,13 @@ export function TransactionsTable({ transactions, isLoading, chainId }: Transact
                     {isLoading
                         ? Array.from({ length: 10 }).map((_, index) => (
                               <SkeletonRow key={`skeleton-${index}`} />
-                          ))
+                          ) : transactions.length === 0 ? (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center py-8">
+                                No transactions found
+                            </TableCell>
+                        </TableRow>
+                    ))
                         : transactions.map((tx, index) => (
                               <TableRow key={`${tx.hash}-${index}`}>
                                   <TableCell className="whitespace-nowrap pl-4">

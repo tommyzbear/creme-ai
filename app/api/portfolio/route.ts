@@ -1,4 +1,9 @@
-import { getWalletTokens, getTokenPrices, getRecentTransfers } from "@/lib/services/alchemy";
+import {
+    getWalletTokens,
+    getTokenPrices,
+    getRecentTransfers,
+    getEthBalance,
+} from "@/lib/services/alchemy";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -14,9 +19,10 @@ export async function GET(request: Request) {
             );
         }
 
-        const [walletTokens, transfers] = await Promise.all([
+        const [walletTokens, transfers, ethBalance] = await Promise.all([
             getWalletTokens(address, chain),
             getRecentTransfers(address, chain),
+            getEthBalance(address, chain),
         ]);
 
         const prices = await getTokenPrices(
@@ -43,7 +49,7 @@ export async function GET(request: Request) {
             .filter((t) => t !== null);
 
         return NextResponse.json({
-            tokens: tokenData,
+            tokens: [...tokenData, ethBalance],
             transactions: transfers,
         });
     } catch (error) {

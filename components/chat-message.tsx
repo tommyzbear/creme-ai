@@ -1,7 +1,7 @@
 import { Bot, User } from "lucide-react"
 import ReactMarkdown from "react-markdown"
-import SyntaxHighlighter from "react-syntax-highlighter"
-import { atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import remarkGfm from 'remark-gfm'
+
 interface ChatMessageProps {
     role: "user" | "assistant"
     content: string
@@ -30,50 +30,7 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
                         </div>
                         <div className={"flex-1 max-w-[80%] bg-muted/100 p-4 rounded-lg prose"}>
                             <ReactMarkdown
-                                components={{
-                                    code({ node, inline, className, children, ...props }) {
-                                        const match = /language-(\w+)/.exec(className || '')
-                                        console.log("match", !inline && match)
-                                        return !inline && match ? (
-                                            <SyntaxHighlighter
-                                                {...props}
-                                                style={atomOneLight}
-                                                language={match[1]}
-                                                PreTag="div"
-                                            >
-                                                {String(children).replace(/\n$/, '')}
-                                            </SyntaxHighlighter>
-                                        ) : (
-                                            <code {...props} className={className}>
-                                                {children}
-                                            </code>
-                                        )
-                                    },
-                                    // Style tables
-                                    table({ children }) {
-                                        return (
-                                            <div className="overflow-x-auto">
-                                                <table className="w-full border-collapse border border-muted">
-                                                    {children}
-                                                </table>
-                                            </div>
-                                        )
-                                    },
-                                    th({ children }) {
-                                        return (
-                                            <th className="border border-muted bg-muted p-2 text-left">
-                                                {children}
-                                            </th>
-                                        )
-                                    },
-                                    td({ children }) {
-                                        return (
-                                            <td className="border border-muted p-2">
-                                                {children}
-                                            </td>
-                                        )
-                                    },
-                                }}
+                                remarkPlugins={[remarkGfm]}
                             >
                                 {content}
                             </ReactMarkdown>

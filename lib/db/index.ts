@@ -10,7 +10,9 @@ interface ScamTokenDB {
 const defaultData: ScamTokenDB = {
     scamTokens: {
         "eth-mainnet": [],
-        "arb-mainnet": []
+        "arb-mainnet": [],
+        "base-mainnet": [],
+        "opt-mainnet": []
     }
 }
 

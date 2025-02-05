@@ -8,7 +8,6 @@ import { extractCAIP2, getCAIP2ByChain, getSupportedChains } from '../utils';
 export const sendTokenOnUserBehalf = {
     description: 'Send a specify amount of token on behalf of a user to a recipient address',
     parameters: z.object({
-        // userId: z.string().describe('The user ID of the user to send the token on behalf of'),
         chain: z.string().describe('The chain to send the token on'),
         recipientAddress: z.string().describe('The address of the recipient'),
         amount: z.number().describe('The amount of token to send')
@@ -56,7 +55,7 @@ export const sendTokenOnUserBehalf = {
                     error: 'No delegated wallet found'
                 }
             }
-            // console.log(parseEther(amount.toString()));
+
             // Get the transaction hash from the response
             try {
                 const params = {

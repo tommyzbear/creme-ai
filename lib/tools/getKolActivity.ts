@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { TweetEntity } from '@/types/data';
 import { simplifyTweet } from '@/lib/scraper';
 import scraper from '@/lib/scraper';
+import { supabase } from '../supabase';
 
 export const getKolActivity = {
     description: 'Get and summarize recent Twitter/X activity for a given user',
@@ -10,19 +11,18 @@ export const getKolActivity = {
     }),
     execute: async ({ username }: { username: string }) => {
         try {
-            console.log("fetching tweets for", username)
-            const timeline = scraper.getTweets(username, 20)
-            console.log("timeline", timeline)
-            const latestTweets: TweetEntity[] = []
+            // const timeline = scraper.getTweets(username, 20)
+            const latestTweets = await supabase.from("tweets").select("*").eq("username", username).order("timestamp", { ascending: false }).limit(20)
+            // const latestTweets: TweetEntity[] = []
 
-            for await (const tweet of timeline) {
-                const simplifiedTweet = simplifyTweet(tweet)
-                if (simplifiedTweet) {
-                    latestTweets.push(simplifiedTweet)
-                }
-            }
+            // for await (const tweet of timeline) {
+            //     const simplifiedTweet = simplifyTweet(tweet)
+            //     if (simplifiedTweet) {
+            //         latestTweets.push(simplifiedTweet)
+            //     }
+            // }
 
-            console.log("latestTweets", latestTweets)
+            // console.log("latestTweets", latestTweets)
 
             return {
                 username,

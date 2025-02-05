@@ -137,9 +137,10 @@ export async function getAgentByContract(
 }
 
 export async function getAgentsPaged(
-    interval: Interval = '_3Days',
+    interval: Interval = '_7Days',
     page: number = 1,
-    pageSize: number = 10
+    pageSize: number = 10,
+    withTweets: boolean = false
 ): Promise<CookieResponse<PagedAgentData>> {
     try {
         validatePageParams(page, pageSize)
@@ -149,14 +150,21 @@ export async function getAgentsPaged(
             headers: {
                 'x-api-key': COOKIE_DAO_API_KEY
             }
-        }
-        )
+        })
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`)
         }
 
         const data = await response.json()
+
+        if (!withTweets) {
+            data.data = data.data.map((agent: AgentData) => ({
+                ...agent,
+                topTweets: undefined
+            }))
+        }
+
         return data
     } catch (error) {
         console.error('Error fetching paged agents:', error)
@@ -198,4 +206,3 @@ export async function searchTweets(
         }
     }
 }
-

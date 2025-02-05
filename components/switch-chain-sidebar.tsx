@@ -13,14 +13,19 @@ import { useWallets } from "@privy-io/react-auth"
 import { getNetworkByChainId } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { config } from "@/lib/wallet/config"
+import { usePortfolioStore } from "@/store/portfolio-store"
+import { useState } from "react"
+
 export function SwitchChainSidebar() {
     const { wallets, ready } = useWallets();
     const { toast } = useToast();
+    const { currentChainId, setCurrentChainId } = usePortfolioStore();
 
     const handleSwitchNetwork = async (chainId: string) => {
         if (!wallets[0]) return;
         try {
             await wallets[0].switchChain(Number(chainId));
+            setCurrentChainId(`eip155:${chainId}`);
             toast({
                 description: "Network switched successfully",
             });
@@ -42,7 +47,7 @@ export function SwitchChainSidebar() {
         <SidebarMenu>
             <SidebarMenuItem>
                 <Select
-                    value={getCurrentNetwork()}
+                    value={currentChainId}
                     onValueChange={handleSwitchNetwork}
                     disabled={!wallets[0]}
                 >

@@ -3,7 +3,7 @@
 import { ChartPie, Copy, Check, RefreshCcw } from "lucide-react"
 import { TokensTable } from "@/components/tokens-table"
 import { TransactionsTable } from "@/components/transactions-table"
-import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth"
+import { usePrivy, useWallets } from "@privy-io/react-auth"
 import { useToast } from "@/hooks/use-toast"
 import { useState, useEffect } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -19,15 +19,16 @@ export default function PortfolioPage() {
         managedWalletTransactions,
         isLoading,
         fetchPortfolioData,
-        clearStore,
         selectedWalletAddress,
-        setSelectedWalletAddress
+        setSelectedWalletAddress,
+        managedWallet,
+        setManagedWallet,
+        setUserWallet,
     } = usePortfolioStore()
     const { user } = usePrivy()
     const { ready: walletReady, wallets } = useWallets()
     const { toast } = useToast()
     const [isCopied, setIsCopied] = useState(false)
-    const [managedWallet, setManagedWallet] = useState<ConnectedWallet | null>(null)
     const [fetchAttempted, setFetchAttempted] = useState<Record<string, boolean>>({})
     const [transactions, setTransactions] = useState<Transfer[]>([])
     const [tokens, setTokens] = useState<TokenData[]>([])
@@ -36,16 +37,16 @@ export default function PortfolioPage() {
         if (walletReady) {
             setManagedWallet(wallets.find(w => w.walletClientType === 'privy') || null)
         }
-    }, [wallets, walletReady])
+        if (user?.wallet?.address) {
+            setUserWallet(user.wallet.address)
+        }
+    }, [wallets, walletReady, setManagedWallet, user?.wallet?.address, setUserWallet])
 
     useEffect(() => {
-        console.log("selectedWalletAddress", selectedWalletAddress)
         if (selectedWalletAddress === user?.wallet?.address) {
-            console.log("userWalletTransactions", userWalletTransactions)
             setTransactions(userWalletTransactions)
             setTokens(userWalletTokens)
         } else {
-            console.log("managedWalletTransactions", managedWalletTransactions)
             setTransactions(managedWalletTransactions)
             setTokens(managedWalletTokens)
         }

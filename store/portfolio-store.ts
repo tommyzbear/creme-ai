@@ -1,5 +1,6 @@
 import { TokenData, Transfer } from '@/lib/services/alchemy'
 import { getAlchemyChainByChainId } from '@/lib/utils'
+import { ConnectedWallet } from '@privy-io/react-auth'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -9,12 +10,17 @@ interface PortfolioState {
     managedWalletTokens: TokenData[]
     managedWalletTransactions: Transfer[]
     isLoading: boolean
-    currentAddress: string | null
     selectedWalletAddress: string
+    currentChainId: string
     setIsLoading: (isLoading: boolean) => void
     fetchPortfolioData: (address: string, chainId: string, isManaged: boolean) => Promise<void>
     clearStore: () => void
     setSelectedWalletAddress: (address: string) => void
+    setCurrentChainId: (chainId: string) => void
+    managedWallet: ConnectedWallet | null
+    setManagedWallet: (wallet: ConnectedWallet | null) => void
+    userWallet: string | undefined
+    setUserWallet: (address: string | null) => void
 }
 
 export const usePortfolioStore = create<PortfolioState>()(
@@ -25,14 +31,27 @@ export const usePortfolioStore = create<PortfolioState>()(
             managedWalletTokens: [],
             managedWalletTransactions: [],
             isLoading: false,
-            currentAddress: null,
             currentChain: null,
             selectedWalletAddress: "",
+            currentChainId: "eip155:1",
+            managedWallet: null,
+            userWallet: undefined,
 
             setIsLoading: (isLoading) => set({ isLoading }),
 
             setSelectedWalletAddress: (address: string) => set({ selectedWalletAddress: address }),
 
+            setCurrentChainId: (chainId: string) => {
+                set({ currentChainId: chainId })
+                if (get().selectedWalletAddress) {
+                    if (get().managedWallet?.address) {
+                        get().fetchPortfolioData(get().managedWallet?.address, chainId, true);
+                    }
+                    if (get().userWallet) {
+                        get().fetchPortfolioData(get().userWallet, chainId, false);
+                    }
+                }
+            },
 
             fetchPortfolioData: async (address: string, chainId: string, isManaged: boolean) => {
                 if (!address || !chainId) return;
@@ -51,14 +70,12 @@ export const usePortfolioStore = create<PortfolioState>()(
                         set({
                             managedWalletTokens: data.tokens,
                             managedWalletTransactions: data.transactions,
-                            currentAddress: address,
                             isLoading: false
                         });
                     } else {
                         set({
                             userWalletTokens: data.tokens,
                             userWalletTransactions: data.transactions,
-                            currentAddress: address,
                             isLoading: false
                         });
                     }
@@ -75,9 +92,14 @@ export const usePortfolioStore = create<PortfolioState>()(
                 managedWalletTokens: [],
                 managedWalletTransactions: [],
                 isLoading: false,
-                currentAddress: null,
-                selectedWalletAddress: ""
-            })
+                selectedWalletAddress: "",
+                userWallet: undefined,
+                managedWallet: null,
+            }),
+
+            setManagedWallet: (wallet) => set({ managedWallet: wallet }),
+
+            setUserWallet: (address) => set({ userWallet: address })
         }),
         {
             name: 'portfolio-storage',
@@ -86,8 +108,10 @@ export const usePortfolioStore = create<PortfolioState>()(
                 userWalletTransactions: state.userWalletTransactions,
                 managedWalletTokens: state.managedWalletTokens,
                 managedWalletTransactions: state.managedWalletTransactions,
-                currentAddress: state.currentAddress,
-                selectedWalletAddress: state.selectedWalletAddress
+                selectedWalletAddress: state.selectedWalletAddress,
+                userWallet: state.userWallet,
+                managedWallet: state.managedWallet,
+                currentChainId: state.currentChainId,
             })
         }
     )

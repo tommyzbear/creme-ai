@@ -113,11 +113,44 @@ export function getExplorerByChainId(chainId: string) {
   return "Unknown";
 }
 
-const extractCAIP2 = (input: string): { namespace: string, chainId: string } | null => {
+export const extractCAIP2 = (input: string): { namespace: string, chainId: string } | null => {
   const pattern = /^([^:]+):(.+)$/; // Captures everything before and after ":"
   const match = input.match(pattern);
   if (match) {
     return { namespace: match[1], chainId: match[2] };
   }
   return null; // Return null if format doesn't match
+}
+
+export const getCAIP2ByChain = (chain: string) => {
+  switch (chain.toLowerCase()) {
+    case "mainnet":
+    case "ethereum mainnet":
+    case "eth-mainnet":
+    case "ethereum":
+      return "eip155:1";
+    case "arbitrum mainnet":
+    case "arbitrum":
+    case "arb-mainnet":
+      return "eip155:42161";
+    case "optimism mainnet":
+    case "optimism":
+    case "opt-mainnet":
+      return "eip155:10";
+    case "base mainnet":
+    case "base":
+    case "base-mainnet":
+      return "eip155:8453";
+    default:
+      return null;
+  }
+}
+
+export const getSupportedChains = () => {
+  return [
+    "Ethereum",
+    "Arbitrum",
+    "Optimism",
+    "Base",
+  ]
 }

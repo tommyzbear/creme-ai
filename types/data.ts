@@ -144,3 +144,27 @@ export interface Tweet {
     tweet: TweetEntity;
     timestamp: number;
 }
+
+export interface DraftPortfolio {
+    id: number;
+    user_id: string;
+    portfolio: AllocationEntry[];
+    created_at: string;
+    applied: boolean;
+}
+
+export interface Portfolio {
+    id: number;
+    user_id: string;
+    portfolio: AllocationEntry[];
+    created_at: string;
+    active: boolean;
+}
+
+export interface AllocationEntry {
+    token: string;
+    token_address: string;
+    chainId: number;
+    chainType: string;
+    weight: number;
+}

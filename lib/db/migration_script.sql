@@ -6,3 +6,17 @@ CREATE TABLE tweets (
 );
 -- Index on timestamp for efficient time-based queries
 CREATE INDEX idx_tweets_timestamp ON tweets(timestamp);
+CREATE TABLE draft_portfolio (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    user_id TEXT NOT NULL REFERENCES account(id),
+    portfolio JSONB NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    applied BOOLEAN DEFAULT FALSE
+);
+CREATE TABLE portfolio (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    user_id TEXT NOT NULL REFERENCES account(id),
+    portfolio JSONB NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    active BOOLEAN DEFAULT FALSE
+);

@@ -14,7 +14,7 @@ interface TopTweet {
     impressionsCount: number
 }
 
-interface AgentData {
+export interface AgentData {
     agentName: string
     contracts: Contract[]
     twitterUsernames: string[]
@@ -159,7 +159,7 @@ export async function getAgentsPaged(
         const data = await response.json()
 
         if (!withTweets) {
-            data.data = data.data.map((agent: AgentData) => ({
+            data.ok.data = data.ok?.data.map((agent: AgentData) => ({
                 ...agent,
                 topTweets: undefined
             }))

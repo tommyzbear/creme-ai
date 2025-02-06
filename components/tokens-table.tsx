@@ -8,9 +8,11 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import Image from "next/image";
-import { Copy, Coins, Check } from "lucide-react";
+import { Copy, Coins, Check, ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Token {
     symbol: string;
@@ -23,26 +25,41 @@ interface Token {
 
 interface TokensTableProps {
     tokens: Token[];
+    totalValue: number;
     onBuy: (symbol: string) => void;
     onSell: (symbol: string) => void;
     isLoading: boolean;
+    isExpanded: boolean;
 }
 
-export function TokensTable({ tokens, onBuy, onSell, isLoading }: TokensTableProps) {
+type SortField = "symbol" | "value" | "percentage";
+
+export function TokensTable({
+    tokens,
+    totalValue,
+    onBuy,
+    onSell,
+    isLoading,
+    isExpanded,
+}: TokensTableProps) {
     const [copiedSymbol, setCopiedSymbol] = useState<string | null>(null);
     const [showAll, setShowAll] = useState(false);
+    const [sortConfig, setSortConfig] = useState<{
+        column: SortField | null;
+        order: "asc" | "desc" | null;
+    }>({ column: "percentage", order: "desc" });
 
     const formatValue = (value: string) => {
         const numValue = Number(value);
-        if (numValue > 0.01) {
-            return "> 0.01";
+        if (numValue < 0.01) {
+            return "< $0.01";
         }
 
         return Intl.NumberFormat("en-US", {
             style: "currency",
             currency: "USD",
             minimumFractionDigits: 2,
-            maximumFractionDigits: 6,
+            maximumFractionDigits: 2,
         }).format(numValue);
     };
 
@@ -74,51 +91,137 @@ export function TokensTable({ tokens, onBuy, onSell, isLoading }: TokensTablePro
 
     const renderSkeletonRows = () => {
         return Array.from({ length: 5 }).map((_, index) => (
-            <TableRow key={`skeleton-${index}`}>
-                <TableCell className="font-medium pl-4">
+            <TableRow key={`skeleton-${index}`} className="h-10">
+                <TableCell className="p-0 px-4">
                     <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full bg-gray-200 animate-pulse" />
-                        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+                        <Skeleton className="h-6 w-6 rounded-full" />
+                        <Skeleton className="h-4 w-16" />
                     </div>
                 </TableCell>
-                <TableCell className="text-left">
-                    <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+                <TableCell className="p-0">
+                    <Skeleton className="h-4 w-20" />
+                </TableCell>
+                <TableCell
+                    className={cn(
+                        "p-0 text-right transition-all duration-300 overflow-hidden",
+                        isExpanded ? "w-[100px]" : "w-0 p-0"
+                    )}
+                >
+                    <Skeleton className="h-4 w-16 ml-auto" />
                 </TableCell>
                 <TableCell className="text-right">
-                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse ml-auto" />
+                    <Skeleton className="h-4 w-20 ml-auto" />
                 </TableCell>
-                <TableCell className="text-right">
-                    <div className="h-4 w-28 bg-gray-200 rounded animate-pulse ml-auto" />
+                <TableCell className="text-right pr-4">
+                    <Skeleton className="h-4 w-12 ml-auto" />
                 </TableCell>
             </TableRow>
         ));
     };
 
-    const displayedTokens = showAll ? tokens : tokens.slice(0, 5);
+    const sortTokens = (tokensToSort: Token[]) => {
+        if (!sortConfig.column || !sortConfig.order) return tokensToSort;
+
+        const totalValue = tokens.reduce((sum, t) => sum + Number(t.value), 0);
+
+        return [...tokensToSort].sort((a, b) => {
+            let valueA: string | number;
+            let valueB: string | number;
+
+            const column = sortConfig.column as keyof Token; // Type assertion since we know column isn't null here
+
+            if (sortConfig.column === "percentage") {
+                valueA = (Number(a.value) / totalValue) * 100;
+                valueB = (Number(b.value) / totalValue) * 100;
+            } else {
+                valueA = column === "symbol" ? a[column] : Number(a[column]);
+                valueB = column === "symbol" ? b[column] : Number(b[column]);
+            }
+
+            if (column === "symbol") {
+                return sortConfig.order === "asc"
+                    ? (valueA as string).localeCompare(valueB as string)
+                    : (valueB as string).localeCompare(valueA as string);
+            }
+
+            return sortConfig.order === "asc"
+                ? (valueA as number) - (valueB as number)
+                : (valueB as number) - (valueA as number);
+        });
+    };
+
+    const handleSort = (column: SortField) => {
+        setSortConfig((current) => ({
+            column,
+            order: current.column !== column ? "desc" : current.order === "desc" ? "asc" : "desc",
+        }));
+    };
+
+    const getSortIcon = (column: SortField) =>
+        sortConfig.column !== column ? (
+            <ChevronsUpDown className="h-3 w-auto inline-block" />
+        ) : sortConfig.order === "asc" ? (
+            <ChevronUp className="h-3 w-auto inline-block" />
+        ) : (
+            <ChevronDown className="h-3 w-auto inline-block" />
+        );
+
+    const displayedTokens = (() => {
+        const sortedTokens = sortTokens(tokens);
+        return showAll ? sortedTokens : sortedTokens.slice(0, 5);
+    })();
+
+    const baseRowHeight = 2.5; // Height of one row in rem
+    const headerHeight = 1.5; // Height of header in rem (24px / 16)
 
     const getTableHeight = () => {
-        const baseRowHeight = 40; // Height of one row in pixels
-        const headerHeight = 24; // Height of header in pixels
         const visibleRows = showAll ? tokens.length : 5;
-        return `${headerHeight + visibleRows * baseRowHeight}px`;
+        return `${headerHeight + visibleRows * baseRowHeight}rem`;
+    };
+
+    const calculateTokenPercentage = (tokenValue: string) => {
+        const totalValue = tokens.reduce((sum, t) => sum + Number(t.value), 0);
+        return ((Number(tokenValue) / totalValue) * 100).toFixed(2);
     };
 
     return (
         <div className="flex flex-col gap-2">
             <div
-                className="overflow-hidden transition-[height_300ms_ease-in-out]"
+                className="overflow-hidden transition-all duration-300"
                 style={{ height: getTableHeight() }}
             >
-                <Table>
+                <Table className="w-full table-fixed">
                     <TableHeader>
-                        <TableRow className="">
-                            <TableHead className="pl-4 w-[150px] whitespace-nowrap">
-                                Token
+                        <TableRow className="h-6 hover:bg-transparent">
+                            <TableHead
+                                className="px-4 whitespace-nowrap w-full cursor-pointe"
+                                onClick={() => handleSort("symbol")}
+                            >
+                                Token {getSortIcon("symbol")}
                             </TableHead>
-                            <TableHead className="text-left">Price</TableHead>
-                            <TableHead className="text-right">Amount</TableHead>
-                            <TableHead className="text-right whitespace-nowrap pr-4">
-                                Value
+                            <TableHead className="px-0 whitespace-nowrap w-[100px] text-left">
+                                Price
+                            </TableHead>
+                            <TableHead
+                                className={cn(
+                                    "text-right px-0",
+                                    "transition-all duration-300 overflow-hidden whitespace-nowrap",
+                                    isExpanded ? "w-[100px]" : "w-0 p-0"
+                                )}
+                            >
+                                Amount
+                            </TableHead>
+                            <TableHead
+                                className="whitespace-nowrap w-full text-right cursor-pointer"
+                                onClick={() => handleSort("value")}
+                            >
+                                Value {getSortIcon("value")}
+                            </TableHead>
+                            <TableHead
+                                className="w-[75px] whitespace-nowrap text-right px-4 cursor-pointer"
+                                onClick={() => handleSort("percentage")}
+                            >
+                                % {getSortIcon("percentage")}
                             </TableHead>
                         </TableRow>
                     </TableHeader>
@@ -133,42 +236,52 @@ export function TokensTable({ tokens, onBuy, onSell, isLoading }: TokensTablePro
                             </TableRow>
                         ) : (
                             displayedTokens.map((token, index) => (
-                                <TableRow key={`${token.symbol}-${index}`}>
-                                    <TableCell className="font-medium pl-4 whitespace-nowrap">
-                                        <a
-                                            className="flex items-center gap-2 cursor-pointer"
-                                            onClick={() =>
-                                                handleCopy(token.contractAddress, token.symbol)
-                                            }
-                                        >
-                                            {token.logo ? (
-                                                <Image
-                                                    src={token.logo}
-                                                    alt={token.symbol}
-                                                    width={24}
-                                                    height={24}
-                                                    className="rounded-full"
-                                                />
-                                            ) : (
-                                                <Coins className="h-5 w-5" />
-                                            )}
-                                            <span>{token.symbol}</span>
+                                <TableRow className="h-10 p-0" key={`${token.symbol}-${index}`}>
+                                    <TableCell className="p-0 px-4 font-medium whitespace-nowrap">
+                                        <div className="truncate w-full">
+                                            <a
+                                                className="flex items-center gap-2 cursor-pointer"
+                                                onClick={() =>
+                                                    handleCopy(token.contractAddress, token.symbol)
+                                                }
+                                            >
+                                                {token.logo ? (
+                                                    <Image
+                                                        src={token.logo}
+                                                        alt={token.symbol}
+                                                        width={24}
+                                                        height={24}
+                                                        className="rounded-full"
+                                                    />
+                                                ) : (
+                                                    <Coins className="h-[24px] w-[24px] inline-block flex-shrink-0" />
+                                                )}
+                                                <span>{token.symbol}</span>
 
-                                            {copiedSymbol === token.symbol ? (
-                                                <Check className="h-2 w-2 text-green-500" />
-                                            ) : (
-                                                <Copy className="h-2 w-2 text-black cursor-pointer hover:text-gray-600" />
-                                            )}
-                                        </a>
+                                                {copiedSymbol === token.symbol ? (
+                                                    <Check className="h-2 w-2 text-green-500" />
+                                                ) : (
+                                                    <Copy className="flex-none h-2 w-2 text-black cursor-pointer hover:text-gray-600" />
+                                                )}
+                                            </a>
+                                        </div>
                                     </TableCell>
-                                    <TableCell className="text-left">
+                                    <TableCell className="p-0 text-left">
                                         {formatCurrency(token.price).slice(0, 8)}
                                     </TableCell>
-                                    <TableCell className="text-right">
+                                    <TableCell
+                                        className={cn(
+                                            "p-0 text-right transition-all duration-300 overflow-hidden",
+                                            isExpanded ? "w-[100px]" : "w-0 p-0"
+                                        )}
+                                    >
                                         {formatNumber(token.balance)}
                                     </TableCell>
-                                    <TableCell className="text-right whitespace-nowrap pr-4">
+                                    <TableCell className="text-right whitespace-nowrap">
                                         {formatValue(token.value)}
+                                    </TableCell>
+                                    <TableCell className="text-right whitespace-nowrap pr-4">
+                                        {calculateTokenPercentage(token.value)}%
                                     </TableCell>
                                 </TableRow>
                             ))
@@ -179,7 +292,7 @@ export function TokensTable({ tokens, onBuy, onSell, isLoading }: TokensTablePro
             {tokens.length > 5 && (
                 <Button
                     variant="outline"
-                    className="w-auto mt-2 mx-auto rounded-xl"
+                    className="w-auto mt-0 mx-auto rounded-xl"
                     onClick={() => setShowAll(!showAll)}
                 >
                     {showAll ? "Show Less" : `Show All (${tokens.length})`}

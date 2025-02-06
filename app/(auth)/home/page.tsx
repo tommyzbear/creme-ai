@@ -8,12 +8,11 @@ import { ChatContainer } from "@/components/chat-container";
 import { cn } from "@/lib/utils";
 import { PortfolioContainer } from "@/components/portfolio-container";
 import { Suspense, useState } from "react";
-import { PortfolioDashboard } from "@/components/portfolio-dashboard";
 import { SwitchChainSidebar } from "@/components/switch-chain-sidebar";
 
 export default function HomePage() {
     const { ready, authenticated } = usePrivy();
-    const [lastFocusedSection, setLastFocusedSection] = useState<"chat" | "portfolio">("");
+    const [lastFocusedSection, setLastFocusedSection] = useState<"chat" | "portfolio" | null>(null);
 
     if (ready && !authenticated) {
         redirect("/login");
@@ -99,9 +98,10 @@ export default function HomePage() {
                     />
 
                     {/* Portfolio Dashboard*/}
-                    <PortfolioDashboard
+                    <PortfolioContainer
                         className="frosted-glass flex-1 w-full h-full rounded-6xl select-none"
                         onFocus={() => setLastFocusedSection("portfolio")}
+                        lastFocus={lastFocusedSection}
                     />
                 </div>
             </div>

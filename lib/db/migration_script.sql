@@ -20,3 +20,20 @@ CREATE TABLE portfolio (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     active BOOLEAN DEFAULT FALSE
 );
+CREATE TABLE chat_sessions (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    user_id TEXT NOT NULL REFERENCES account(id),
+    session_id TEXT NOT NULL,
+    session_name TEXT NOT NULL DEFAULT 'New Chat',
+    role TEXT CHECK (role IN ('user', 'assistant')) NOT NULL,
+    content TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+-- Index for faster user session lookups
+CREATE INDEX idx_user_id ON chat_sessions(user_id);
+-- Composite index for quick session filtering and ordering
+CREATE INDEX idx_session_id ON chat_sessions(session_id);
+-- Index for fast searching by session name (useful if querying by name)
+CREATE INDEX idx_session_name ON chat_sessions(session_name);
+-- Index for sorting chat history efficiently
+CREATE INDEX idx_timestamp ON chat_sessions(timestamp DESC);

@@ -168,3 +168,13 @@ export interface AllocationEntry {
     chainType: string;
     weight: number;
 }
+
+export interface ChatSession {
+    id: number;
+    user_id: string;
+    session_id: string;
+    session_name: string;
+    role: string;
+    content: string;
+    timestamp: number;
+}

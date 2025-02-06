@@ -48,8 +48,8 @@ export default function Login() {
                 <div>
                     <div className="flex justify-center mb-8">
                         <Image
-                            src="/creme-ai.png"
-                            alt="Creme AI"
+                            src="/FaiDeeLah.png"
+                            alt="DeFAI Hero"
                             width={480}
                             height={480}
                             priority

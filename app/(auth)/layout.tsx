@@ -1,8 +1,11 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+// import { AppSidebar } from "@/components/app-sidebar";
+// import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { privyClient } from "@/lib/privy";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
+import BlurredCursor from "@/components/ui/blurred-cursor";
+import GradientBackground from "@/components/gradient-background";
 
 async function checkAuth() {
     const cookieStore = await cookies();
@@ -31,15 +34,10 @@ export default async function Layout({
     }
 
     return (
-        <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-                <div className="flex min-h-screen">
-                    <main className="flex-1 pt-6 w-full">
-                        {children}
-                    </main>
-                </div>
-            </SidebarInset>
-        </SidebarProvider>
+        <div className="flex h-screen bg-neutral-200">
+            <GradientBackground />
+            <BlurredCursor />
+            <main className="flex-1 w-full h-full relative">{children}</main>
+        </div>
     );
 }

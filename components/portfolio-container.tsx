@@ -5,19 +5,20 @@ import { TokensTable } from "@/components/tokens-table";
 import { TransactionsTable } from "@/components/transactions-table";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { usePortfolioStore } from "@/store/portfolio-store";
 import { TokenData, Transfer } from "@/lib/services/alchemy";
+import { cn } from "@/lib/utils";
+import { usePortfolioStore } from "@/store/portfolio-store";
+import { HoldingsDashboard } from "@/components/holdings-dashboard";
 
-export default function PortfolioPage() {
+interface PortfolioContainerProps {
+    className?: string;
+    onFocus?: () => void;
+    lastFocus: "chat" | "portfolio" | null;
+}
+
+export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioContainerProps) {
     const {
         userWalletTokens,
         userWalletTransactions,
@@ -31,6 +32,7 @@ export default function PortfolioPage() {
         setManagedWallet,
         setUserWallet,
     } = usePortfolioStore();
+
     const { user } = usePrivy();
     const { ready: walletReady, wallets } = useWallets();
     const { toast } = useToast();
@@ -38,6 +40,13 @@ export default function PortfolioPage() {
     const [fetchAttempted, setFetchAttempted] = useState<Record<string, boolean>>({});
     const [transactions, setTransactions] = useState<Transfer[]>([]);
     const [tokens, setTokens] = useState<TokenData[]>([]);
+    const [scrollOpacity, setScrollOpacity] = useState(0);
+    const portfolioContainerRef = useRef<HTMLDivElement>(null);
+
+    const isPortfolioFocused = (lastFocus: "chat" | "portfolio" | null): boolean => {
+        if (lastFocus === null) return true;
+        return lastFocus === "portfolio";
+    };
 
     useEffect(() => {
         if (walletReady) {
@@ -77,7 +86,6 @@ export default function PortfolioPage() {
             relevantTransactions.length === 0 &&
             !fetchAttempted[selectedWalletAddress]
         ) {
-            console.log("Fetching portfolio data");
             setFetchAttempted((prev) => ({ ...prev, [selectedWalletAddress]: true }));
             fetchPortfolioData(selectedWalletAddress, wallets[0].chainId, isManaged).catch(() => {
                 toast({
@@ -107,13 +115,27 @@ export default function PortfolioPage() {
         }
     }, [user?.wallet?.address, setSelectedWalletAddress, selectedWalletAddress]);
 
+    useEffect(() => {
+        const handleScroll = () => {
+            if (portfolioContainerRef.current) {
+                const scrollPosition = portfolioContainerRef.current.scrollTop;
+                const opacity = Math.min(scrollPosition / 100, 0.3); // Max opacity of 0.3
+                setScrollOpacity(opacity);
+            }
+        };
+
+        const container = portfolioContainerRef.current;
+        if (container) {
+            container.addEventListener("scroll", handleScroll);
+            return () => container.removeEventListener("scroll", handleScroll);
+        }
+    }, []);
+
     const handleBuy = (symbol: string) => {
-        // Implement buy logic
         console.log("Buy", symbol);
     };
 
     const handleSell = (symbol: string) => {
-        // Implement sell logic
         console.log("Sell", symbol);
     };
 
@@ -149,7 +171,6 @@ export default function PortfolioPage() {
             relevantTransactions.length === 0 &&
             !fetchAttempted[address]
         ) {
-            console.log("Fetching portfolio data");
             setFetchAttempted((prev) => ({ ...prev, [address]: true }));
             fetchPortfolioData(address, wallets[0].chainId, isManaged).catch(() => {
                 toast({
@@ -161,101 +182,111 @@ export default function PortfolioPage() {
         }
     };
 
+    const scrollToTop = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (portfolioContainerRef.current) {
+            portfolioContainerRef.current.scrollTo({
+                top: 0,
+                behavior: "smooth",
+            });
+        }
+    };
+
+    const handlePortfolioRefresh = async () => {
+        await fetchPortfolioData(
+            selectedWalletAddress,
+            wallets[0].chainId,
+            selectedWalletAddress !== user?.wallet?.address
+        );
+        toast({
+            description: "Portfolio data refreshed",
+            duration: 2000,
+        });
+    };
+
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <ChartPie className="h-8 w-8" />
-                    <h1 className="text-xl font-semibold">Portfolio</h1>
-                    <div className="flex items-center gap-2">
+        <div
+            className={cn("max-w-5xl mx-auto h-screen overflow-hidden", className)}
+            onFocus={() => {
+                onFocus?.();
+            }}
+            onBlur={() => {}}
+            tabIndex={0}
+        >
+            <div
+                className="relative w-full mx-auto h-full overflow-y-auto test"
+                ref={portfolioContainerRef}
+            >
+                <header
+                    className={`
+                sticky top-0 z-10 antialiased frosted-glass flex flex-col items-center 
+                w-full shadow-b-sm bg-gradient-to-b main-gradient min-h-[60px]
+                backdrop-blur-sm backdrop-brightness-110 pointer-events-auto
+            `}
+                >
+                    <div
+                        className="absolute inset-0 bg-gradient-to-b from-background/100 to-transparent transition-opacity duration-300"
+                        style={{
+                            opacity: Math.max(scrollOpacity, 0.1),
+                        }}
+                    />
+                    <h1
+                        className={`
+                            pt-3 w-full h-full leading-none
+                            flex flex-col justify-center 
+                            text-center text-lg font-bold font-bricolage 
+                            relative cursor-pointer pointer-events-auto 
+                        `}
+                        onClick={scrollToTop}
+                    >
+                        Portfolio
+                    </h1>
+                    <div className="flex items-center gap-2 h-6">
                         {isLoading ? (
-                            <Skeleton className="h-6 w-32" />
+                            <Skeleton className="h-4 w-28" />
                         ) : (
-                            <>
-                                <span className="text-md text-muted-foreground">
-                                    {user?.wallet?.address
-                                        ? `${user?.wallet?.address.slice(
-                                              0,
-                                              6
-                                          )}...${user?.wallet?.address.slice(-4)}`
-                                        : "Not Connected"}
-                                </span>
+                            <button
+                                className="text-sm text-muted-foreground pl-3 hover:text-primary transition-colors flex items-center gap-1 cursor-pointer pointer-events-auto"
+                                onClick={() => copyToClipboard(user?.wallet?.address || "")}
+                                title="Copy address to clipboard"
+                                disabled={!user?.wallet?.address}
+                            >
+                                {user?.wallet?.address
+                                    ? `${user?.wallet?.address.slice(
+                                          0,
+                                          6
+                                      )}...${user?.wallet?.address.slice(-4)}`
+                                    : "Not Connected"}
                                 {user?.wallet?.address &&
                                     (isCopied ? (
-                                        <Check className="w-4 h-4 text-green-500" />
+                                        <Check className="w-3 h-3 text-green-500" />
                                     ) : (
-                                        <Copy
-                                            className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                            onClick={() =>
-                                                copyToClipboard(user?.wallet?.address || "")
-                                            }
-                                        />
+                                        <Copy className="w-3 h-3 text-gray-500 hover:text-gray-700" />
                                     ))}
-                                <RefreshCcw
-                                    className="w-4 h-4 cursor-pointer hover:text-gray-700"
-                                    onClick={async () => {
-                                        await fetchPortfolioData(
-                                            selectedWalletAddress,
-                                            wallets[0].chainId,
-                                            selectedWalletAddress !== user?.wallet?.address
-                                        );
-                                        toast({
-                                            description: "Portfolio data refreshed",
-                                            duration: 2000,
-                                        });
-                                    }}
-                                />
-                            </>
+                            </button>
                         )}
                     </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Select value={selectedWalletAddress} onValueChange={handleWalletChange}>
-                        <SelectTrigger className="w-[280px]">
-                            <SelectValue placeholder="Select wallet" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value={user?.wallet?.address || "user-wallet"}>
-                                User Connected Wallet
-                            </SelectItem>
-                            {managedWallet && (
-                                <SelectItem value={managedWallet?.address || "managed-wallet"}>
-                                    Creme Managed Wallet
-                                </SelectItem>
-                            )}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-
-            <div className="rounded-lg border bg-card">
-                <div className="flex items-center justify-between p-4 border-b">
-                    <h2 className="font-semibold">Tokens</h2>
-                    {isLoading ? (
-                        <Skeleton className="h-6 w-24" />
-                    ) : (
-                        <span className="font-mono">${totalValue.toFixed(2)}</span>
-                    )}
-                </div>
-                <div className="p-4">
+                </header>
+                <div className="">
+                    <HoldingsDashboard
+                        isLoading={isLoading}
+                        totalValue={totalValue}
+                        tokens={tokens}
+                        onRefresh={handlePortfolioRefresh}
+                    />
                     <TokensTable
                         tokens={tokens}
+                        totalValue={totalValue}
                         onBuy={handleBuy}
                         onSell={handleSell}
                         isLoading={isLoading}
+                        isExpanded={isPortfolioFocused(lastFocus)}
                     />
-                </div>
-            </div>
-
-            <div className="rounded-lg border bg-card">
-                <div className="p-4 border-b">
-                    <h2 className="font-semibold">Transactions</h2>
-                </div>
-                <div className="p-4">
                     <TransactionsTable
                         transactions={transactions}
                         isLoading={isLoading || !walletReady}
                         chainId={walletReady ? wallets[0]?.chainId : ""}
+                        isExpanded={isPortfolioFocused(lastFocus)}
                     />
                 </div>
             </div>

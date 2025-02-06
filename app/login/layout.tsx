@@ -1,5 +1,5 @@
 export const metadata = {
-    title: 'Login · Creme AI',
+    title: 'Login · DeFAI Hero',
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

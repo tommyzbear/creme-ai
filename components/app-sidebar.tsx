@@ -41,8 +41,8 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild className="py-8">
                             <Link href="/" className="flex items-center font-bold text-xl">
-                                <Image src="/round-logo.png" alt="Creme AI" width={56} height={56} />
-                                <span className="ml-2">Creme AI</span>
+                                <Image src="/round-logo.png" alt="DeFAI Hero" width={56} height={56} />
+                                <span className="ml-2">DeFAI Hero</span>
                             </Link>
                         </SidebarMenuButton>
 

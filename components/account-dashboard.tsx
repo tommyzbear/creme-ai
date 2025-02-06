@@ -3,23 +3,13 @@
 import { ProfileSection } from "@/components/profile-section";
 import { ConnectedAccounts } from "@/components/connected-accounts";
 import { useUserStore } from "@/stores/use-user-store";
-import {
-    ConnectedWallet,
-    useDelegatedActions,
-    useFundWallet,
-    usePrivy,
-    useWallets,
-    type WalletWithMetadata,
-} from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 import { UploadProfileImageDialog } from "@/components/dialogs/upload-profile-image-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { redirect } from "next/navigation";
-import { ChangeUsernameDialog } from "@/components/dialogs/change-username-dialog";
-import { usePortfolioStore } from "@/store/portfolio-store";
-export default function AccountPage() {
+
+export function AccountDashboard() {
     const {
-        ready,
         user,
         linkEmail,
         linkWallet,
@@ -33,21 +23,12 @@ export default function AccountPage() {
         unlinkTwitter,
         linkDiscord,
         unlinkDiscord,
-        exportWallet,
         logout,
     } = usePrivy();
-    const { ready: walletReady, wallets } = useWallets();
-    const { fundWallet } = useFundWallet();
-    const { delegateWallet, revokeWallets } = useDelegatedActions();
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [usernameDialogOpen, setUsernameDialogOpen] = useState(false);
-    const [managedWallet, setManagedWallet] = useState<ConnectedWallet | undefined>(undefined);
-    const [delegatedWallet, setDelegatedWallet] = useState<WalletWithMetadata | undefined>(
-        undefined
-    );
-    const { user: dbUser, fetchUser, updateUsername } = useUserStore();
+    const { user: dbUser, fetchUser } = useUserStore();
     const { toast } = useToast();
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const copyToClipboard = async (text: string) => {
         try {
@@ -67,41 +48,13 @@ export default function AccountPage() {
     };
 
     useEffect(() => {
-        if (!ready || !walletReady) return;
-        if (!user) redirect("/login");
-
-        if (wallets.find((w) => w.walletClientType === "privy")) {
-            setManagedWallet(wallets.find((w) => w.walletClientType === "privy")!);
-        }
-
         const loadData = async () => {
-            if (!dbUser) {
-                console.log("Fetching user data");
-                setIsLoading(true);
-                await fetchUser();
-                setIsLoading(false);
-            }
+            setIsLoading(true);
+            await fetchUser();
+            setIsLoading(false);
         };
-
         loadData();
-    }, [ready, fetchUser, user, dbUser, wallets, walletReady]);
-
-    useEffect(() => {
-        const embeddedWallets = user?.linkedAccounts.filter(
-            (account): account is WalletWithMetadata =>
-                account.type === "wallet" && account.walletClientType === "privy"
-        );
-        const delegatedWallets = embeddedWallets?.filter((wallet) => wallet.delegated);
-        if (delegatedWallets && delegatedWallets.length > 0) {
-            setDelegatedWallet(delegatedWallets[0]);
-        }
-    }, [user, revokeWallets]);
-
-    const handleLogout = async () => {
-        useUserStore.getState().clearStore();
-        usePortfolioStore.getState().clearStore();
-        await logout();
-    };
+    }, [fetchUser]);
 
     if (isLoading) {
         return (
@@ -138,19 +91,10 @@ export default function AccountPage() {
                 joinedDate={dbUser?.created_at}
                 userId={dbUser?.id}
                 walletAddress={user?.wallet?.address}
-                managedWalletAddress={managedWallet?.address}
                 profilePicture={dbUser?.profile_img}
                 onOpenChange={setDialogOpen}
-                onUsernameChange={() => setUsernameDialogOpen(true)}
                 copyToClipboard={copyToClipboard}
-                logout={handleLogout}
-                fundWallet={fundWallet}
-                delegatedWallet={delegatedWallet}
-                delegateWallet={delegateWallet}
-                revokeWallets={async () => {
-                    await revokeWallets();
-                    setDelegatedWallet(undefined);
-                }}
+                logout={logout}
             />
 
             <ConnectedAccounts
@@ -171,13 +115,6 @@ export default function AccountPage() {
             />
 
             <UploadProfileImageDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-
-            <ChangeUsernameDialog
-                open={usernameDialogOpen}
-                onOpenChange={setUsernameDialogOpen}
-                currentUsername={dbUser?.username}
-                onUpdate={updateUsername}
-            />
         </div>
     );
 }

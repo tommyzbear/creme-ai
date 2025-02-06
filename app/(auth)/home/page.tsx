@@ -12,12 +12,17 @@ import { SwitchChainSidebar } from "@/components/switch-chain-sidebar";
 import { usePortfolioStore } from "@/store/portfolio-store";
 import { WalletSelector } from "@/components/wallet-selector";
 import { AppStatus } from "@/components/app-status";
+import { AccountDialog } from "@/components/dialogs/account-dialog";
+import { SideNav } from "@/components/side-nav";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export default function HomePage() {
     const { ready, authenticated } = usePrivy();
     const [lastFocusedSection, setLastFocusedSection] = useState<"chat" | "portfolio" | null>(null);
     const { selectedWalletAddress, managedWallet, setSelectedWalletAddress } = usePortfolioStore();
     const router = useRouter();
+    const [accountDialogOpen, setAccountDialogOpen] = useState(false);
 
     if (ready && !authenticated) {
         redirect("/login");
@@ -31,29 +36,21 @@ export default function HomePage() {
         <div className="min-h-screen relative">
             <div className="flex gap-3 px-2 py-3 h-screen">
                 {/* Sidebar */}
-                <div className="flex flex-row w-[400px] h-full gap-2">
-                    <div className="w-12 h-full">
-                        <div className="flex flex-col gap-1 h-full">
-                            <div
-                                className={cn(
-                                    "flex justify-center items-center h-16 bg-black/90 rounded-3xl",
-                                    "backdrop-blur-md backdrop-brightness-125 backdrop-saturate-150"
-                                )}
-                            >
-                                {/* <h1 className="inline-block font-caramel text-7xl text-white font-style-italic">
-                                c
-                            </h1> */}
-                            </div>
-                            <Card className="flex-1 bg-black/90" />
-                        </div>
-                    </div>
+                <div className="flex flex-row w-[400px] max-h-full h-full gap-2">
+                    <SidebarProvider>
+                        <AppSidebar />
+                    </SidebarProvider>
+
+                    <SidebarProvider className="!min-h-fit !h-full">
+                        <SideNav className="w-full h-full" />
+                    </SidebarProvider>
 
                     {/* Account Balances */}
                     <div className="flex-1 h-full">
                         <div className="flex flex-col gap-1 h-full">
                             <Card
                                 className="flex items-center h-16 pl-2 gap-3 cursor-pointer hover:bg-accent/50 transition-colors"
-                                onClick={() => router.push("/account")}
+                                onClick={() => setAccountDialogOpen(true)}
                             >
                                 <span className="text-sm">Account info</span>
                             </Card>
@@ -82,7 +79,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Main Container */}
-                <div className="flex flex-row w-full h-full gap-2">
+                {/* <div className="flex flex-row w-full h-full gap-2">
                     <ChatContainer
                         className={cn(
                             "frosted-glass h-full rounded-6xl",
@@ -95,8 +92,10 @@ export default function HomePage() {
                         onFocus={() => setLastFocusedSection("portfolio")}
                         lastFocus={lastFocusedSection}
                     />
-                </div>
+                </div> */}
             </div>
+
+            <AccountDialog open={accountDialogOpen} onOpenChange={setAccountDialogOpen} />
         </div>
     );
 }

@@ -1,7 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { ResponsiveTreeMap } from "@nivo/treemap";
 import { TokenData } from "@/lib/services/alchemy";
-import { ComputedDatum } from "@nivo/core";
 import { RefreshCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -62,8 +61,9 @@ export function HoldingsDashboard({
                         valueFormat=">-$,.2f"
                         margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
                         labelSkipSize={12}
-                        label={(d: ComputedDatum<TreeMapDatum>) => {
-                            return `${d.data.name} (${((d.value / totalValue) * 100).toFixed(1)}%)`;
+                        label={(d) => {
+                            const percentage = ((d.value / totalValue) * 100).toFixed(1);
+                            return `${d.data.name} (${percentage}%)`;
                         }}
                         colors={{ scheme: "pastel2" }}
                         borderColor={{ theme: "background" }}

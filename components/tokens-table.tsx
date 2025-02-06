@@ -194,7 +194,7 @@ export function TokensTable({
                     <TableHeader>
                         <TableRow className="h-6 hover:bg-transparent">
                             <TableHead
-                                className="px-4 whitespace-nowrap w-full cursor-pointe"
+                                className="px-4 whitespace-nowrap w-full cursor-pointer"
                                 onClick={() => handleSort("symbol")}
                             >
                                 Token {getSortIcon("symbol")}

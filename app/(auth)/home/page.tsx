@@ -96,8 +96,6 @@ export default function HomePage() {
                         )}
                         onFocus={() => setLastFocusedSection("chat")}
                     />
-
-                    {/* Portfolio Dashboard*/}
                     <PortfolioContainer
                         className="frosted-glass flex-1 w-full h-full rounded-6xl select-none"
                         onFocus={() => setLastFocusedSection("portfolio")}

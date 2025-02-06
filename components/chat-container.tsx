@@ -4,6 +4,7 @@ import { useChat } from "ai/react";
 import { useEffect, useRef } from "react";
 import { ChatMessage } from "@/components/chat-message";
 import { ChatInput } from "@/components/chat-input";
+import { useToast } from "@/hooks/use-toast";
 
 export function ChatContainer({
     className,
@@ -14,12 +15,40 @@ export function ChatContainer({
 }) {
     const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
         api: "/api/chat",
+        maxSteps: 5,
+        onError: (error) => {
+            console.error("Chat error:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error.message || "Failed to process your request",
+            });
+        },
+        onToolCall: (toolCall) => {
+            console.log("toolCall", toolCall);
+        },
     });
+    const { toast } = useToast();
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const messagesContainer = messagesEndRef.current?.parentElement;
+        if (messagesContainer) {
+            const isScrolledToBottom =
+                Math.abs(
+                    messagesContainer.scrollHeight -
+                        messagesContainer.scrollTop -
+                        messagesContainer.clientHeight
+                ) < 10;
+
+            if (isScrolledToBottom) {
+                messagesEndRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "end",
+                });
+            }
+        }
     };
 
     useEffect(() => {
@@ -34,9 +63,9 @@ export function ChatContainer({
         >
             <div className="flex-1 overflow-y-auto">
                 <div className="h-full">
-                    <div className="space-y-6 p-4">
+                    <div className="space-y-6 p-6">
                         {messages.length === 0 && (
-                            <p className="text-center text-base select-none">
+                            <p className="text-center text-base text-muted-foreground select-none">
                                 No messages yet. Start a conversation!
                             </p>
                         )}
@@ -59,15 +88,14 @@ export function ChatContainer({
 
             <div className="bottom-fade" />
 
-            <div className="p-6 relative">
-                <div className="w-full">
-                    <ChatInput
-                        input={input}
-                        handleInputChange={handleInputChange}
-                        handleSubmit={handleSubmit}
-                        isLoading={isLoading}
-                    />
-                </div>
+            <div className="px-6 pt-2 pb-6 relative">
+                <ChatInput
+                    className="w-full"
+                    input={input}
+                    handleInputChange={handleInputChange}
+                    handleSubmit={handleSubmit}
+                    isLoading={isLoading}
+                />
             </div>
         </div>
     );

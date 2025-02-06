@@ -129,7 +129,7 @@ body {
     }
 
     .frosted-glass-active {
-        @apply backdrop-brightness-125
+        @apply backdrop-brightness-[1.15]
             shadow-md border-white/30;
     }
 }
@@ -146,4 +146,16 @@ body {
     .bottom-fade {
         @apply absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t main-gradient;
     }
+}
+
+::selection {
+    @apply bg-accent text-accent-foreground;
+}
+
+::-moz-selection {
+    @apply bg-accent text-accent-foreground;
+}
+
+*:focus {
+    @apply focus:ring-0 focus:outline-none;
 }

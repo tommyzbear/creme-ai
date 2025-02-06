@@ -21,7 +21,7 @@ interface SettingsModalProps {
 export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px] bg-slate-900 text-white border-slate-800">
+            <DialogContent className="sm:max-w-[500px] h-[calc(100vh-10rem)] bg-slate-900 text-white border-slate-800">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-semibold">
                         Trading Preferences

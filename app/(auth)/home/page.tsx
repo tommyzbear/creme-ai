@@ -37,12 +37,8 @@ export default function HomePage() {
             <div className="flex gap-3 px-2 py-3 h-screen">
                 {/* Sidebar */}
                 <div className="flex flex-row w-[400px] max-h-full h-full gap-2">
-                    <SidebarProvider>
-                        <AppSidebar />
-                    </SidebarProvider>
-
                     <SidebarProvider className="!min-h-fit !h-full">
-                        <SideNav className="w-full h-full" />
+                        <SideNav className="w-12 h-full" />
                     </SidebarProvider>
 
                     {/* Account Balances */}
@@ -79,7 +75,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Main Container */}
-                {/* <div className="flex flex-row w-full h-full gap-2">
+                <div className="flex flex-row w-full h-full gap-2">
                     <ChatContainer
                         className={cn(
                             "frosted-glass h-full rounded-6xl",
@@ -92,7 +88,7 @@ export default function HomePage() {
                         onFocus={() => setLastFocusedSection("portfolio")}
                         lastFocus={lastFocusedSection}
                     />
-                </div> */}
+                </div>
             </div>
 
             <AccountDialog open={accountDialogOpen} onOpenChange={setAccountDialogOpen} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -8,65 +9,106 @@ import {
     DialogTitle,
     DialogDescription,
     DialogFooter,
+    DialogOverlay,
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { SlippageSelector } from "@/components/slippage-selector";
+import { SegmentedControl } from "@/components/segmented-control";
 
 interface SettingsModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
 
+const SLIPPAGE_PRESETS = ["0.5", "1", "2", "5"];
+
 export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
+    const [selectedSlippage, setSelectedSlippage] = useState("0.5");
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px] h-[calc(100vh-10rem)] bg-slate-900 text-white border-slate-800">
+            <DialogOverlay className="backdrop-blur-sm bg-transparent" />
+            <DialogContent
+                className={cn(
+                    "sm:max-w-[500px]",
+                    "max-h-[calc(100vh-10rem)]",
+                    "bg-neutral-900/70",
+                    "text-white",
+                    "overflow-y-auto",
+                    "!rounded-3xl"
+                )}
+            >
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-semibold">
-                        Trading Preferences
+                    <DialogTitle className="text-xl font-semibold">
+                        Transaction Preferences
                     </DialogTitle>
-                    <DialogDescription className="text-slate-400">
-                        Configure your trading parameters
-                    </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-8 py-4">
+                <div className="space-y-12 py-4">
                     <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Slippage Tolerance (%)</h3>
-                        <div className="w-full p-3 rounded-lg bg-slate-800/50">
-                            <span>1%</span>
-                        </div>
+                        <h3 className="text-base font-medium">Slippage Tolerance (%)</h3>
+                        <SegmentedControl
+                            className="flex"
+                            options={["0.3", "1.0", "3.0", "5.0"]}
+                            defaultValue="1.0"
+                            onChange={(value) => console.log("Slippage:", value)}
+                        />
                     </div>
 
                     <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Allowance</h3>
-                        <RadioGroup defaultValue="exact" className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="exact" id="exact" />
+                        <div className="flex flex-col gap-0">
+                            <h4 className="text-base font-medium">Transaction Allowance</h4>
+                            <DialogDescription className="text-sm font-light text-slate-400">
+                                Approval for token spending
+                            </DialogDescription>
+                        </div>
+
+                        <RadioGroup
+                            defaultValue="exact"
+                            className="flex flex-row justify-start gap-6 items-center"
+                        >
+                            <div className="flex items-center space-x-2 text-sm">
+                                <RadioGroupItem value="exact" id="exact" className="" />
                                 <Label htmlFor="exact">Exact</Label>
                             </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="unlimited" id="unlimited" />
+                            <div className="flex items-center space-x-2 text-sm">
+                                <RadioGroupItem value="unlimited" id="unlimited" className="" />
                                 <Label htmlFor="unlimited">Unlimited</Label>
                             </div>
                         </RadioGroup>
                     </div>
 
+                    {/* Gas Settings */}
                     <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Gas Settings</h3>
-                        <DialogDescription className="text-slate-400">
-                            Manage your transaction gas preferences
-                        </DialogDescription>
-                        <div className="w-full p-3 rounded-lg bg-slate-800/50">
-                            <span>Medium</span>
+                        <div className="flex flex-col gap-0">
+                            <h4 className="text-base font-medium">Gas Settings</h4>
+                            <DialogDescription className="text-sm font-light text-slate-400">
+                                Manage your transaction gas preferences
+                            </DialogDescription>
                         </div>
+                        <SegmentedControl
+                            className="flex"
+                            options={["Slow", "Medium", "Fast", "Ape"]}
+                            defaultValue="Medium"
+                            onChange={(value) => console.log("Gas setting:", value)}
+                        />
                     </div>
 
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Automation Settings</h3>
+                    {/* Risk Settings */}
+                    {/* <div className="space-y-4">
+                        <h3 className="text-lg font-medium">Risk Settings</h3>
                         <DialogDescription className="text-slate-400">
-                            Configure your automated trading preferences
+                            Configure your risk preferences
                         </DialogDescription>
                         <div className="space-y-2">
                             <h4 className="text-sm font-medium">Risk Tolerance</h4>
@@ -74,19 +116,19 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                                 defaultValue={[10]}
                                 max={100}
                                 step={1}
-                                className="[&_[role=slider]]:bg-purple-500"
+                                className="[&_[role=slider]]:bg-accent stroke-none stroke-0"
                             />
                             <p className="text-sm text-slate-400">
                                 Current: 10% (Higher value indicates higher risk tolerance)
                             </p>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
 
                 <DialogFooter className="sm:justify-between">
                     <Button
                         variant="outline"
-                        className="bg-transparent border-slate-700 text-white hover:bg-slate-800"
+                        className="bg-slate-700 border-slate-700 text-white hover:bg-slate-800"
                     >
                         Use Defaults
                     </Button>

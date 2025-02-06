@@ -4,3 +4,6 @@ export { searchTweets } from './searchTweets';
 export { getAgentByTwitter } from './getAgentByTwitter';
 export { adjustPortfolio } from './adjustPortfolio';
 export { sendTokenOnUserBehalf } from './sendTokenOnUserBehalf';
+export { createPortfolio } from './createPortfolio';
+export { getPortfolio } from './getPortfolio';
+export { promotePortfolio } from './promotePortfolio';

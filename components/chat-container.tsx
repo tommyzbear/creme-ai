@@ -1,10 +1,11 @@
 "use client";
 
 import { useChat } from "ai/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChatMessage } from "@/components/chat-message";
 import { ChatInput } from "@/components/chat-input";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export function ChatContainer({
     className,
@@ -29,8 +30,10 @@ export function ChatContainer({
         },
     });
     const { toast } = useToast();
+    const [showTopFade, setShowTopFade] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
         const messagesContainer = messagesEndRef.current?.parentElement;
@@ -51,6 +54,12 @@ export function ChatContainer({
         }
     };
 
+    const handleScroll = () => {
+        if (messagesContainerRef.current) {
+            setShowTopFade(messagesContainerRef.current.scrollTop > 0);
+        }
+    };
+
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
@@ -61,7 +70,14 @@ export function ChatContainer({
             onFocus={onFocus}
             tabIndex={0}
         >
-            <div className="flex-1 overflow-y-auto">
+            {showTopFade && (
+                <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-background/30 to-transparent z-10 pointer-events-none" />
+            )}
+            <div
+                className="flex-1 overflow-y-auto"
+                ref={messagesContainerRef}
+                onScroll={handleScroll}
+            >
                 <div className="h-full">
                     <div className="space-y-6 p-6">
                         {messages.length === 0 && (

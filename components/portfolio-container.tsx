@@ -10,7 +10,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TokenData, Transfer } from "@/lib/services/alchemy";
 import { cn } from "@/lib/utils";
 import { usePortfolioStore } from "@/store/portfolio-store";
-import { WalletSelector } from "@/components/wallet-selector";
 import { HoldingsDashboard } from "@/components/holdings-dashboard";
 
 interface PortfolioContainerProps {
@@ -225,6 +224,12 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
                 backdrop-blur-sm backdrop-brightness-110 pointer-events-auto
             `}
                 >
+                    <div
+                        className="absolute inset-0 bg-gradient-to-b from-background/100 to-transparent transition-opacity duration-300"
+                        style={{
+                            opacity: Math.max(scrollOpacity, 0.1),
+                        }}
+                    />
                     <h1
                         className={`
                             pt-3 w-full h-full leading-none
@@ -234,12 +239,6 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
                         `}
                         onClick={scrollToTop}
                     >
-                        <div
-                            className="absolute inset-0 bg-gradient-to-b from-accent/30 to-white transition-opacity duration-300"
-                            style={{
-                                opacity: Math.max(scrollOpacity, 0.1),
-                            }}
-                        />
                         Portfolio
                     </h1>
                     <div className="flex items-center gap-2 h-6">
@@ -268,11 +267,6 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
                         )}
                     </div>
                 </header>
-                {/* <WalletSelector
-                    selectedWalletAddress={selectedWalletAddress}
-                    managedWallet={managedWallet}
-                    onWalletChange={handleWalletChange}
-                /> */}
                 <div className="">
                     <HoldingsDashboard
                         isLoading={isLoading}

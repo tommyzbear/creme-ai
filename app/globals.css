@@ -140,7 +140,8 @@ body {
     }
 
     .top-fade {
-        @apply absolute top-0 left-0 right-0 h-24 bg-gradient-to-b main-gradient;
+        background: linear-gradient(to bottom, rgb(var(--background) / 0.8), transparent);
+        backdrop-filter: blur(4px);
     }
 
     .bottom-fade {

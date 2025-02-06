@@ -7,3 +7,4 @@ export { sendTokenOnUserBehalf } from './sendTokenOnUserBehalf';
 export { createPortfolio } from './createPortfolio';
 export { getPortfolio } from './getPortfolio';
 export { promotePortfolio } from './promotePortfolio';
+export { swapTokens } from './swapTokens';

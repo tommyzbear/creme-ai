@@ -21,18 +21,27 @@ export function WalletSelector({
     const { user } = usePrivy();
 
     return (
-        <div className="flex items-center gap-2 w-full">
+        <div className="">
             <Select value={selectedWalletAddress} onValueChange={onWalletChange}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="bg-white/40 rounded-xl border-0 transition-colors duration-200 focus:ring-0 focus:outline-none outline-none hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select wallet" />
                 </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value={user?.wallet?.address || "user-wallet"}>
+                <SelectContent
+                    position="popper"
+                    className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] rounded-xl"
+                >
+                    <SelectItem
+                        value={user?.wallet?.address || "user-wallet"}
+                        className="rounded-lg"
+                    >
                         User Connected Wallet
                     </SelectItem>
                     {managedWallet && (
-                        <SelectItem value={managedWallet?.address || "managed-wallet"}>
-                            Creme Managed Wallet
+                        <SelectItem
+                            value={managedWallet?.address || "managed-wallet"}
+                            className="rounded-lg"
+                        >
+                            Crème Managed Wallet
                         </SelectItem>
                     )}
                 </SelectContent>

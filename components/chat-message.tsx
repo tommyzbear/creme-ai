@@ -17,10 +17,10 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
                     {isUser ? (
                         <div className="flex gap-3 justify-end">
                             <div className="max-w-[70%] bg-primary p-3 rounded-2xl relative">
-                                <div className="absolute antialiased bottom-0 right-[14px] translate-x-1/2 translate-y-[14.5px] rotate-[135deg] w-0 h-0 border-[15px] border-transparent border-l-primary" />
                                 <p className="w-full text-sm not-italic leading-relaxed text-primary-foreground">
                                     {content}
                                 </p>
+                                <div className="select-none z-[-1] absolute antialiased bottom-0 right-[14px] translate-x-1/2 translate-y-[14.5px] rotate-[135deg] w-0 h-0 border-[15px] border-transparent border-l-primary" />
                             </div>
                         </div>
                     ) : (

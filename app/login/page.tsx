@@ -4,6 +4,7 @@ import { useLogin, User } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 export default function Login() {
     const router = useRouter();
@@ -45,24 +46,29 @@ export default function Login() {
     return (
         <main className="flex min-h-screen min-w-full">
             <div className="flex bg-privy-light-blue flex-1 p-6 justify-center items-center">
-                <div>
-                    <div className="flex justify-center mb-8">
+                <div className="">
+                    <div className="select-none flex justify-center mb-8 transition-transform duration-1000 scale-x-[-1] hover:scale-[1.05] hover:scale-x-[-1.05]">
                         <Image
                             src="/creme-ai.png"
                             alt="DeFAI Hero"
                             width={480}
                             height={480}
                             priority
-                            className="rounded-3xl opacity-95 mix-blend-multiply"
+                            draggable="false"
+                            className="select-none rounded-3xl opacity-95 mix-blend-multiply animate-float hover:scale-[1.05] pointer-events-auto"
                         />
                     </div>
-                    <div className="mt-6 flex justify-center text-center">
-                        <button
-                            className="bg-blue-500 hover:bg-blue-600 py-3 px-6 text-white rounded-lg"
+                    <div className="mt-6 flex items-center justify-center flex-col gap-2">
+                        <Button
+                            size="lg"
+                            className="w-fit rounded-xl bg-accent/80 transition-colors hover:bg-accent"
                             onClick={login}
                         >
-                            Log in
-                        </button>
+                            Sign Up
+                        </Button>
+                        <Button size="lg" className="w-fit rounded-xl" onClick={login}>
+                            Log In
+                        </Button>
                     </div>
                 </div>
             </div>

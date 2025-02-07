@@ -84,81 +84,71 @@ export function AccountCard({ onAccountClick }: AccountCardProps) {
     return (
         <div
             className={cn(
-                "flex flex-col gap-1 max-w-full",
+                "flex flex-col gap-1 max-w-full h-full max-h-[140px]",
                 "rounded-2xl frosted-glass bg-white/50",
-                "overflow-hidden",
-                "transition-colors"
+                "overflow-hidden"
             )}
         >
             <ProfileCard
                 profileImage={dbUser?.profile_img || null}
                 username={dbUser?.username}
                 walletAddress={user?.wallet?.address}
+                userID={dbUser?.id}
                 onClick={onAccountClick}
             />
 
             <div
-                className={cn("flex flex-row items-center", "gap-1 h-14 px-4")}
+                className={cn("flex flex-row items-center", "gap-1 h-14 px-3 pb-3 pr-4 max-w-full")}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex-1">
+                <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-7 bg-white/50 transition-colors duration-200 rounded-lg"
+                        onClick={async () => await fundWallet(managedWallet?.address || "")}
+                    >
+                        <CreditCard className="h-4 w-4" />
+                    </Button>
+
+                    {delegatedWallet !== undefined ? (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-7 bg-white/50 transition-colors duration-200 rounded-lg"
+                            aria-description="Revoke wallet"
+                            onClick={async () => {
+                                await revokeWallets();
+                                setDelegatedWallet(undefined);
+                            }}
+                        >
+                            <UserX className="h-4 w-4" />
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-7 bg-white/50 transition-colors duration-200 rounded-lg"
+                            aria-description="Delegate wallet"
+                            onClick={async () =>
+                                await delegateWallet({
+                                    address: managedWallet?.address || "",
+                                    chainType: "ethereum",
+                                })
+                            }
+                        >
+                            <UserCheck className="h-4 w-4" />
+                        </Button>
+                    )}
+                </div>
+
+                <div className="flex-1 min-w-0">
                     <WalletSelector
                         selectedWalletAddress={selectedWalletAddress}
                         managedWallet={managedWallet}
                         onWalletChange={handleWalletChange}
                     />
                 </div>
-                {/* <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (user?.wallet?.address) {
-                            copyToClipboard(user.wallet.address);
-                        }
-                    }}
-                >
-                    <Copy className="h-4 w-4" />
-                </Button> */}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={async () => await fundWallet(managedWallet?.address || "")}
-                >
-                    <CreditCard className="h-4 w-4" />
-                </Button>
-
-                {delegatedWallet !== undefined ? (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        aria-description="Revoke wallet"
-                        onClick={async () => {
-                            await revokeWallets();
-                            setDelegatedWallet(undefined);
-                        }}
-                    >
-                        <UserX className="h-4 w-4" />
-                    </Button>
-                ) : (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        aria-description="Delegate wallet"
-                        onClick={async () =>
-                            await delegateWallet({
-                                address: managedWallet?.address || "",
-                                chainType: "ethereum",
-                            })
-                        }
-                    >
-                        <UserCheck className="h-4 w-4" />
-                    </Button>
-                )}
             </div>
         </div>
     );

@@ -119,11 +119,11 @@ export function TransactionsTable({
                     )}
                 </TableBody>
             </Table>
-            <div className="w-full text-center py-4 text-sm">
+            {/* <div className="w-full text-center py-4 text-sm">
                 <a href="#" className="hover:underline">
-                    todo: Load transactions from over 30 days ago
+                    Load more transactions
                 </a>
-            </div>
+            </div> */}
         </div>
     );
 }

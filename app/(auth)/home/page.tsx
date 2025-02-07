@@ -11,7 +11,6 @@ import { SideNav } from "@/components/side-nav";
 import { useChatStore } from "@/stores/chat-store";
 import { SidebarContent } from "@/components/sidebar-content";
 
-
 export default function HomePage() {
     const { ready, authenticated } = usePrivy();
     const [lastFocusedSection, setLastFocusedSection] = useState<"chat" | "portfolio" | null>(null);
@@ -29,12 +28,12 @@ export default function HomePage() {
         <div className="min-h-screen relative">
             <div className="flex gap-3 px-2 py-3 h-screen">
                 {/* Left Aside */}
-                <div className="flex flex-row w-[350px] max-h-full h-full gap-2 ">
-                    <SidebarProvider className="!min-h-fit !h-full !w-12">
-                        <SideNav className="h-full" />
+                <div className="flex flex-row w-[21rem] max-h-full h-full gap-2 ">
+                    <SidebarProvider className="!min-h-fit !h-full !max-w-12">
+                        <SideNav className="h-full max-w-full" />
                     </SidebarProvider>
 
-                    <SidebarContent className="flex-1 h-full max-w-[calc(350px-3.5rem)]" />
+                    <SidebarContent className="flex-1 h-full max-w-[calc(21rem-3.5rem)]" />
                 </div>
 
                 {/* Main Container */}

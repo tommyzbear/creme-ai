@@ -3,6 +3,7 @@
 import { privyClient } from "@/lib/privy";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import PageTransition from "@/components/page-transition";
 
 import BlurredCursor from "@/components/ui/blurred-cursor";
 import GradientBackground from "@/components/gradient-background";
@@ -35,9 +36,13 @@ export default async function Layout({
 
     return (
         <div className="flex h-screen bg-neutral-200">
-            <GradientBackground />
-            <BlurredCursor />
-            <main className="flex-1 w-full h-full relative">{children}</main>
+            <PageTransition delay={0}>
+                <GradientBackground />
+                <BlurredCursor />
+            </PageTransition>
+            <PageTransition delay={0.5}>
+                <main className="flex-1 w-full h-full relative">{children}</main>
+            </PageTransition>
         </div>
     );
 }

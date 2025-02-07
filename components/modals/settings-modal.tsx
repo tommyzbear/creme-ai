@@ -21,11 +21,7 @@ interface SettingsModalProps {
     onOpenChange: (open: boolean) => void;
 }
 
-const SLIPPAGE_PRESETS = ["0.5", "1", "2", "5"];
-
 export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
-    const [selectedSlippage, setSelectedSlippage] = useState("0.5");
-
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogOverlay className="backdrop-blur-sm bg-transparent" />

@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
 
-export default {
+const config: Config = {
     darkMode: ["class"],
     content: [
         "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -95,12 +95,8 @@ export default {
             },
             keyframes: {
                 float: {
-                    "0%": { transform: "translate(10%, 10%)" },
-                    "20%": { transform: "translate(60%, 20%)" },
-                    "40%": { transform: "translate(80%, 70%)" },
-                    "60%": { transform: "translate(30%, 80%)" },
-                    "80%": { transform: "translate(20%, 40%)" },
-                    "100%": { transform: "translate(10%, 10%)" },
+                    "0%, 100%": { transform: "translateY(0)" },
+                    "50%": { transform: "translateY(-10px)" },
                 },
                 "float-fast": {
                     "0%": { transform: "translate(70%, 20%)" },
@@ -112,7 +108,7 @@ export default {
                 },
             },
             animation: {
-                float: "float 30s ease-in-out infinite",
+                float: "float 3s ease-in-out infinite",
                 "float-fast": "float-fast 20s ease-in-out infinite",
             },
             fontFamily: {
@@ -127,4 +123,6 @@ export default {
         },
     },
     plugins: [animate],
-} satisfies Config;
+};
+
+export default config;

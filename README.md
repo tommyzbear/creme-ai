@@ -91,3 +91,10 @@ Deployed at [crème'ai](https://creme-ai.vercel.app)
 -   `pnpm install`
 -   `pnpm run dev`
 -   For signing in to Crème'ai, you will need to create a privy wallet.
+
+
+![Demo Screenshot 1](screen_shot1.png) 
+
+
+
+![Demo Screenshot 2](screen_shot2.png)

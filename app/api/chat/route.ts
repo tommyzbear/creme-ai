@@ -1,7 +1,7 @@
 import { systemPrompt } from '@/lib/systemPrompt';
 import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { getTokenPrice, adjustPortfolio, sendTokenOnUserBehalf, createPortfolio, getPortfolio, promotePortfolio, swapTokens } from '@/lib/tools';
+import { getTokenPrice, adjustPortfolio, sendTokenOnUserBehalf, createPortfolio, getPortfolio, promotePortfolio, swapTokens, searchTweets, getAgentByTwitter } from '@/lib/tools';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -23,8 +23,8 @@ export async function POST(req: Request) {
             tools: {
                 getTokenPrice,
                 // getKolActivity,
-                // searchTweets,
-                // getAgentByTwitter,
+                searchTweets,
+                getAgentByTwitter,
                 sendTokenOnUserBehalf,
                 createPortfolio,
                 adjustPortfolio,

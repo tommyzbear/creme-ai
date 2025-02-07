@@ -4,6 +4,7 @@ import { etherscan } from "./services/etherscan";
 import { hasValidTradingVolume } from "./services/dexscreener";
 import { arbitrum, base, mainnet, optimism } from "viem/chains";
 import { arbiscan } from "./services/arbiscan";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }

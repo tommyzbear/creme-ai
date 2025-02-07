@@ -1,14 +1,6 @@
 import { isLegitToken } from "@/lib/utils";
 import { addScamToken, isScamToken } from '@/lib/services/scam-token';
-import { Alchemy, Network } from "alchemy-sdk";
 import { formatEther } from "viem";
-
-// const config = {
-//     apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
-//     network: Network.ETH_MAINNET,
-// };
-
-// const alchemy = new Alchemy(config);
 
 const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY
 
@@ -92,22 +84,9 @@ export async function getWalletTokens(address: string, chain: string): Promise<{
                 if (await isScamToken(token.contractAddress, chain)) {
                     return null
                 }
-                const metadataResponse = await fetch(
-                    `https://${chain}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            id: 1,
-                            jsonrpc: "2.0",
-                            method: "alchemy_getTokenMetadata",
-                            params: [token.contractAddress]
-                        })
-                    }
-                )
-                const metadata: { result: TokenMetadata } = await metadataResponse.json()
+                const metadata = await getTokenMetadata(token.contractAddress, chain);
 
-                if (!metadata.result) {
+                if (!metadata) {
                     // Mark as scam token if metadata is not available
                     await addScamToken(token.contractAddress, chain)
                     return null
@@ -115,11 +94,11 @@ export async function getWalletTokens(address: string, chain: string): Promise<{
 
                 return {
                     contractAddress: token.contractAddress,
-                    tokenName: metadata.result.name,
-                    symbol: metadata.result.symbol,
-                    divisor: Math.pow(10, metadata.result.decimals),
+                    tokenName: metadata.name,
+                    symbol: metadata.symbol,
+                    divisor: Math.pow(10, metadata.decimals),
                     balance: token.tokenBalance,
-                    logo: metadata.result.logo,
+                    logo: metadata.logo,
                     type: 'ERC20'
                 }
             })
@@ -219,24 +198,12 @@ export async function getRecentTransfers(address: string, chain: string): Promis
     }
 }
 
-export async function getEthBalance(address: string, chain: string): Promise<TokenData> {
-    const response = await fetch(
-        `https://${chain}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                id: 1,
-                jsonrpc: "2.0",
-                method: "eth_getBalance",
-                params: [address, "latest"]
-            })
-        }
-    )
-    const data = await response.json();
+export async function getEthBalanceTokenData(address: string, chain: string): Promise<TokenData> {
+    const balanceHex = await getETHBalance(address, chain);
+
     const price = await getPriceBySymbol("ETH");
 
-    const balance = formatEther(BigInt(data.result));
+    const balance = formatEther(BigInt(balanceHex));
 
     return {
         symbol: "ETH",
@@ -258,4 +225,65 @@ export async function getPriceBySymbol(symbol: string): Promise<number> {
     )
     const data = await response.json();
     return data.data[0].prices[0].value;
+}
+
+export async function getTokenBalances(address: string, chain: string): Promise<TokenBalance[]> {
+    // Get token balances
+    const balancesResponse = await fetch(
+        `https://${chain}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: 1,
+                jsonrpc: "2.0",
+                method: "alchemy_getTokenBalances",
+                params: [address]
+            })
+        }
+    )
+
+    const balancesData = await balancesResponse.json()
+    // Filter out zero balances
+    const nonZeroBalances = balancesData.result.tokenBalances.filter(
+        (token: TokenBalance) => token.tokenBalance !== '0x0000000000000000000000000000000000000000000000000000000000000000'
+    )
+
+    return nonZeroBalances;
+}
+
+export async function getETHBalance(address: string, chain: string): Promise<string> {
+    const response = await fetch(
+        `https://${chain}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: 1,
+                jsonrpc: "2.0",
+                method: "eth_getBalance",
+                params: [address, "latest"]
+            })
+        }
+    )
+    const data = await response.json();
+    return data.result;
+}
+
+export async function getTokenMetadata(contractAddress: string, chain: string): Promise<TokenMetadata> {
+    const metadataResponse = await fetch(
+        `https://${chain}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: 1,
+                jsonrpc: "2.0",
+                method: "alchemy_getTokenMetadata",
+                params: [contractAddress]
+            })
+        }
+    )
+    const metadata: { result: TokenMetadata } = await metadataResponse.json()
+    return metadata.result;
 }

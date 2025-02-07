@@ -57,6 +57,9 @@ export function ChatContainer({
                 description: error.message || "Failed to process your request",
             });
         },
+        onToolCall: (toolCall) => {
+            console.log("toolCall", toolCall);
+        }
     });
 
     useEffect(() => {
@@ -117,8 +120,8 @@ export function ChatContainer({
             const isScrolledToBottom =
                 Math.abs(
                     messagesContainer.scrollHeight -
-                        messagesContainer.scrollTop -
-                        messagesContainer.clientHeight
+                    messagesContainer.scrollTop -
+                    messagesContainer.clientHeight
                 ) < 10;
 
             if (isScrolledToBottom) {

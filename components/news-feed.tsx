@@ -1,5 +1,4 @@
 import { format } from 'date-fns'
-import { useNewsStore } from '../stores/news-store'
 
 type NewsItem = {
     summary: string

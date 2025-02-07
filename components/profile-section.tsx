@@ -60,14 +60,16 @@ export function ProfileSection({
                     <div className="flex items-center justify-between">
                         <div>
                             <h3 className="font-semibold">{username}</h3>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm font-light text-slate-400">
                                 Joined on{" "}
                                 {joinedDate ? new Date(joinedDate).toLocaleDateString("en-GB") : ""}
                             </p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button onClick={onUsernameChange}>Change Username</Button>
-                            <Button onClick={() => onOpenChange(true)}>
+                            <Button variant="main" onClick={onUsernameChange}>
+                                Change Username
+                            </Button>
+                            <Button variant="main" onClick={() => onOpenChange(true)}>
                                 Change Profile Picture
                             </Button>
                         </div>
@@ -76,16 +78,16 @@ export function ProfileSection({
                     <div className="mt-6 space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h4 className="text-sm font-medium text-muted-foreground">
-                                    User ID
-                                </h4>
+                                <h4 className="text-sm font-medium text-slate-400">User ID</h4>
                                 <p className="mt-1 font-mono text-sm">{userId}</p>
                             </div>
-                            <Button onClick={logout}>Logout</Button>
+                            <Button variant="destructive" onClick={logout}>
+                                Logout
+                            </Button>
                         </div>
 
                         <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">
+                            <h4 className="text-sm font-medium text-slate-400">
                                 Connected Wallets
                             </h4>
                             <div className="flex items-center gap-2 mt-1">
@@ -105,7 +107,7 @@ export function ProfileSection({
 
                         <div className="flex items-center justify-between">
                             <div>
-                                <h4 className="text-sm font-medium text-muted-foreground">
+                                <h4 className="text-sm font-medium text-slate-400">
                                     Managed Wallet
                                 </h4>
                                 <div className="flex items-center gap-2 mt-1">
@@ -125,6 +127,7 @@ export function ProfileSection({
                             </div>
                             <div className="flex items-center gap-2">
                                 <Button
+                                    variant="main"
                                     onClick={async () =>
                                         await fundWallet(managedWalletAddress || "")
                                     }
@@ -132,11 +135,15 @@ export function ProfileSection({
                                     Fund Wallet
                                 </Button>
                                 {delegatedWallet !== undefined ? (
-                                    <Button onClick={async () => await revokeWallets()}>
+                                    <Button
+                                        variant="destructive"
+                                        onClick={async () => await revokeWallets()}
+                                    >
                                         Revoke Delegation
                                     </Button>
                                 ) : (
                                     <Button
+                                        variant="main"
                                         onClick={async () =>
                                             await delegateWallet({
                                                 address: managedWalletAddress || "",

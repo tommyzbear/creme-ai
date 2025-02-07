@@ -41,7 +41,7 @@ function DialogWrapper({ children }: { children: React.ReactNode }) {
                 "bg-neutral-900/70",
                 "text-white",
                 "overflow-y-auto",
-                "!rounded-3xl"
+                "!rounded-5xl"
             )}
         >
             <VisuallyHidden>

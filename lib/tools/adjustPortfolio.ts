@@ -44,7 +44,7 @@ export const adjustPortfolio = {
         tokenAdjustment: z.object({
             token: z.string().describe('The token to adjust the portfolio for'),
             weight: z.number().describe('The weight of the token in the portfolio'),
-        }).array(),
+        }).array().describe('User could propose change base on chain type or multiple tokens, please be sure to include all the tokens that the user want to adjust'),
     }),
     execute: async (
         { portfolioId, tokenAdjustment }: { portfolioId: number, tokenAdjustment: { token: string, weight: number }[] }) => {
@@ -67,7 +67,6 @@ export const adjustPortfolio = {
                     message: 'Unauthorized'
                 }
             }
-            console.log("tokenAdjustment", tokenAdjustment);
 
             const { data: draftPortfolio, error: draftPortfolioError } = await supabase
                 .from('draft_portfolio')
@@ -96,6 +95,8 @@ export const adjustPortfolio = {
             }
 
             let updatedPortfolio: AllocationEntry[] = draftPortfolio.portfolio;
+
+            console.log("tokenAdjustment", tokenAdjustment);
 
             // First remove all the tokens that are being set to zero weighting
             if (tokenAdjustment.find((t: { token: string, weight: number }) => t.weight === undefined || t.weight === 0)) {

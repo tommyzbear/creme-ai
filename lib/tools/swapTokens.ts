@@ -18,6 +18,7 @@ export const swapTokens = {
     execute: async (
         { chain, inputToken, outputToken, amount }: { chain: string, inputToken: string, outputToken: string, amount: number }) => {
         try {
+            console.log(chain, inputToken, outputToken, amount);
 
             const caip2 = getCAIP2ByChain(chain);
             if (!caip2) {
@@ -61,6 +62,9 @@ export const swapTokens = {
 
             const inputTokenInfo = SUPPORTED_TOKENS_BY_CHAIN[caip2][inputToken];
             const outputTokenInfo = SUPPORTED_TOKENS_BY_CHAIN[caip2][outputToken];
+
+            console.log("inputTokenInfo", inputTokenInfo);
+            console.log("outputTokenInfo", outputTokenInfo);
             const amountInDecimals = inputTokenInfo.decimals === 18 ? parseEther(amount.toString()).toString(10) : parseUnits(amount.toString(), inputTokenInfo.decimals).toString(10);
 
             const quote = await odosClient.getQuote(
@@ -118,8 +122,8 @@ export const swapTokens = {
                 })
 
                 return {
-                    swapTransactionHash: sendTxResponse.hash,
-                    approveTransactionHash: approveHash,
+                    swapTransactionHash: getExplorerLink(sendTxResponse.hash, caip2),
+                    approveTransactionHash: getExplorerLink(approveHash, caip2),
                     swapPathVizImage: quote.pathVizImage
                 };
             } catch (error) {
@@ -162,3 +166,17 @@ const approveTokenSpending = async (actionWalletAddress: `0x${string}`, caip2: E
     return hash;
 }
 
+const getExplorerLink = (hash: string, chain: EvmCaip2ChainId) => {
+    switch (chain) {
+        case 'eip155:1':
+            return `[${hash.slice(0, 6)}...${hash.slice(-4)}](https://etherscan.io/tx/${hash})`;
+        case 'eip155:8453':
+            return `[${hash.slice(0, 6)}...${hash.slice(-4)}](https://basescan.org/tx/${hash})`;
+        case 'eip155:10':
+            return `[${hash.slice(0, 6)}...${hash.slice(-4)}](https://optimistic.etherscan.io/tx/${hash})`;
+        case 'eip155:42161':
+            return `[${hash.slice(0, 6)}...${hash.slice(-4)}](https://arbiscan.io/tx/${hash})`;
+        default:
+            return `[${hash.slice(0, 6)}...${hash.slice(-4)}](https://basescan.org/tx/${hash})`;
+    }
+}

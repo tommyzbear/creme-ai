@@ -1,12 +1,10 @@
 import { z } from 'zod';
 import { privyClient } from '../privy';
-import { erc20Abi, encodeFunctionData } from 'viem';
-import { EvmCaip2ChainId, WalletWithMetadata } from '@privy-io/server-auth';
+import { WalletWithMetadata } from '@privy-io/server-auth';
 import { cookies } from 'next/headers';
 import { odosClient } from '../services/odos';
-import { rpcClients } from '../services/rpcClients';
 import { getETHBalance } from '../services/alchemy';
-import { NATIVE_TOKEN_ADDRESS, SUPPORTED_TOKENS_BY_CHAIN } from '../constants/token-mappings';
+import { SUPPORTED_TOKENS_BY_CHAIN } from '../constants/token-mappings';
 import { supabase } from '../supabase';
 import { Portfolio } from '@/types/data';
 
@@ -121,26 +119,6 @@ export const executePortfolioOrder = {
                 }
             }
 
-            const approveHashes: string[] = [];
-
-            inputTokens.forEach(async (inputToken) => {
-
-                if (inputToken.tokenAddress !== NATIVE_TOKEN_ADDRESS) {
-                    try {
-                        const approveHash = await approveTokenSpending(delegatedWallets[0].address as `0x${string}`, "eip155:8453", inputToken.tokenAddress as `0x${string}`, odosClient.routerAddressByChain["eip155:8453"], BigInt(inputToken.amount));
-                        const receipt = await rpcClients["eip155:8453"].waitForTransactionReceipt({ hash: approveHash as `0x${string}` })
-                        console.log("receipt", receipt);
-                        approveHashes.push(approveHash);
-                    } catch (error) {
-                        console.error('Privy API error:', error);
-                        return {
-                            error: error,
-                            message: 'Failed to approve token spending'
-                        }
-                    }
-                }
-            })
-
             const assembledTransaction = await odosClient.assembleTransaction(quote.pathId, delegatedWallets[0].address);
 
             if (!assembledTransaction || assembledTransaction.simulation.isSuccess === false) {
@@ -167,8 +145,7 @@ export const executePortfolioOrder = {
                 })
 
                 return {
-                    swapTransactionHash: sendTxResponse.hash,
-                    approveTransactionHashes: approveHashes,
+                    swapTransactionHash: `[${sendTxResponse.hash.slice(0, 6)}...${sendTxResponse.hash.slice(-4)}](https://basescan.org/tx/${sendTxResponse.hash})`,
                 };
             } catch (error) {
                 console.error('Privy API error:', error);
@@ -186,27 +163,3 @@ export const executePortfolioOrder = {
         }
     }
 };
-
-const approveTokenSpending = async (actionWalletAddress: `0x${string}`, caip2: EvmCaip2ChainId, tokenAddress: `0x${string}`, spenderAddress: `0x${string}`, amount: bigint) => {
-
-
-    const data = encodeFunctionData({
-        abi: erc20Abi,
-        functionName: 'approve',
-        args: [spenderAddress, amount]
-    });
-
-    const { hash } = await privyClient.walletApi.ethereum.sendTransaction({
-        address: actionWalletAddress,
-        chainType: 'ethereum',
-        caip2: caip2,
-        transaction: {
-            data,
-            to: tokenAddress,
-            value: `0x0`
-        },
-    })
-
-    return hash;
-}
-

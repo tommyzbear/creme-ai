@@ -196,6 +196,7 @@ export function AccountModal({ open, onOpenChange }: AccountModalProps) {
                                 await revokeWallets();
                                 setDelegatedWallet(undefined);
                             }}
+                            exportWallet={exportWallet}
                         />
                         <ConnectedAccounts
                             user={user}

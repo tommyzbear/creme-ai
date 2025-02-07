@@ -1,7 +1,7 @@
 "use client";
 
 import { Shrikhand } from "next/font/google";
-const shrikhand = Shrikhand({ weight: "400", style: "normal" });
+const shrikhand = Shrikhand({ weight: "400", style: "normal", subsets: ["latin"], display: "swap" });
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";

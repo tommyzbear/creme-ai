@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import { UploadProfileImageDialog } from "@/components/dialogs/upload-profile-image-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ChangeUsernameDialog } from "@/components/dialogs/change-username-dialog";
-import { usePortfolioStore } from "@/store/portfolio-store";
+import { usePortfolioStore } from "@/stores/portfolio-store";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface AccountModalProps {

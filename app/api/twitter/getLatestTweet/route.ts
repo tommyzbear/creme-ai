@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import scraper, { simplifyTweet } from "@/lib/scraper"
-import { Tweet } from "@the-convocation/twitter-scraper"
 import { TweetEntity } from "@/types/data"
 import { supabase } from "@/lib/supabase"
 

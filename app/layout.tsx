@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 import Providers from "@/components/providers";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const bricolage = localFont({
   src: "./fonts/Bricolage.ttf",
@@ -69,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>{children}</Providers>
         <Toaster />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

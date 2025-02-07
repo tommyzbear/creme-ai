@@ -2,7 +2,7 @@ import GradientBackground from "@/components/gradient-background";
 import BlurredCursor from "@/components/ui/blurred-cursor";
 
 export const metadata = {
-    title: "Login · DeFAI Hero",
+    title: "Login · Crème'ai",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

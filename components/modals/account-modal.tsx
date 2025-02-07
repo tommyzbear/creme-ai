@@ -5,8 +5,6 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogDescription,
-    DialogFooter,
     DialogOverlay,
 } from "@/components/ui/dialog";
 import { ProfileSection } from "@/components/profile-section";
@@ -27,6 +25,7 @@ import { ChangeUsernameDialog } from "@/components/dialogs/change-username-dialo
 import { usePortfolioStore } from "@/stores/portfolio-store";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
+import { useChatStore } from "@/stores/chat-store";
 interface AccountModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -132,9 +131,12 @@ export function AccountModal({ open, onOpenChange }: AccountModalProps) {
     }, [user, revokeWallets]);
 
     const handleLogout = async () => {
+        // The order is very important here. If not awaiting the logout to complete, the store will be replenished with old user session.
+        await logout();
         useUserStore.getState().clearStore();
         usePortfolioStore.getState().clearStore();
-        await logout();
+        useChatStore.getState().clearStore();
+        console.log("Clearing store");
     };
 
     const renderLoadingSkeleton = () => (

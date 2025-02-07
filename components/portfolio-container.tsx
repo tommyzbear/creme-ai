@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartPie, Copy, Check, RefreshCcw } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 import { TokensTable } from "@/components/tokens-table";
 import { TransactionsTable } from "@/components/transactions-table";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
@@ -11,6 +11,7 @@ import { TokenData, Transfer } from "@/lib/services/alchemy";
 import { cn } from "@/lib/utils";
 import { usePortfolioStore } from "@/stores/portfolio-store";
 import { HoldingsDashboard } from "@/components/holdings-dashboard";
+import { ProfileCard } from "./profile-card";
 
 interface PortfolioContainerProps {
     className?: string;
@@ -28,7 +29,6 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
         fetchPortfolioData,
         selectedWalletAddress,
         setSelectedWalletAddress,
-        managedWallet,
         setManagedWallet,
         setUserWallet,
     } = usePortfolioStore();
@@ -116,6 +116,31 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
     }, [user?.wallet?.address, setSelectedWalletAddress, selectedWalletAddress]);
 
     useEffect(() => {
+        if (!walletReady) return;
+
+        if (selectedWalletAddress) {
+            const isManaged = selectedWalletAddress !== user?.wallet?.address;
+            const relevantTokens = isManaged ? managedWalletTokens : userWalletTokens;
+            const relevantTransactions = isManaged ? managedWalletTransactions : userWalletTransactions;
+
+            if (
+                relevantTokens.length === 0 &&
+                relevantTransactions.length === 0 &&
+                !fetchAttempted[selectedWalletAddress]
+            ) {
+                setFetchAttempted((prev) => ({ ...prev, [selectedWalletAddress]: true }));
+                fetchPortfolioData(selectedWalletAddress, wallets[0].chainId, isManaged).catch(() => {
+                    toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: "Failed to fetch token data",
+                    });
+                });
+            }
+        }
+    }, [selectedWalletAddress, fetchPortfolioData, walletReady]);
+
+    useEffect(() => {
         const handleScroll = () => {
             if (portfolioContainerRef.current) {
                 const scrollPosition = portfolioContainerRef.current.scrollTop;
@@ -130,14 +155,6 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
             return () => container.removeEventListener("scroll", handleScroll);
         }
     }, []);
-
-    const handleBuy = (symbol: string) => {
-        console.log("Buy", symbol);
-    };
-
-    const handleSell = (symbol: string) => {
-        console.log("Sell", symbol);
-    };
 
     const totalValue = tokens.reduce((sum, token) => sum + Number(token.value), 0);
 
@@ -156,28 +173,6 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
                 variant: "destructive",
                 title: "Error",
                 description: "Failed to copy to clipboard",
-            });
-        }
-    };
-
-    const handleWalletChange = (address: string) => {
-        setSelectedWalletAddress(address);
-        const isManaged = selectedWalletAddress !== user?.wallet?.address;
-        const relevantTokens = isManaged ? managedWalletTokens : userWalletTokens;
-        const relevantTransactions = isManaged ? managedWalletTransactions : userWalletTransactions;
-
-        if (
-            relevantTokens.length === 0 &&
-            relevantTransactions.length === 0 &&
-            !fetchAttempted[address]
-        ) {
-            setFetchAttempted((prev) => ({ ...prev, [address]: true }));
-            fetchPortfolioData(address, wallets[0].chainId, isManaged).catch(() => {
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "Failed to fetch token data",
-                });
             });
         }
     };
@@ -210,7 +205,7 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
             onFocus={() => {
                 onFocus?.();
             }}
-            onBlur={() => {}}
+            onBlur={() => { }}
             tabIndex={0}
         >
             <div
@@ -247,17 +242,17 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
                         ) : (
                             <button
                                 className="text-sm text-muted-foreground pl-3 hover:text-primary transition-colors flex items-center gap-1 cursor-pointer pointer-events-auto"
-                                onClick={() => copyToClipboard(user?.wallet?.address || "")}
+                                onClick={() => copyToClipboard(selectedWalletAddress || "")}
                                 title="Copy address to clipboard"
-                                disabled={!user?.wallet?.address}
+                                disabled={!selectedWalletAddress}
                             >
-                                {user?.wallet?.address
-                                    ? `${user?.wallet?.address.slice(
-                                          0,
-                                          6
-                                      )}...${user?.wallet?.address.slice(-4)}`
+                                {selectedWalletAddress
+                                    ? `${selectedWalletAddress.slice(
+                                        0,
+                                        6
+                                    )}...${selectedWalletAddress.slice(-4)}`
                                     : "Not Connected"}
-                                {user?.wallet?.address &&
+                                {selectedWalletAddress &&
                                     (isCopied ? (
                                         <Check className="w-3 h-3 text-green-500" />
                                     ) : (
@@ -277,8 +272,6 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
                     <TokensTable
                         tokens={tokens}
                         totalValue={totalValue}
-                        onBuy={handleBuy}
-                        onSell={handleSell}
                         isLoading={isLoading}
                         isExpanded={isPortfolioFocused(lastFocus)}
                     />

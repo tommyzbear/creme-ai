@@ -10,7 +10,7 @@ interface PortfolioState {
     managedWalletTokens: TokenData[];
     managedWalletTransactions: Transfer[];
     isLoading: boolean;
-    selectedWalletAddress: string;
+    selectedWalletAddress: string | undefined;
     currentChainId: string;
     setIsLoading: (isLoading: boolean) => void;
     fetchPortfolioData: (address: string, chainId: string, isManaged: boolean) => Promise<void>;
@@ -98,7 +98,7 @@ export const usePortfolioStore = create<PortfolioState>()(
                     managedWalletTokens: [],
                     managedWalletTransactions: [],
                     isLoading: false,
-                    selectedWalletAddress: "",
+                    selectedWalletAddress: undefined,
                     userWallet: undefined,
                     managedWallet: null,
                 }),

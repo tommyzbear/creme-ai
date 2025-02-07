@@ -26,8 +26,6 @@ interface Token {
 interface TokensTableProps {
     tokens: Token[];
     totalValue: number;
-    onBuy: (symbol: string) => void;
-    onSell: (symbol: string) => void;
     isLoading: boolean;
     isExpanded: boolean;
 }
@@ -36,9 +34,6 @@ type SortField = "symbol" | "value" | "percentage";
 
 export function TokensTable({
     tokens,
-    totalValue,
-    onBuy,
-    onSell,
     isLoading,
     isExpanded,
 }: TokensTableProps) {
@@ -249,8 +244,8 @@ export function TokensTable({
                                                     <Image
                                                         src={token.logo}
                                                         alt={token.symbol}
-                                                        width={24}
-                                                        height={24}
+                                                        width={token.symbol === "ETH" ? 16 : 24}
+                                                        height={token.symbol === "ETH" ? 16 : 24}
                                                         className="rounded-full"
                                                     />
                                                 ) : (

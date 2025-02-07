@@ -14,7 +14,6 @@ export function ProfileCard({
     profileImage,
     username,
     userID,
-    walletAddress,
     onClick,
     className,
 }: ProfileCardProps) {
@@ -40,7 +39,13 @@ export function ProfileCard({
             <div className="flex-1 min-w-0">
                 <div className="w-full overflow-hidden">
                     <h3 className="text-lg font-medium font-bricolage leading-none truncate">
-                        Evening,
+                        {(() => {
+                            const hour = new Date().getHours();
+                            if (hour >= 5 && hour < 12) return "Morning";
+                            if (hour >= 12 && hour < 17) return "Afternoon";
+                            if (hour >= 17 && hour < 22) return "Evening";
+                            return "Go Sleep";
+                        })()},
                         <br />
                         {username || "Anon"}
                     </h3>

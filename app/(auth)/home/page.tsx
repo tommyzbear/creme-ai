@@ -10,15 +10,30 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { SideNav } from "@/components/side-nav";
 import { useChatStore } from "@/stores/chat-store";
 import { SidebarContent } from "@/components/sidebar-content";
+import { useToast } from "@/hooks/use-toast";
+import { useNewsStore } from "@/stores/news-store";
 
 export default function HomePage() {
     const { ready, authenticated } = usePrivy();
     const [lastFocusedSection, setLastFocusedSection] = useState<"chat" | "portfolio" | null>(null);
     const { sessionName, setSessionName, startNewChat, fetchSessions } = useChatStore();
+    const { news, fetchNews } = useNewsStore();
+    const { toast } = useToast();
 
     if (ready && !authenticated) {
         redirect("/login");
     }
+
+    useEffect(() => {
+        fetchNews()
+            .catch((error) => {
+                toast({
+                    title: "Error fetching news",
+                    description: "Please try again later",
+                    variant: "destructive",
+                });
+            });
+    }, [fetchNews, toast]);
 
     useEffect(() => {
         fetchSessions();

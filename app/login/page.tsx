@@ -50,7 +50,7 @@ export default function Login() {
                     <div className="select-none flex justify-center mb-8 transition-transform duration-1000 scale-x-[-1] hover:scale-[1.05] hover:scale-x-[-1.05]">
                         <Image
                             src="/creme-ai.png"
-                            alt="DeFAI Hero"
+                            alt="Crème'ai Logo"
                             width={480}
                             height={480}
                             priority

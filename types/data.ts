@@ -122,6 +122,12 @@ export interface SimplePaymentQrCode {
     chain: string;
 }
 
+export interface TweetDbEntity {
+    id: string;
+    tweet: TweetEntity;
+    timestamp: number;
+}
+
 export interface TweetEntity {
     id: string | undefined,
     username: string | undefined,
@@ -177,4 +183,10 @@ export interface ChatSession {
     role: string;
     content: string;
     timestamp: number;
+}
+
+export interface NewsItem {
+    summary: string;
+    sources: string;
+    timestamp: string;
 }

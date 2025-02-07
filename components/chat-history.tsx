@@ -1,4 +1,3 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useChatStore } from "@/stores/chat-store";
@@ -46,11 +45,10 @@ export const ChatHistory = forwardRef<HTMLDivElement, ChatHistoryProps>(
                                 key={session.session_id}
                                 onClick={() => onSelectSession(session.session_id)}
                                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-2xl text-sm transition-colors
-                                ${
-                                    session.session_id === currentSessionId
+                                ${session.session_id === currentSessionId
                                         ? "bg-gradient-to-r bg-white/70 shadow-md text-black"
-                                        : "hover:bg-neutral-500/50 "
-                                }`}
+                                        : "hover:bg-accent/10 "
+                                    }`}
                             >
                                 <MessageSquare className="h-4 w-4" />
                                 <div className="flex-1 text-left truncate ">

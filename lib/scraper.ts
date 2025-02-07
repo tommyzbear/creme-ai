@@ -1,12 +1,16 @@
 import { TweetEntity } from "@/types/data";
 import { Scraper, Tweet } from "@the-convocation/twitter-scraper"
 
+const TWITTER_USERNAME = process.env.TWITTER_USERNAME!
+const TWITTER_PASSWORD = process.env.TWITTER_PASSWORD!
+const TWITTER_EMAIL = process.env.TWITTER_EMAIL!
+
 const scraper = new Scraper()
 
 await scraper.login(
-    process.env.TWITTER_USERNAME!,
-    process.env.TWITTER_PASSWORD!,
-    process.env.TWITTER_EMAIL!,
+    TWITTER_USERNAME,
+    TWITTER_PASSWORD,
+    TWITTER_EMAIL,
     // process.env.TWITTER_TWO_FACTOR_SECRET!,
 )
 

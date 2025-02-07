@@ -22,7 +22,7 @@ export function ChatContainer({
 }) {
     const { toast } = useToast();
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const { saveMessage, sessionId, addSession } = useChatStore();
+    const { sessionId, addSession } = useChatStore();
 
     const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useChat({
         api: "/api/chat",
@@ -97,7 +97,7 @@ export function ChatContainer({
                     content: {
                         role: 'user',
                         content: input
-                    }
+                    } as Message
                 })
             });
         } catch (error) {

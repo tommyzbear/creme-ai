@@ -1,5 +1,5 @@
 import { WalletSelector } from "@/components/wallet-selector";
-import { usePortfolioStore } from "@/store/portfolio-store";
+import { usePortfolioStore } from "@/stores/portfolio-store";
 import { CreditCard, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserStore } from "@/stores/use-user-store";

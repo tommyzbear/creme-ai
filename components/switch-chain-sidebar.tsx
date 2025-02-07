@@ -13,7 +13,7 @@ import { useWallets } from "@privy-io/react-auth"
 import { getNetworkByChainId } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { config } from "@/lib/wallet/config"
-import { usePortfolioStore } from "@/store/portfolio-store"
+import { usePortfolioStore } from "@/stores/portfolio-store"
 import { useState } from "react"
 
 export function SwitchChainSidebar() {

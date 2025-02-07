@@ -4,6 +4,15 @@ import { TweetEntity } from "@/types/data"
 import { supabase } from "@/lib/supabase"
 
 export async function GET(request: Request) {
+    // Add API key validation
+    const apiKey = request.headers.get('x-api-key')
+    if (!apiKey || apiKey !== process.env.API_KEY) {
+        return NextResponse.json(
+            { error: "Unauthorized - Invalid API key" },
+            { status: 401 }
+        )
+    }
+
     const { searchParams } = new URL(request.url)
     const username = searchParams.get("username")
     const limit = searchParams.get("limit")

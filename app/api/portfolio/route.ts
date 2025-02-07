@@ -9,8 +9,7 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
-        // const address = searchParams.get("address");
-        const address = "0x5dd596c901987a2b28c38a9c1dfbf86fffc15d77";
+        const address = searchParams.get("address");
         const chain = searchParams.get("chain");
 
         if (!address || !chain) {

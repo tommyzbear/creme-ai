@@ -5,8 +5,11 @@ import { SwitchChainSidebar } from "@/components/switch-chain-sidebar";
 import { AppStatus } from "@/components/app-status";
 import { AccountModal } from "@/components/modals/account-modal";
 import { cn } from "@/lib/utils";
+import { ChatHistory } from "./chat-history";
+import { useChatStore } from "@/stores/chat-store";
 export function SidebarContent({ className }: { className?: string }) {
     const [accountModalOpen, setAccountModalOpen] = useState(false);
+    const { sessionId, setSessionId } = useChatStore();
 
     return (
         <div className={cn("", className)}>
@@ -21,7 +24,10 @@ export function SidebarContent({ className }: { className?: string }) {
                 </Card>
                 <Card className="flex-1">
                     <div className="p-6">
-                        <h3 className="text-sm">Last actions done by creme agent?</h3>
+                        <ChatHistory
+                            onSelectSession={setSessionId}
+                            currentSessionId={sessionId}
+                        />
                     </div>
                 </Card>
                 <SwitchChainSidebar />

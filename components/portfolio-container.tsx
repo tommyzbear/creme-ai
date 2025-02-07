@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TokenData, Transfer } from "@/lib/services/alchemy";
 import { cn } from "@/lib/utils";
-import { usePortfolioStore } from "@/store/portfolio-store";
+import { usePortfolioStore } from "@/stores/portfolio-store";
 import { HoldingsDashboard } from "@/components/holdings-dashboard";
 
 interface PortfolioContainerProps {
@@ -210,7 +210,7 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
             onFocus={() => {
                 onFocus?.();
             }}
-            onBlur={() => {}}
+            onBlur={() => { }}
             tabIndex={0}
         >
             <div
@@ -253,9 +253,9 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
                             >
                                 {user?.wallet?.address
                                     ? `${user?.wallet?.address.slice(
-                                          0,
-                                          6
-                                      )}...${user?.wallet?.address.slice(-4)}`
+                                        0,
+                                        6
+                                    )}...${user?.wallet?.address.slice(-4)}`
                                     : "Not Connected"}
                                 {user?.wallet?.address &&
                                     (isCopied ? (

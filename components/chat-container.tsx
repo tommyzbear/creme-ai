@@ -1,22 +1,51 @@
 "use client";
 
-import { useChat } from "ai/react";
+import { Message, useChat } from "ai/react";
 import { useEffect, useRef, useState } from "react";
 import { ChatMessage } from "@/components/chat-message";
 import { ChatInput } from "@/components/chat-input";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { useChatStore } from "@/stores/chat-store";
 
 export function ChatContainer({
     className,
     onFocus,
+    sessionName,
+    setSessionName,
+    startNewChat
 }: {
     className?: string;
     onFocus?: () => void;
+    sessionName: string;
+    setSessionName: (name: string) => void;
+    startNewChat: () => void;
 }) {
-    const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    const { toast } = useToast();
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const { sessionId, addSession } = useChatStore();
+
+    const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useChat({
         api: "/api/chat",
         maxSteps: 5,
+        id: sessionId,
+        onFinish: async (message) => {
+            try {
+                await fetch('/api/chat/message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        session_name: sessionName,
+                        role: 'assistant',
+                        content: message
+                    })
+                });
+            } catch (error) {
+                console.error(`Failed to save assistant message:`, error);
+            }
+        },
         onError: (error) => {
             console.error("Chat error:", error);
             toast({
@@ -24,16 +53,60 @@ export function ChatContainer({
                 title: "Error",
                 description: error.message || "Failed to process your request",
             });
-        },
-        onToolCall: (toolCall) => {
-            console.log("toolCall", toolCall);
-        },
+        }
     });
-    const { toast } = useToast();
-    const [showTopFade, setShowTopFade] = useState(false);
 
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const fetchMessages = async () => {
+            console.log("sessionId", sessionId);
+            try {
+                const response = await fetch(`/api/chat/sessions/${sessionId}`);
+                if (!response.ok) throw new Error('Failed to fetch session messages');
+                const messages = await response.json();
+                setMessages(messages);
+            } catch (error) {
+                console.error('Error fetching session messages:', error);
+            }
+        }
+        fetchMessages();
+    }, [sessionId, setMessages]);
+
+    const [showTopFade, setShowTopFade] = useState(false);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+    const handleMessageSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const currentSessionName = sessionName === "" ? input.substring(0, 35) : "";
+
+        // first message
+        if (sessionName === "") {
+            setSessionName(input.substring(0, 35));
+            addSession(sessionId, currentSessionName);
+        }
+
+        try {
+            await fetch('/api/chat/message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    session_name: currentSessionName,
+                    role: 'user',
+                    content: {
+                        role: 'user',
+                        content: input
+                    } as Message
+                })
+            });
+        } catch (error) {
+            console.error(`Failed to save user message:`, error);
+        }
+
+        // Process the message
+        handleSubmit(e);
+    };
 
     const scrollToBottom = () => {
         const messagesContainer = messagesEndRef.current?.parentElement;
@@ -41,8 +114,8 @@ export function ChatContainer({
             const isScrolledToBottom =
                 Math.abs(
                     messagesContainer.scrollHeight -
-                        messagesContainer.scrollTop -
-                        messagesContainer.clientHeight
+                    messagesContainer.scrollTop -
+                    messagesContainer.clientHeight
                 ) < 10;
 
             if (isScrolledToBottom) {
@@ -73,6 +146,15 @@ export function ChatContainer({
             {showTopFade && (
                 <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-background/30 to-transparent z-10 pointer-events-none" />
             )}
+            <div className="flex justify-between items-center p-4 border-b">
+                <h1 className="text-xl font-semibold">Chat</h1>
+                <button
+                    onClick={startNewChat}
+                    className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                >
+                    New Chat
+                </button>
+            </div>
             <div
                 className="flex-1 overflow-y-auto"
                 ref={messagesContainerRef}
@@ -86,9 +168,9 @@ export function ChatContainer({
                             </p>
                         )}
 
-                        {messages.map((message) => (
+                        {messages.map((message, index) => (
                             <ChatMessage
-                                key={message.id}
+                                key={message.id ?? index}
                                 role={
                                     message.role === "user" || message.role === "assistant"
                                         ? message.role
@@ -109,7 +191,7 @@ export function ChatContainer({
                     className="w-full"
                     input={input}
                     handleInputChange={handleInputChange}
-                    handleSubmit={handleSubmit}
+                    handleSubmit={async (e) => await handleMessageSubmit(e)}
                     isLoading={isLoading}
                 />
             </div>

@@ -1,16 +1,21 @@
 import { z } from 'zod';
 import { privyClient } from '../privy';
-import { erc20Abi, encodeFunctionData, getAddress, formatEther } from 'viem';
+import { erc20Abi, encodeFunctionData } from 'viem';
 import { EvmCaip2ChainId, WalletWithMetadata } from '@privy-io/server-auth';
 import { cookies } from 'next/headers';
 import { odosClient } from '../services/odos';
 import { rpcClients } from '../services/rpcClients';
-import { getETHBalance, getEthBalanceTokenData, getPriceBySymbol, getRecentTransfers, getTokenBalances, getWalletTokens } from '../services/alchemy';
+import { getETHBalance } from '../services/alchemy';
 import { NATIVE_TOKEN_ADDRESS, SUPPORTED_TOKENS_BY_CHAIN } from '../constants/token-mappings';
 import { supabase } from '../supabase';
 import { Portfolio } from '@/types/data';
 
-// TODO: Add support for multiple chains, at the moment only base is supported (more cost effective for mvp development)
+/*
+TODO: Add support for multiple chains, at the moment only base is supported (more cost effective for mvp development)
+    - Also need to support multiple input tokens
+    - i.e. Currently swap would raise an issue if USDC is also input and output token, so need to handle this
+*/
+
 export const executePortfolioOrder = {
     description: 'Place or submit a portfolio order',
     parameters: z.object({

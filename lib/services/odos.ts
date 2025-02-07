@@ -20,8 +20,10 @@ const getQuote = async (chainId: number, inputTokens: { tokenAddress: string, am
         referralCode: 0, // referral code (recommended)
         disableRFQs: true,
         compact: true,
-        pathVizImage: true // get pathviz graph
+        // pathVizImage: true // get pathviz graph
     };
+
+    console.log("quote payload \n", quoteRequestBody)
 
     const response = await fetch(
         quoteUrl,

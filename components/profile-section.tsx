@@ -23,6 +23,9 @@ interface ProfileSectionProps {
         chainType: "solana" | "ethereum";
     }) => Promise<void>;
     revokeWallets: () => Promise<void>;
+    exportWallet: (options?: {
+        address: string;
+    }) => Promise<void>;
 }
 
 export function ProfileSection({
@@ -40,6 +43,7 @@ export function ProfileSection({
     delegatedWallet,
     delegateWallet,
     revokeWallets,
+    exportWallet,
 }: ProfileSectionProps) {
     return (
         <div>
@@ -125,6 +129,16 @@ export function ProfileSection({
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
+                                <Button
+                                    variant="main"
+                                    onClick={async () =>
+                                        await exportWallet({
+                                            address: managedWalletAddress || "",
+                                        })
+                                    }
+                                >
+                                    Export Wallet
+                                </Button>
                                 <Button
                                     variant="main"
                                     onClick={async () =>

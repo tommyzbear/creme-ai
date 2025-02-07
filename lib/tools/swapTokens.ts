@@ -1,11 +1,12 @@
 import { z } from 'zod';
 import { privyClient } from '../privy';
-import { getContract, erc20Abi, parseEther, parseUnits, encodeFunctionData } from 'viem';
+import { erc20Abi, parseEther, parseUnits, encodeFunctionData } from 'viem';
 import { EvmCaip2ChainId, WalletWithMetadata } from '@privy-io/server-auth';
 import { cookies } from 'next/headers';
 import { extractCAIP2, getCAIP2ByChain, getSupportedChains } from '../utils';
 import { odosClient } from '../services/odos';
 import { rpcClients } from '../services/rpcClients';
+import { NATIVE_TOKEN_ADDRESS, SUPPORTED_TOKENS_BY_CHAIN } from '../constants/token-mappings';
 export const swapTokens = {
     description: 'Swap a specify amount of token on behalf of a user',
     parameters: z.object({
@@ -17,6 +18,7 @@ export const swapTokens = {
     execute: async (
         { chain, inputToken, outputToken, amount }: { chain: string, inputToken: string, outputToken: string, amount: number }) => {
         try {
+            console.log(chain, inputToken, outputToken, amount);
 
             const caip2 = getCAIP2ByChain(chain);
             if (!caip2) {
@@ -58,8 +60,11 @@ export const swapTokens = {
                 }
             }
 
-            const inputTokenInfo = supportedTokensByChain[caip2][inputToken];
-            const outputTokenInfo = supportedTokensByChain[caip2][outputToken];
+            const inputTokenInfo = SUPPORTED_TOKENS_BY_CHAIN[caip2][inputToken];
+            const outputTokenInfo = SUPPORTED_TOKENS_BY_CHAIN[caip2][outputToken];
+
+            console.log("inputTokenInfo", inputTokenInfo);
+            console.log("outputTokenInfo", outputTokenInfo);
             const amountInDecimals = inputTokenInfo.decimals === 18 ? parseEther(amount.toString()).toString(10) : parseUnits(amount.toString(), inputTokenInfo.decimals).toString(10);
 
             const quote = await odosClient.getQuote(
@@ -81,11 +86,10 @@ export const swapTokens = {
 
             let approveHash = "";
 
-            if (inputTokenInfo.tokenAddress !== nativeTokenAddress) {
+            if (inputTokenInfo.tokenAddress !== NATIVE_TOKEN_ADDRESS) {
                 try {
                     approveHash = await approveTokenSpending(delegatedWallets[0].address as `0x${string}`, caip2, inputTokenInfo.tokenAddress as `0x${string}`, odosClient.routerAddressByChain[caip2], BigInt(amountInDecimals));
-                    const receipt = await rpcClients[caip2].waitForTransactionReceipt({ hash: approveHash as `0x${string}` })
-                    console.log("receipt", receipt);
+                    await rpcClients[caip2].waitForTransactionReceipt({ hash: approveHash as `0x${string}` })
                 } catch (error) {
                     console.error('Privy API error:', error);
                     return {
@@ -118,8 +122,8 @@ export const swapTokens = {
                 })
 
                 return {
-                    swapTransactionHash: sendTxResponse.hash,
-                    approveTransactionHash: approveHash,
+                    swapTransactionHash: getExplorerLink(sendTxResponse.hash, caip2),
+                    approveTransactionHash: getExplorerLink(approveHash, caip2),
                     swapPathVizImage: quote.pathVizImage
                 };
             } catch (error) {
@@ -138,52 +142,6 @@ export const swapTokens = {
         }
     }
 };
-
-
-const nativeTokenAddress = "0x0000000000000000000000000000000000000000"
-
-const supportedTokensByChain = {
-    "eip155:1": { // Ethereum
-        ETH: {
-            tokenAddress: nativeTokenAddress,
-            decimals: 18
-        },
-        USDC: {
-            tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-            decimals: 6
-        }
-    },
-    "eip155:42161": { // Arbitrum
-        ETH: {
-            tokenAddress: nativeTokenAddress,
-            decimals: 18
-        },
-        USDC: {
-            tokenAddress: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
-            decimals: 6
-        }
-    },
-    "eip155:10": { // Optimism
-        ETH: {
-            tokenAddress: nativeTokenAddress,
-            decimals: 18
-        },
-        USDC: {
-            tokenAddress: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
-            decimals: 6
-        }
-    },
-    "eip155:8453": { // Base
-        ETH: {
-            tokenAddress: nativeTokenAddress,
-            decimals: 18
-        },
-        USDC: {
-            tokenAddress: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-            decimals: 6
-        }
-    }
-}
 
 const approveTokenSpending = async (actionWalletAddress: `0x${string}`, caip2: EvmCaip2ChainId, tokenAddress: `0x${string}`, spenderAddress: `0x${string}`, amount: bigint) => {
 
@@ -208,3 +166,17 @@ const approveTokenSpending = async (actionWalletAddress: `0x${string}`, caip2: E
     return hash;
 }
 
+const getExplorerLink = (hash: string, chain: EvmCaip2ChainId) => {
+    switch (chain) {
+        case 'eip155:1':
+            return `[${hash.slice(0, 6)}...${hash.slice(-4)}](https://etherscan.io/tx/${hash})`;
+        case 'eip155:8453':
+            return `[${hash.slice(0, 6)}...${hash.slice(-4)}](https://basescan.org/tx/${hash})`;
+        case 'eip155:10':
+            return `[${hash.slice(0, 6)}...${hash.slice(-4)}](https://optimistic.etherscan.io/tx/${hash})`;
+        case 'eip155:42161':
+            return `[${hash.slice(0, 6)}...${hash.slice(-4)}](https://arbiscan.io/tx/${hash})`;
+        default:
+            return `[${hash.slice(0, 6)}...${hash.slice(-4)}](https://basescan.org/tx/${hash})`;
+    }
+}

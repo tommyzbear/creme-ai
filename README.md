@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Technical Documentation
 
-## Getting Started
+## Website
+Deployed at [crème'ai](https://creme-ai.vercel.app)
 
-First, run the development server:
+## Demo Videos
+- [AI chat interface I](https://drive.google.com/file/d/18K4_e1fPBkw7CNu9LPnPqW0JsJHsjM8C/view?usp=drive_link)
+- [AI chat interface II & Overall App Review](https://drive.google.com/file/d/1cqCOAsxGJ7Zg70z_nKI7Jisq8XYcBScy/view?usp=drive_link)
+- [User Settings and embedded wallet access](https://drive.google.com/file/d/1kbAwETS-0V4MkA2UPnqZr9GXOjGrnemc/view?usp=sharing)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 1. Frontend Framework
+- **Next.js** 15.1.0 with TypeScript
+- **Tailwind CSS** for styling with custom configuration
+- **Framer Motion** for animations
+- Custom dark/light theme system with HSL color variables
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 2. Authentication & Web3 Integration
+- **Privy** for Web3 authentication and wallet management
+- Support for multiple chains:
+  - Ethereum Mainnet
+  - Arbitrum
+  - Base
+  - Optimism
+- Multi-wallet support with delegation capabilities, allowing Ai autonomous control over wallet capital
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 3. Backend Services
+- **Supabase** for database management
+- Multiple API integrations:
+  - **Alchemy SDK** for blockchain data (for work in progress)
+  - **OpenAI** for base model of AI analysis
+  - **CookieDAO API** for social metrics
+  - **DexScreener** currently for token pricing
+  - **Odos** for optimal order routing
+  - **Etherscan**, **Basescan**, **Optimistic**, **Arbiscan** for explorer API and links
+  - Twitter scraping capabilities
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 4. State Management
+- **Zustand** for global state management
+- Persistent storage with state partitioning
+- Dedicated stores for:
+  - Chat sessions
+  - Portfolio data
+  - User preferences
+  - News feed
 
-## Learn More
+## 5. Key Features
+### AI Chat Interface
+### Portfolio Management
+- Real-time portfolio tracking
+- Multi-chain asset visualization
+- Perform token swaps/send tokens on behalf of the user
+- Risk analysis and rebalancing suggestions
+- Custom portfolio creation, adjustment and execution
+### Social Intelligence
+- Twitter/X integration for sentiment analysis
+- KOL (Key Opinion Leader) activity monitoring
+- Social metrics integration for market sentiment
 
-To learn more about Next.js, take a look at the following resources:
+## 6. Unique Technical Features
+- Smart Portfolio Rebalancing
+- Risk Scoring System
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Future Improvements
+- Add support for more chains and on-chain actions
+- Implement alternative reasoning models for:
+  - Diverse thinking process
+  - Cross examination
+  - Development for better price predictions and indications
+- Add more social platform integrations
+- Implement automated trading strategies
+- Add portfolio performance analytics
+- Enhance mobile responsiveness
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## 7. Startup Instructions (Local Development)
+- `cp .env.template .env`
+- Fill in the required environment variables
+- `pnpm install`
+- `pnpm run dev`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

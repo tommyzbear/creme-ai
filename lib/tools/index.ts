@@ -8,3 +8,5 @@ export { createPortfolio } from './createPortfolio';
 export { getPortfolio } from './getPortfolio';
 export { promotePortfolio } from './promotePortfolio';
 export { swapTokens } from './swapTokens';
+export { executePortfolioOrder } from './executePortfolioOrder';
+export { rebalancePortfolioTool } from './rebalancePortfolioTool';

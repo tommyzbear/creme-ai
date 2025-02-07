@@ -1,54 +1,54 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
     DialogFooter,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { useState } from "react"
-import { useToast } from "@/hooks/use-toast"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChangeUsernameDialogProps {
-    open: boolean
-    onOpenChange: (open: boolean) => void
-    currentUsername?: string
-    onUpdate: (username: string) => Promise<void>
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    currentUsername?: string;
+    onUpdate: (username: string) => Promise<void>;
 }
 
 export function ChangeUsernameDialog({
     open,
     onOpenChange,
     currentUsername,
-    onUpdate
+    onUpdate,
 }: ChangeUsernameDialogProps) {
-    const [username, setUsername] = useState(currentUsername || "")
-    const [isLoading, setIsLoading] = useState(false)
-    const { toast } = useToast()
+    const [username, setUsername] = useState(currentUsername || "");
+    const [isLoading, setIsLoading] = useState(false);
+    const { toast } = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setIsLoading(true)
+        e.preventDefault();
+        setIsLoading(true);
 
         try {
-            await onUpdate(username)
+            await onUpdate(username);
             toast({
                 description: "Username updated successfully",
-            })
-            onOpenChange(false)
+            });
+            onOpenChange(false);
         } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: "Failed to update username",
-            })
+            });
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -81,5 +81,5 @@ export function ChangeUsernameDialog({
                 </form>
             </DialogContent>
         </Dialog>
-    )
-} 
+    );
+}

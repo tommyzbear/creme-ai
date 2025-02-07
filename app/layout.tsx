@@ -57,7 +57,7 @@ const ibm = localFont({
 });
 
 export const metadata: Metadata = {
-    title: "DeFAI Hero",
+    title: "Crème'ai",
     description: "DeFAI Hero is a platform for DeFi AI Agents",
 };
 

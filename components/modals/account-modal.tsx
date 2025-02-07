@@ -19,7 +19,7 @@ import { ChangeUsernameDialog } from "@/components/dialogs/change-username-dialo
 import { usePortfolioStore } from "@/store/portfolio-store";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
-interface AccountDialogProps {
+interface AccountModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
@@ -35,7 +35,7 @@ function DialogWrapper({ children }: { children: React.ReactNode }) {
     );
 }
 
-export function AccountDialog({ open, onOpenChange }: AccountDialogProps) {
+export function AccountModal({ open, onOpenChange }: AccountModalProps) {
     const {
         ready,
         user,

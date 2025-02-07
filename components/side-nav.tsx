@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Settings } from "lucide-react";
-import { SettingsModal } from "@/components/settings-modal";
+import { SettingsModal } from "@/components/modals/settings-modal";
 
 export function SideNav({ className }: { className?: string }) {
     const [showSettings, setShowSettings] = useState(false);

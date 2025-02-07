@@ -25,8 +25,8 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
                         </div>
                     ) : (
                         <div className={"flex gap-3 justify-start"}>
-                            <div className="h-10 w-10 rounded-full flex items-center justify-center shrink-0 frosted-glass bg-background/70 hover:none shadow-md">
-                                <Bot className="h-8 w-8 text-primary" />
+                            <div className="h-10 w-10 rounded-full overflow-hidden flex items-center justify-center shrink-0 frosted-glass bg-orange-500/90 hover:none shadow-md">
+                                {/* <img src="/creme-ai.webp" alt="Creme AI" className="h-14 w-14" /> */}
                             </div>
                             <div
                                 className={

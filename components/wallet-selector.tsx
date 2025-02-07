@@ -21,9 +21,9 @@ export function WalletSelector({
     const { user } = usePrivy();
 
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full">
             <Select value={selectedWalletAddress} onValueChange={onWalletChange}>
-                <SelectTrigger className="w-[280px]">
+                <SelectTrigger className="w-[150px]">
                     <SelectValue placeholder="Select wallet" />
                 </SelectTrigger>
                 <SelectContent>

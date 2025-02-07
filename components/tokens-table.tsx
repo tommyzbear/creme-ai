@@ -292,7 +292,7 @@ export function TokensTable({
             {tokens.length > 5 && (
                 <Button
                     variant="outline"
-                    className="w-auto mt-0 mx-auto rounded-xl"
+                    className="w-auto mt-0 mx-auto rounded-xl transition-colour duration-300 px-3"
                     onClick={() => setShowAll(!showAll)}
                 >
                     {showAll ? "Show Less" : `Show All (${tokens.length})`}

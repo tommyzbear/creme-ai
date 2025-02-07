@@ -1,6 +1,14 @@
 "use client";
 
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    DialogOverlay,
+} from "@/components/ui/dialog";
 import { ProfileSection } from "@/components/profile-section";
 import { ConnectedAccounts } from "@/components/connected-accounts";
 import { useUserStore } from "@/stores/use-user-store";
@@ -18,7 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ChangeUsernameDialog } from "@/components/dialogs/change-username-dialog";
 import { usePortfolioStore } from "@/store/portfolio-store";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-
+import { cn } from "@/lib/utils";
 interface AccountModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -26,7 +34,16 @@ interface AccountModalProps {
 
 function DialogWrapper({ children }: { children: React.ReactNode }) {
     return (
-        <DialogContent className="max-w-3xl">
+        <DialogContent
+            className={cn(
+                "sm:max-w-3xl",
+                "max-h-[calc(100vh-10rem)]",
+                "bg-neutral-900/70",
+                "text-white",
+                "overflow-y-auto",
+                "!rounded-3xl"
+            )}
+        >
             <VisuallyHidden>
                 <DialogTitle>Account Settings</DialogTitle>
             </VisuallyHidden>
@@ -148,11 +165,17 @@ export function AccountModal({ open, onOpenChange }: AccountModalProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogOverlay className="backdrop-blur-sm bg-transparent" />
             <DialogWrapper>
                 {isLoading ? (
                     renderLoadingSkeleton()
                 ) : (
                     <div className="space-y-6">
+                        <DialogHeader>
+                            <DialogTitle className="text-xl font-semibold">
+                                Account Settings
+                            </DialogTitle>
+                        </DialogHeader>
                         <ProfileSection
                             username={dbUser?.username || null}
                             joinedDate={dbUser?.created_at || null}
@@ -172,7 +195,7 @@ export function AccountModal({ open, onOpenChange }: AccountModalProps) {
                                 setDelegatedWallet(undefined);
                             }}
                         />
-                        {/* <ConnectedAccounts
+                        <ConnectedAccounts
                             user={user}
                             {...{
                                 linkEmail,
@@ -196,7 +219,7 @@ export function AccountModal({ open, onOpenChange }: AccountModalProps) {
                             onOpenChange={setUsernameDialogOpen}
                             currentUsername={dbUser?.username}
                             onUpdate={updateUsername}
-                        /> */}
+                        />
                     </div>
                 )}
             </DialogWrapper>

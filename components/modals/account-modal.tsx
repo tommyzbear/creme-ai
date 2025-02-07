@@ -131,10 +131,12 @@ export function AccountModal({ open, onOpenChange }: AccountModalProps) {
     }, [user, revokeWallets]);
 
     const handleLogout = async () => {
+        // The order is very important here. If not awaiting the logout to complete, the store will be replenished with old user session.
+        await logout();
         useUserStore.getState().clearStore();
         usePortfolioStore.getState().clearStore();
         useChatStore.getState().clearStore();
-        await logout();
+        console.log("Clearing store");
     };
 
     const renderLoadingSkeleton = () => (

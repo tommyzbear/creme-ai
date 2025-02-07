@@ -190,3 +190,10 @@ export interface NewsItem {
     sources: string;
     timestamp: string;
 }
+
+export interface NewsFeed {
+    id: number;
+    summary: string;
+    sources: string;
+    timestamp: string;
+}

@@ -21,6 +21,40 @@ export async function GET() {
         }
 
         const { data, error } = await supabase
+            .from('news_feed')
+            .select('*')
+            .order('timestamp', { ascending: false })
+            .limit(10)
+
+        if (error) throw error;
+
+        return NextResponse.json(data.map((item) => ({
+            summary: item.summary,
+            sources: item.sources,
+            timestamp: item.timestamp
+        })))
+    } catch (error) {
+        console.error('Error fetching tweets:', error)
+        return NextResponse.json(
+            { error: 'Failed to fetch tweets' },
+            { status: 500 }
+        )
+    }
+}
+
+
+export async function POST(request: Request) {
+    // Add API key validation
+    const apiKey = request.headers.get('x-api-key')
+    if (!apiKey || apiKey !== process.env.API_KEY) {
+        return NextResponse.json(
+            { error: "Unauthorized - Invalid API key" },
+            { status: 401 }
+        )
+    }
+
+    try {
+        const { data, error } = await supabase
             .from('tweets')
             .select('*')
             .gte('timestamp', Math.floor(Date.now() / 1000) - (60 * 60 * 24))
@@ -52,10 +86,22 @@ export async function GET() {
 
         const summaryArray = summaryText ? summaryText.split("\n").map((line) => {
             const match = line.match(/^(\d+)\.\s*(.*?)\s*\(Sources:\s*(.*?)\s*,\s*Timestamp:\s*(.*?)\)$/);
-            return match ? { summary: match[2], sources: match[3], timestamp: match[4] } : null;
+            return match ? {
+                summary: match[2],
+                sources: match[3],
+                timestamp: new Date(Number(match[4]) * 1000)
+            } : null;
         }).filter(Boolean) : [];
 
-        return NextResponse.json(summaryArray)
+
+        const { data: newsData, error: newsError } = await supabase
+            .from('news_feed')
+            .insert(summaryArray)
+            .select()
+
+        if (newsError) throw newsError;
+
+        return NextResponse.json(newsData)
     } catch (error) {
         console.error('Error fetching tweets:', error)
         return NextResponse.json(

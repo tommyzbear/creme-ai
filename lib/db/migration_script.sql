@@ -37,3 +37,9 @@ CREATE INDEX idx_session_id ON chat_sessions(session_id);
 CREATE INDEX idx_session_name ON chat_sessions(session_name);
 -- Index for sorting chat history efficiently
 CREATE INDEX idx_timestamp ON chat_sessions(timestamp DESC);
+CREATE TABLE news_feed (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    summary TEXT NOT NULL,
+    sources TEXT NOT NULL,
+    timestamp TIMESTAMP NOT NULL
+);

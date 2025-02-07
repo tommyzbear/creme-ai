@@ -1,7 +1,14 @@
+import GradientBackground from "@/components/gradient-background";
+
 export const metadata = {
-    title: 'Login · DeFAI Hero',
+    title: "Login · DeFAI Hero",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-    return children;
+    return (
+        <div className="flex h-screen bg-neutral-200">
+            <GradientBackground />
+            <main className="z-10 mx-auto">{children}</main>
+        </div>
+    );
 }

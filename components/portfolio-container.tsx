@@ -210,7 +210,7 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
             onFocus={() => {
                 onFocus?.();
             }}
-            onBlur={() => { }}
+            onBlur={() => {}}
             tabIndex={0}
         >
             <div
@@ -253,9 +253,9 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
                             >
                                 {user?.wallet?.address
                                     ? `${user?.wallet?.address.slice(
-                                        0,
-                                        6
-                                    )}...${user?.wallet?.address.slice(-4)}`
+                                          0,
+                                          6
+                                      )}...${user?.wallet?.address.slice(-4)}`
                                     : "Not Connected"}
                                 {user?.wallet?.address &&
                                     (isCopied ? (
@@ -290,6 +290,7 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
                     />
                 </div>
             </div>
+            <div className="bottom-fade z-[-5]" />
         </div>
     );
 }

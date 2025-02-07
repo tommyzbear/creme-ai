@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { AccountCard } from "@/components/account-card";
 import { SwitchChainSidebar } from "@/components/switch-chain-sidebar";
@@ -7,9 +7,21 @@ import { AccountModal } from "@/components/modals/account-modal";
 import { cn } from "@/lib/utils";
 import { ChatHistory } from "./chat-history";
 import { useChatStore } from "@/stores/chat-store";
+
 export function SidebarContent({ className }: { className?: string }) {
     const [accountModalOpen, setAccountModalOpen] = useState(false);
-    const { sessionId, setSessionId } = useChatStore();
+    const { sessionId, setSessionId, isNewSession } = useChatStore();
+    const chatHistoryRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        // Only scroll to top when a new session is created
+        if (isNewSession && chatHistoryRef.current) {
+            chatHistoryRef.current.scrollTo({
+                top: 0,
+                behavior: "smooth",
+            });
+        }
+    }, [sessionId, isNewSession]);
 
     return (
         <div className={cn("", className)}>
@@ -22,13 +34,12 @@ export function SidebarContent({ className }: { className?: string }) {
                         </h3>
                     </div>
                 </Card>
-                <Card className="flex-1">
-                    <div className="p-6">
-                        <ChatHistory
-                            onSelectSession={setSessionId}
-                            currentSessionId={sessionId}
-                        />
-                    </div>
+                <Card className="flex-1 overflow-hidden">
+                    <ChatHistory
+                        ref={chatHistoryRef}
+                        onSelectSession={setSessionId}
+                        currentSessionId={sessionId}
+                    />
                 </Card>
                 <SwitchChainSidebar />
                 <AppStatus />

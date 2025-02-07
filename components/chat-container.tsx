@@ -6,13 +6,16 @@ import { ChatMessage } from "@/components/chat-message";
 import { ChatInput } from "@/components/chat-input";
 import { useToast } from "@/hooks/use-toast";
 import { useChatStore } from "@/stores/chat-store";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function ChatContainer({
     className,
     onFocus,
     sessionName,
     setSessionName,
-    startNewChat
+    startNewChat,
 }: {
     className?: string;
     onFocus?: () => void;
@@ -30,17 +33,17 @@ export function ChatContainer({
         id: sessionId,
         onFinish: async (message) => {
             try {
-                await fetch('/api/chat/message', {
-                    method: 'POST',
+                await fetch("/api/chat/message", {
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
                         session_id: sessionId,
                         session_name: sessionName,
-                        role: 'assistant',
-                        content: message
-                    })
+                        role: "assistant",
+                        content: message,
+                    }),
                 });
             } catch (error) {
                 console.error(`Failed to save assistant message:`, error);
@@ -53,7 +56,7 @@ export function ChatContainer({
                 title: "Error",
                 description: error.message || "Failed to process your request",
             });
-        }
+        },
     });
 
     useEffect(() => {
@@ -61,20 +64,20 @@ export function ChatContainer({
             console.log("sessionId", sessionId);
             try {
                 const response = await fetch(`/api/chat/sessions/${sessionId}`);
-                if (!response.ok) throw new Error('Failed to fetch session messages');
+                if (!response.ok) throw new Error("Failed to fetch session messages");
                 const messages = await response.json();
                 setMessages(messages);
             } catch (error) {
-                console.error('Error fetching session messages:', error);
+                console.error("Error fetching session messages:", error);
             }
-        }
+        };
         fetchMessages();
     }, [sessionId, setMessages]);
 
     const [showTopFade, setShowTopFade] = useState(false);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-    const handleMessageSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleMessageSubmit = async (e: React.FormEvent<Element>) => {
         e.preventDefault();
         const currentSessionName = sessionName === "" ? input.substring(0, 35) : "";
 
@@ -85,20 +88,20 @@ export function ChatContainer({
         }
 
         try {
-            await fetch('/api/chat/message', {
-                method: 'POST',
+            await fetch("/api/chat/message", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     session_id: sessionId,
                     session_name: currentSessionName,
-                    role: 'user',
+                    role: "user",
                     content: {
-                        role: 'user',
-                        content: input
-                    } as Message
-                })
+                        role: "user",
+                        content: input,
+                    } as Message,
+                }),
             });
         } catch (error) {
             console.error(`Failed to save user message:`, error);
@@ -114,8 +117,8 @@ export function ChatContainer({
             const isScrolledToBottom =
                 Math.abs(
                     messagesContainer.scrollHeight -
-                    messagesContainer.scrollTop -
-                    messagesContainer.clientHeight
+                        messagesContainer.scrollTop -
+                        messagesContainer.clientHeight
                 ) < 10;
 
             if (isScrolledToBottom) {
@@ -146,15 +149,6 @@ export function ChatContainer({
             {showTopFade && (
                 <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-background/30 to-transparent z-10 pointer-events-none" />
             )}
-            <div className="flex justify-between items-center p-4 border-b">
-                <h1 className="text-xl font-semibold">Chat</h1>
-                <button
-                    onClick={startNewChat}
-                    className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-                >
-                    New Chat
-                </button>
-            </div>
             <div
                 className="flex-1 overflow-y-auto"
                 ref={messagesContainerRef}
@@ -184,16 +178,36 @@ export function ChatContainer({
                 </div>
             </div>
 
-            <div className="bottom-fade" />
+            <div className="bottom-fade z-[-5]" />
 
             <div className="px-6 pt-2 pb-6 relative">
-                <ChatInput
-                    className="w-full"
-                    input={input}
-                    handleInputChange={handleInputChange}
-                    handleSubmit={async (e) => await handleMessageSubmit(e)}
-                    isLoading={isLoading}
-                />
+                <div className="flex flex-row gap-5 justify-center items-center min-h-[40px]">
+                    <TooltipProvider>
+                        <Tooltip delayDuration={200}>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    onClick={startNewChat}
+                                    className="rounded-full h-10 w-12 hover:bg-ai"
+                                >
+                                    <Plus className="w-5 h-5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="text-sm">New Chat</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <ChatInput
+                        className="w-full"
+                        input={input}
+                        handleInputChange={handleInputChange}
+                        handleSubmit={async (e: React.FormEvent<Element>) =>
+                            await handleMessageSubmit(e)
+                        }
+                        isLoading={isLoading}
+                    />
+                </div>
             </div>
         </div>
     );

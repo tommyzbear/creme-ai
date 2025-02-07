@@ -10,26 +10,26 @@ export default function Login() {
 
     const postLogin = async (userData: User) => {
         try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
+            const response = await fetch("/api/login", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify(userData),
             });
 
             if (!response.ok) {
-                throw new Error('Failed to send user data to backend');
+                throw new Error("Failed to send user data to backend");
             }
 
             return await response.json();
         } catch (error) {
             toast({
-                title: 'Error',
-                description: 'Error sending user data to backend',
-                variant: 'destructive',
+                title: "Error",
+                description: "Error sending user data to backend",
+                variant: "destructive",
             });
-            console.error('Error sending user data to backend:', error);
+            console.error("Error sending user data to backend:", error);
         }
     };
 
@@ -48,12 +48,12 @@ export default function Login() {
                 <div>
                     <div className="flex justify-center mb-8">
                         <Image
-                            src="/FaiDeeLah.png"
+                            src="/creme-ai.png"
                             alt="DeFAI Hero"
                             width={480}
                             height={480}
                             priority
-                            className="rounded-3xl"
+                            className="rounded-3xl opacity-95 mix-blend-multiply"
                         />
                     </div>
                     <div className="mt-6 flex justify-center text-center">

@@ -1,20 +1,15 @@
-"use client"
+"use client";
 
-import {
-    NetworkIcon,
-} from "@/components/network-icon"
+import { NetworkIcon } from "@/components/network-icon";
 
-import {
-    SidebarMenu,
-    SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
-import { useWallets } from "@privy-io/react-auth"
-import { getNetworkByChainId } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
-import { config } from "@/lib/wallet/config"
-import { usePortfolioStore } from "@/stores/portfolio-store"
-import { useState } from "react"
+import { SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { useWallets } from "@privy-io/react-auth";
+import { getNetworkByChainId } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { config } from "@/lib/wallet/config";
+import { usePortfolioStore } from "@/stores/portfolio-store";
+import { useState } from "react";
 
 export function SwitchChainSidebar() {
     const { wallets, ready } = useWallets();
@@ -40,35 +35,34 @@ export function SwitchChainSidebar() {
 
     const getCurrentNetwork = () => {
         if (!ready || !wallets[0]) return "Ethereum";
-        return getNetworkByChainId(wallets[0].chainId);;
+        return getNetworkByChainId(wallets[0].chainId);
     };
 
     return (
-        <SidebarMenu>
-            <SidebarMenuItem>
+        <SidebarMenu className="focus:ring-0 focus:outline-none ">
+            <SidebarMenuItem className="focus:ring-0 focus:outline-none">
                 <Select
                     value={currentChainId}
                     onValueChange={handleSwitchNetwork}
                     disabled={!wallets[0]}
                 >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full border-0 focus:ring-0 focus:outline-none rounded-3xl frosted-glass bg-background/40">
                         <SelectValue placeholder="Select network">
                             <div className="flex items-center space-x-3">
-                                <NetworkIcon
-                                    chain={getCurrentNetwork()}
-                                    className="w-6 h-6"
-                                />
+                                <NetworkIcon chain={getCurrentNetwork()} className="w-6 h-6" />
                                 <div>
-                                    <p className="font-medium">
-                                        {getCurrentNetwork()}
-                                    </p>
+                                    <p className="font-medium">{getCurrentNetwork()}</p>
                                 </div>
                             </div>
                         </SelectValue>
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="focus:ring-0 focus:outline-none rounded-3xl">
                         {config.chains.map((chain) => (
-                            <SelectItem key={chain.id} value={chain.id.toString()}>
+                            <SelectItem
+                                key={chain.id}
+                                value={chain.id.toString()}
+                                className="transition-all duration-100 rounded-3xl"
+                            >
                                 <div className="flex items-center space-x-3">
                                     <NetworkIcon chain={chain.name} className="w-6 h-6" />
                                     <div>
@@ -81,5 +75,5 @@ export function SwitchChainSidebar() {
                 </Select>
             </SidebarMenuItem>
         </SidebarMenu>
-    )
+    );
 }

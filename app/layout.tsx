@@ -60,7 +60,7 @@ const ibm = localFont({
 
 export const metadata: Metadata = {
   title: "Crème'ai",
-  description: "DeFAI Hero is a platform for DeFi AI Agents",
+  description: "Crème'ai is a platform for DeFi AI Agents",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

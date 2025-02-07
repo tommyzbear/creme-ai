@@ -5,16 +5,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, WalletWithMetadata } from "@privy-io/react-auth";
 
 interface WalletSelectorProps {
     selectedWalletAddress: string;
+    delegatedWallet: WalletWithMetadata | undefined;
     managedWallet: { address: string } | null;
     onWalletChange: (address: string) => void;
 }
 
 export function WalletSelector({
     selectedWalletAddress,
+    delegatedWallet,
     managedWallet,
     onWalletChange,
 }: WalletSelectorProps) {
@@ -30,20 +32,45 @@ export function WalletSelector({
                     position="popper"
                     className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] rounded-xl"
                 >
-                    <SelectItem
-                        value={user?.wallet?.address || "user-wallet"}
-                        className="rounded-lg"
-                    >
-                        User Connected Wallet
-                    </SelectItem>
-                    {managedWallet && (
-                        <SelectItem
-                            value={managedWallet?.address || "managed-wallet"}
-                            className="rounded-lg"
-                        >
-                            Crème Managed Wallet
-                        </SelectItem>
-                    )}
+                    {user?.wallet?.address === managedWallet?.address ?
+                        <>
+                            {
+                                !delegatedWallet && user?.wallet?.address === managedWallet?.address &&
+                                <SelectItem
+                                    value={user?.wallet?.address || "user-wallet"}
+                                    className="rounded-lg"
+                                >
+                                    User Connected Wallet
+                                </SelectItem>
+                            }
+
+                            {
+                                delegatedWallet && user?.wallet?.address === delegatedWallet?.address &&
+                                <SelectItem
+                                    value={managedWallet?.address || "managed-wallet"}
+                                    className="rounded-lg"
+                                >
+                                    Crème Managed Wallet
+                                </SelectItem>
+                            }
+                        </> :
+                        <>
+                            <SelectItem
+                                value={user?.wallet?.address || "user-wallet"}
+                                className="rounded-lg"
+                            >
+                                User Connected Wallet
+                            </SelectItem>
+                            {managedWallet && (
+                                <SelectItem
+                                    value={managedWallet?.address || "managed-wallet"}
+                                    className="rounded-lg"
+                                >
+                                    Crème Managed Wallet
+                                </SelectItem>
+                            )}
+                        </>
+                    }
                 </SelectContent>
             </Select>
         </div>

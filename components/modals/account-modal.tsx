@@ -5,8 +5,6 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogDescription,
-    DialogFooter,
     DialogOverlay,
 } from "@/components/ui/dialog";
 import { ProfileSection } from "@/components/profile-section";
@@ -27,6 +25,7 @@ import { ChangeUsernameDialog } from "@/components/dialogs/change-username-dialo
 import { usePortfolioStore } from "@/stores/portfolio-store";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
+import { useChatStore } from "@/stores/chat-store";
 interface AccountModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -134,6 +133,7 @@ export function AccountModal({ open, onOpenChange }: AccountModalProps) {
     const handleLogout = async () => {
         useUserStore.getState().clearStore();
         usePortfolioStore.getState().clearStore();
+        useChatStore.getState().clearStore();
         await logout();
     };
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { WalletSelector } from "@/components/wallet-selector";
 import { usePortfolioStore } from "@/stores/portfolio-store";
 import { CreditCard, UserCheck, UserX } from "lucide-react";
@@ -77,6 +79,10 @@ export function AccountCard({ onAccountClick }: AccountCardProps) {
         }
     }, [user, revokeWallets]);
 
+    useEffect(() => {
+        console.log("selectedWalletAddress", selectedWalletAddress);
+    }, [selectedWalletAddress]);
+
     const handleWalletChange = (address: string) => {
         setSelectedWalletAddress(address);
     };
@@ -145,6 +151,7 @@ export function AccountCard({ onAccountClick }: AccountCardProps) {
                 <div className="flex-1 min-w-0">
                     <WalletSelector
                         selectedWalletAddress={selectedWalletAddress}
+                        delegatedWallet={delegatedWallet}
                         managedWallet={managedWallet}
                         onWalletChange={handleWalletChange}
                     />

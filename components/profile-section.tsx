@@ -1,6 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Copy } from "lucide-react";
 import { type WalletWithMetadata } from "@privy-io/react-auth";
 interface ProfileSectionProps {
@@ -94,8 +93,8 @@ export function ProfileSection({
                                 <p className="font-mono text-sm">
                                     {walletAddress
                                         ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(
-                                              -4
-                                          )}`
+                                            -4
+                                        )}`
                                         : ""}
                                 </p>
                                 <Copy
@@ -108,15 +107,15 @@ export function ProfileSection({
                         <div className="flex items-center justify-between">
                             <div>
                                 <h4 className="text-sm font-medium text-slate-400">
-                                    Managed Wallet
+                                    Crème'ai Managed Wallet
                                 </h4>
                                 <div className="flex items-center gap-2 mt-1">
                                     <p className="font-mono text-sm">
                                         {managedWalletAddress
                                             ? `${managedWalletAddress.slice(
-                                                  0,
-                                                  6
-                                              )}...${managedWalletAddress.slice(-4)}`
+                                                0,
+                                                6
+                                            )}...${managedWalletAddress.slice(-4)}`
                                             : ""}
                                     </p>
                                     <Copy

@@ -195,5 +195,5 @@ export interface NewsFeed {
     id: number;
     summary: string;
     sources: string;
-    timestamp: string;
+    timestamp: number;
 }

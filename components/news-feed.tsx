@@ -1,13 +1,8 @@
 import { format } from 'date-fns'
-
-type NewsItem = {
-    summary: string
-    sources: string
-    timestamp: string
-}
+import { NewsFeed as NewsFeedType } from '@/types/data'
 
 type NewsFeedProps = {
-    news: NewsItem[]
+    news: NewsFeedType[]
     isLoading: boolean
 }
 
@@ -49,7 +44,7 @@ export function NewsFeed({ news, isLoading }: NewsFeedProps) {
                         <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
                             <span>{item.sources}</span>
                             <time>
-                                {format(parseInt(item.timestamp) * 1000, 'MMM d, yyyy HH:mm')}
+                                {format(item.timestamp, 'MMM d, yyyy HH:mm')}
                             </time>
                         </div>
                     </div>

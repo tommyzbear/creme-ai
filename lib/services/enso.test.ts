@@ -1,5 +1,6 @@
 import {enso} from './enso';
 import { RouteParams, ApproveParams } from '@ensofinance/sdk';
+import fs from 'fs';
 // Example test case
 async function testGetRouterData() {
   try {
@@ -37,4 +38,12 @@ async function testGetApproveData() {
           console.error('Test failed:', error);
       }
   }
-  testGetApproveData();
+  async function getTokenData(){
+    const tokenData = await enso.getTokenData({
+        chainId: 42161,
+        includeMetadata: true,
+    });
+    //store the token data into a json file
+    fs.writeFileSync('tokenData.json', JSON.stringify(tokenData, null, 2));
+  }
+  getTokenData();

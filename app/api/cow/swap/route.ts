@@ -3,10 +3,8 @@ import { cowswap } from '@/lib/services/cowswap';
 import { arbitrum, base, mainnet, optimism } from 'viem/chains';
 import { supabase } from '@/lib/supabase';
 import { safeService } from '@/lib/services/safe';
-import { WETH_ADDRESS_ARBITRUM } from '@/lib/constants/constants';
 import { alchemy } from '@/lib/services/alchemy';
 import { getAlchemyChainByChainId } from '@/lib/utils';
-import { parseEther } from 'viem';
 
 interface TokenAllocation {
     token: string;
@@ -56,7 +54,7 @@ export async function POST(req: Request) {
         }
 
         const tokenBalances = await alchemy.getTokenBalances(data.address, getAlchemyChainByChainId(chainId));
-        const wethBalance = tokenBalances.find((token) => token.contractAddress === WETH_ADDRESS_ARBITRUM.toLowerCase());
+        const wethBalance = tokenBalances.find((token) => token.contractAddress === cowswap.getWethAddress(chain).toLowerCase());
 
         // If the balance is less than the amount, wrap the ETH and approve the WETH
         if (BigInt(wethBalance?.tokenBalance || 0) < BigInt(ethAmount)) {
@@ -70,7 +68,7 @@ export async function POST(req: Request) {
 
             const preSignTransaction = await cowswap.getSwapPreSignTransaction(
                 data.address,
-                WETH_ADDRESS_ARBITRUM,
+                cowswap.getWethAddress(chain),
                 18,
                 token.address,
                 token.decimals,

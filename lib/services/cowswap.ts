@@ -3,6 +3,9 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { VoidSigner } from "@ethersproject/abstract-signer";
 import { Chain } from 'viem';
 import { getAlchemyRpcByChainId } from './alchemy';
+import { WETH_ADDRESS_BASE } from '../constants/constants';
+import { WETH_ADDRESS_ARBITRUM } from '../constants/constants';
+import { WETH_ADDRESS_MAINNET } from '../constants/constants';
 
 const APP_CODE = process.env.COWSWAP_APP_CODE
 
@@ -52,7 +55,21 @@ const getSwapPreSignTransaction = async (
     return preSignTransaction
 }
 
+const getWethAddress = (chain: Chain) => {
+    switch (chain.id) {
+        case 1:
+            return WETH_ADDRESS_MAINNET
+        case 42161:
+            return WETH_ADDRESS_ARBITRUM
+        case 8453:
+            return WETH_ADDRESS_BASE
+        default:
+            throw new Error(`Unsupported chain: ${chain.id}`)
+    }
+}
+
 
 export const cowswap = {
-    getSwapPreSignTransaction
+    getSwapPreSignTransaction,
+    getWethAddress
 }

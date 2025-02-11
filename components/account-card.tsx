@@ -91,8 +91,8 @@ export function AccountCard({ onAccountClick }: AccountCardProps) {
         <div
             className={cn(
                 "flex flex-col gap-1 max-w-full h-full max-h-[140px]",
-                "rounded-2xl frosted-glass bg-white/50",
-                "overflow-hidden"
+                "rounded-3xl frosted-glass bg-white/50",
+                "overflow-hidden hover:bg-white/50"
             )}
         >
             <ProfileCard

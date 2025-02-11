@@ -20,8 +20,10 @@ export function ProfileCard({
     return (
         <div
             className={cn(
-                "flex flex-row gap-3 h-20 p-3 cursor-pointer w-full",
-                " hover:bg-gradient-to-b from-white/80 to-transparent",
+                "flex flex-row gap-3 h-20 p-3 cursor-pointer w-full relative",
+                "hover:before:opacity-100 before:opacity-0 before:absolute before:inset-0",
+                "before:bg-gradient-to-b before:from-white/70 before:to-transparent",
+                "before:transition-opacity before:duration-200 before:-z-10",
                 className
             )}
             onClick={onClick}
@@ -45,7 +47,8 @@ export function ProfileCard({
                             if (hour >= 12 && hour < 17) return "Afternoon";
                             if (hour >= 17 && hour < 22) return "Evening";
                             return "Go Sleep";
-                        })()},
+                        })()}
+                        ,
                         <br />
                         {username || "Anon"}
                     </h3>

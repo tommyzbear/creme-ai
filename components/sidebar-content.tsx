@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { AccountCard } from "@/components/account-card";
-import { SwitchChainSidebar } from "@/components/switch-chain-sidebar";
+import { ChainSelector } from "@/components/chain-selector";
 import { AppStatus } from "@/components/app-status";
 import { AccountModal } from "@/components/modals/account-modal";
 import { cn } from "@/lib/utils";
@@ -45,9 +45,8 @@ export function SidebarContent({ className }: { className?: string }) {
                         currentSessionId={sessionId}
                     />
                 </Card>
-                <SwitchChainSidebar />
+                <ChainSelector />
                 <AppStatus />
-
             </div>
 
             <AccountModal open={accountModalOpen} onOpenChange={setAccountModalOpen} />

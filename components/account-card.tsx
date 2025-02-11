@@ -150,7 +150,7 @@ export function AccountCard({ onAccountClick }: AccountCardProps) {
 
                 <div className="flex-1 min-w-0">
                     <WalletSelector
-                        selectedWalletAddress={selectedWalletAddress}
+                        selectedWalletAddress={selectedWalletAddress ?? ""}
                         delegatedWallet={delegatedWallet}
                         managedWallet={managedWallet}
                         onWalletChange={handleWalletChange}

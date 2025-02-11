@@ -14,7 +14,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { SegmentedControl } from "@/components/segmented-control";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 
 interface SettingsModalProps {
     open: boolean;

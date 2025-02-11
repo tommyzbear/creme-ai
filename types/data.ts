@@ -197,3 +197,10 @@ export interface NewsFeed {
     sources: string;
     timestamp: number;
 }
+
+export interface SafeWallet {
+    id: number;
+    address: string;
+    deployment_tx: string;
+    user_id: string;
+}

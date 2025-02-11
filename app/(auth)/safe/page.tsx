@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { formatEther, parseEther } from "viem";
+import { parseEther } from "viem";
 
 export default function SafePage() {
     const { user } = usePrivy();

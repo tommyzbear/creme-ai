@@ -12,6 +12,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^1.1.5",
     "@cowprotocol/cow-sdk": "^5.10.0",
+    "@ethersproject/abstract-signer": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
     "@hookform/resolvers": "^3.10.0",
     "@nivo/core": "^0.88.0",

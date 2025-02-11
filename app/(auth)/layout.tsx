@@ -35,7 +35,7 @@ export default async function Layout({
     }
 
     return (
-        <div className="flex h-screen bg-neutral-200">
+        <div className="flex h-screen bg-neutral-200 w-full justify-center items-center">
             <PageTransition delay={0}>
                 <GradientBackground />
                 <BlurredCursor />

@@ -309,3 +309,13 @@ export const getAlchemyRpcByChainId = (chainId: number) => {
             throw new Error(`Unsupported chainId: ${chainId}`);
     }
 }
+
+export const alchemy = {
+    getTokenBalances,
+    getETHBalance,
+    getTokenMetadata,
+    getPriceBySymbol,
+    getRecentTransfers,
+    getEthBalanceTokenData,
+    getAlchemyRpcByChainId,
+}

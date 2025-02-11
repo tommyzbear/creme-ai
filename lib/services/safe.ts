@@ -9,10 +9,9 @@ import { COWSWAP_GPv2VAULT_RELAYER_ADDRESS } from '../constants/constants'
 import WETH_ABI from '../abi/weth'
 import { getWethAddressByChainId } from '../utils'
 import SafeApiKit from '@safe-global/api-kit'
-import { privyClient } from '../privy'
-import { WalletWithMetadata } from '@privy-io/server-auth'
-import { cookies } from 'next/headers'
+import { privy, privyClient } from '../privy'
 import { adjustVInSignature, EthSafeSignature } from '@safe-global/protocol-kit/dist/src/utils'
+import { TransactionParams } from '@cowprotocol/cow-sdk'
 
 const SIGNER_ADDRESS = process.env.AGENT_SIGNER_ADDRESS
 const SIGNER_PRIVATE_KEY = process.env.AGENT_SIGNER_PRIVATE_KEY
@@ -127,33 +126,8 @@ const createSafe = async (chain: Chain, embeddedWalletAddress: string, ownerAddr
 // Required to Wrap ETH to WETH
 /////////////////////////////////////////////////////////////
 const wrapETHAndApprove = async (chain: Chain, inputAmount: string, safeAddress: string) => {
-    const cookieStore = await cookies();
-    const cookieAuthToken = cookieStore.get("privy-token");
-
-    if (!cookieAuthToken) {
-        return {
-            error: 'Unauthorized',
-            message: 'Unauthorized'
-        }
-    }
-
-    const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
-
-    if (!claims) {
-        return {
-            error: 'Unauthorized',
-            message: 'Unauthorized'
-        }
-    }
-
-    const user = await privyClient.getUser(claims.userId);
-
-    const embeddedWallets = user.linkedAccounts.filter(
-        (account): account is WalletWithMetadata =>
-            account.type === 'wallet' && account.walletClientType === 'privy',
-    );
-    const delegatedWallets = embeddedWallets.filter((wallet) => wallet.delegated);
-
+    const claims = await privy.getClaims();
+    const delegatedWallets = await privy.getDelegatedWallets(claims.userId);
 
     const publicClient = createPublicClient({
         chain: chain,
@@ -217,7 +191,6 @@ const wrapETHAndApprove = async (chain: Chain, inputAmount: string, safeAddress:
     // The AI agent signs this Safe (Smart Account) Transaction Hash
     const signature = await safe.signHash(safeTxHash)
 
-
     // Now the transaction with the signature is sent to the Transaction Service with the Api Kit:
     const apiKit = new SafeApiKit({
         chainId: BigInt(chain.id)
@@ -241,6 +214,58 @@ const wrapETHAndApprove = async (chain: Chain, inputAmount: string, safeAddress:
         // As only one more signater is required, AI agent can execute the transaction:
         // const signatures = await apiKit.getTransactionConfirmations(safeTxHash)
         // Need to refetch latest transaction that contains all signatures
+        const safeTransaction = await apiKit.getTransaction(safeTxHash)
+        const txResponse = await safe.executeTransaction(safeTransaction);
+        console.log(`Transaction executed successfully [${txResponse.hash}]`);
+    }
+}
+
+/////////////////////////////////////////////////////////////
+// Pre-Sign CowSwap Transaction
+/////////////////////////////////////////////////////////////
+const preSignCowSwapTransaction = async (chain: Chain, safeAddress: string, transaction: TransactionParams) => {
+    const claims = await privy.getClaims();
+    const delegatedWallets = await privy.getDelegatedWallets(claims.userId);
+
+    const safePreSignTx: MetaTransactionData = {
+        to: transaction.to,
+        value: transaction.value,
+        data: transaction.data,
+        operation: OperationType.Call,
+    };
+
+    const safe = await Safe.init({
+        provider: getAlchemyRpcByChainId(chain.id),
+        signer: SIGNER_PRIVATE_KEY,
+        safeAddress: safeAddress,
+    });
+
+    const safeTx = await safe.createTransaction({
+        transactions: [safePreSignTx],
+        onlyCalls: true,
+    });
+
+    const safeTxHash = await safe.getTransactionHash(safeTx)
+    const signature = await safe.signHash(safeTxHash)
+
+    const apiKit = new SafeApiKit({
+        chainId: BigInt(chain.id)
+    })
+
+    await apiKit.proposeTransaction({
+        safeAddress: safeAddress,
+        safeTransactionData: safeTx.data,
+        safeTxHash,
+        senderSignature: signature.data,
+        senderAddress: SIGNER_ADDRESS as `0x${string}`
+    })
+
+    // If the user has a delegated wallet, then provide the 2nd signature for the transaction and auto-execute
+    if (delegatedWallets.length > 0) {
+        console.log("Delegated wallet found", delegatedWallets[0].address)
+        const safeSignature = await customSignHash(delegatedWallets[0].address, safeTxHash)
+        await customConfirmation(safeSignature.data, safeTxHash, chain.id)
+
         const safeTransaction = await apiKit.getTransaction(safeTxHash)
         const txResponse = await safe.executeTransaction(safeTransaction);
         console.log(`Transaction executed successfully [${txResponse.hash}]`);
@@ -313,5 +338,6 @@ const customConfirmation = async (signature: string, safeTxHash: string, chainId
 
 export const safeService = {
     createSafe,
-    wrapETHAndApprove
+    wrapETHAndApprove,
+    preSignCowSwapTransaction
 }

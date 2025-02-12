@@ -43,3 +43,9 @@ CREATE TABLE news_feed (
     sources TEXT NOT NULL,
     timestamp TIMESTAMP NOT NULL
 );
+CREATE TABLE safe_wallets (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    address TEXT NOT NULL,
+    deployment_tx TEXT NOT NULL,
+    user_id TEXT NOT NULL REFERENCES account(id)
+);

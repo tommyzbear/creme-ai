@@ -287,3 +287,35 @@ export async function getTokenMetadata(contractAddress: string, chain: string): 
     const metadata: { result: TokenMetadata } = await metadataResponse.json()
     return metadata.result;
 }
+
+export const ALCHEMY_RPC = {
+    ARBITRUM_ONE: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+    ETHEREUM_MAINNET: `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+    OPTIMISM_MAINNET: `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+    BASE_MAINNET: `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+}
+
+export const getAlchemyRpcByChainId = (chainId: number) => {
+    switch (chainId) {
+        case 1:
+            return ALCHEMY_RPC.ETHEREUM_MAINNET;
+        case 42161:
+            return ALCHEMY_RPC.ARBITRUM_ONE;
+        case 10:
+            return ALCHEMY_RPC.OPTIMISM_MAINNET;
+        case 8453:
+            return ALCHEMY_RPC.BASE_MAINNET;
+        default:
+            throw new Error(`Unsupported chainId: ${chainId}`);
+    }
+}
+
+export const alchemy = {
+    getTokenBalances,
+    getETHBalance,
+    getTokenMetadata,
+    getPriceBySymbol,
+    getRecentTransfers,
+    getEthBalanceTokenData,
+    getAlchemyRpcByChainId,
+}

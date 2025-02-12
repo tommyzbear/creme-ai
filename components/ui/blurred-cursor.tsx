@@ -1,25 +1,25 @@
 "use client";
 
-import React from "react";
+import { useState, useEffect } from "react";
 
 export default function BlurredCursor() {
-    const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
-    const [offset, setOffset] = React.useState(0);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [offset, setOffset] = useState(0);
 
-    React.useEffect(() => {
+    useEffect(() => {
         // Set initial offset
-        setOffset(window.innerWidth * 0.05);
+        setOffset(window.innerWidth * 0.1);
 
         // Optional: Update offset on window resize
         const handleResize = () => {
-            setOffset(window.innerWidth * 0.05);
+            setOffset(window.innerWidth * 0.1);
         };
 
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
             setMousePosition({ x: e.clientX, y: e.clientY });
         };
@@ -32,19 +32,17 @@ export default function BlurredCursor() {
         <div
             className="absolute pointer-events-none"
             style={{
-                transform: `translate(${mousePosition.x - offset}px, ${
-                    mousePosition.y - offset
-                }px)`,
+                transform: `translate(calc(${mousePosition.x}px - 50vw), calc(${mousePosition.y}px - 50vh))`,
                 transition: "transform 1.2s linear",
             }}
         >
             <div
                 className="rounded-full bg-radial 
                     from-sky-600 via-sky-400 to-transparent
-                    opacity-100 blur-[5rem]"
+                    opacity-100 blur-[3rem]"
                 style={{
-                    height: `${2 * offset}px`,
-                    width: `${2 * offset}px`,
+                    height: `${offset}px`,
+                    width: `${offset}px`,
                 }}
             />
         </div>

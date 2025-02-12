@@ -4,6 +4,7 @@ import { etherscan } from "./services/etherscan";
 import { hasValidTradingVolume } from "./services/dexscreener";
 import { arbitrum, base, mainnet, optimism } from "viem/chains";
 import { arbiscan } from "./services/arbiscan";
+import { WETH_ADDRESS_ARBITRUM, WETH_ADDRESS_MAINNET, WETH_ADDRESS_BASE } from "./constants/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -154,4 +155,17 @@ export const getSupportedChains = () => {
     "Optimism",
     "Base",
   ]
+}
+
+export const getWethAddressByChainId = (chainId: number) => {
+  switch (chainId) {
+    case arbitrum.id:
+      return WETH_ADDRESS_ARBITRUM;
+    case base.id:
+      return WETH_ADDRESS_BASE;
+    case mainnet.id:
+      return WETH_ADDRESS_MAINNET;
+    default:
+      throw new Error(`Unsupported chainId: ${chainId}`);
+  }
 }

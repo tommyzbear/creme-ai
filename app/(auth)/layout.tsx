@@ -4,9 +4,9 @@ import { privyClient } from "@/lib/privy";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import PageTransition from "@/components/page-transition";
-
 import BlurredCursor from "@/components/ui/blurred-cursor";
 import GradientBackground from "@/components/gradient-background";
+import LeftAside from "@/components/left-aside";
 
 async function checkAuth() {
     const cookieStore = await cookies();
@@ -35,13 +35,14 @@ export default async function Layout({
     }
 
     return (
-        <div className="flex h-screen bg-neutral-200">
-            <PageTransition delay={0}>
-                <GradientBackground />
-                <BlurredCursor />
-            </PageTransition>
+        <div className="flex h-screen bg-neutral-200 w-full justify-center items-center">
+            <BlurredCursor />
+            <GradientBackground />
             <PageTransition delay={0.5}>
-                <main className="flex-1 w-full h-full relative">{children}</main>
+                <div className="flex gap-3 px-2 py-3 w-screen h-screen relative">
+                    <LeftAside />
+                    <main className="flex w-full h-full">{children}</main>
+                </div>
             </PageTransition>
         </div>
     );

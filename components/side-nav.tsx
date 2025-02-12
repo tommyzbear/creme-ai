@@ -1,11 +1,17 @@
 "use client";
 
 import { Shrikhand } from "next/font/google";
-const shrikhand = Shrikhand({ weight: "400", style: "normal", subsets: ["latin"], display: "swap" });
+const shrikhand = Shrikhand({
+    weight: "400",
+    style: "normal",
+    subsets: ["latin"],
+    display: "swap",
+});
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Settings, ChartNoAxesCombined, History } from "lucide-react";
+import Link from "next/link";
+import { Home, Settings, ChartNoAxesCombined, History } from "lucide-react";
 import { SettingsModal } from "@/components/modals/settings-modal";
 import { AnalyticsModal } from "@/components/modals/analytics-modal";
 import { HistoricalModal } from "@/components/modals/historical-modal";
@@ -17,7 +23,8 @@ export function SideNav({ className }: { className?: string }) {
     return (
         <div className={cn(" overflow-visible", className)}>
             <div className="flex flex-col gap-1 h-full">
-                <div
+                <Link
+                    href="/home"
                     className={cn(
                         "flex justify-center items-center h-full max-h-[140px] bg-black/90 rounded-3xl cursor-pointer shrink-0",
                         "hover:bg-accent hover:shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all duration-200 shadow-lg"
@@ -31,8 +38,11 @@ export function SideNav({ className }: { className?: string }) {
                     >
                         crème'ai
                     </span>
-                </div>
-                <div className="flex-1 min-h-0 bg-black/90 flex flex-col rounded-3xl">
+                </Link>
+                <div className="flex-1 min-h-0 bg-black/90 flex flex-col rounded-3xl items-center">
+                    <Link href="/home" className="flex flex-col items-center gap-5 p-3">
+                        <Home className="w-6 h-6 text-white/50 hover:text-white cursor-pointer transition-colors" />
+                    </Link>
                     <div className="p-3 mt-auto flex flex-col justify-center gap-5">
                         <History
                             className="w-6 h-6 text-white/50 hover:text-white cursor-pointer transition-colors"

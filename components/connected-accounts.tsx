@@ -43,7 +43,7 @@ export function ConnectedAccounts({
     };
 
     return (
-        <div className="mt-6 frosted-glass rounded-3xl">
+        <div className="mt-6 bg-white/20 rounded-3xl">
             <h3 className="text-base font-semibold px-6 py-4">Connected Accounts</h3>
             <div className="space-y-6 px-6 py-3 pb-6">
                 <div className="flex items-center justify-between">
@@ -106,9 +106,9 @@ export function ConnectedAccounts({
                                 <p className="text-sm font-light text-slate-400">
                                     {user?.wallet?.address
                                         ? `${user?.wallet?.address.slice(
-                                            0,
-                                            6
-                                        )}...${user?.wallet?.address.slice(-4)}`
+                                              0,
+                                              6
+                                          )}...${user?.wallet?.address.slice(-4)}`
                                         : "Not Connected"}
                                 </p>
                                 {user?.wallet?.address && (

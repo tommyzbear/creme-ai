@@ -1,7 +1,9 @@
+"use client";
+
 import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { AccountCard } from "@/components/account-card";
-import { SwitchChainSidebar } from "@/components/switch-chain-sidebar";
+import { ChainSelector } from "@/components/chain-selector";
 import { AppStatus } from "@/components/app-status";
 import { AccountModal } from "@/components/modals/account-modal";
 import { cn } from "@/lib/utils";
@@ -10,7 +12,7 @@ import { useChatStore } from "@/stores/chat-store";
 import { NewsFeed } from "@/components/news-feed";
 import { useNewsStore } from "@/stores/news-store";
 
-export function SidebarContent({ className }: { className?: string }) {
+export function SideContent({ className }: { className?: string }) {
     const [accountModalOpen, setAccountModalOpen] = useState(false);
     const { sessionId, setSessionId, isNewSession } = useChatStore();
     const chatHistoryRef = useRef<HTMLDivElement>(null);
@@ -45,9 +47,8 @@ export function SidebarContent({ className }: { className?: string }) {
                         currentSessionId={sessionId}
                     />
                 </Card>
-                <SwitchChainSidebar />
+                <ChainSelector />
                 <AppStatus />
-
             </div>
 
             <AccountModal open={accountModalOpen} onOpenChange={setAccountModalOpen} />

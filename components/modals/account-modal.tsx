@@ -71,6 +71,7 @@ export function AccountModal({ open, onOpenChange }: AccountModalProps) {
         logout,
     } = usePrivy();
     const { ready: walletReady, wallets } = useWallets();
+
     const { fundWallet } = useFundWallet();
     const { delegateWallet, revokeWallets } = useDelegatedActions();
     const [dialogOpen, setDialogOpen] = useState(false);

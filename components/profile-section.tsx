@@ -23,9 +23,7 @@ interface ProfileSectionProps {
         chainType: "solana" | "ethereum";
     }) => Promise<void>;
     revokeWallets: () => Promise<void>;
-    exportWallet: (options?: {
-        address: string;
-    }) => Promise<void>;
+    exportWallet: (options?: { address: string }) => Promise<void>;
 }
 
 export function ProfileSection({
@@ -93,19 +91,19 @@ export function ProfileSection({
                             <h4 className="text-sm font-medium text-slate-400">
                                 Connected Wallets
                             </h4>
-                            <div className="flex items-center gap-2 mt-1">
+                            <button
+                                className="flex items-center gap-2 mt-1"
+                                onClick={() => copyToClipboard(walletAddress || "")}
+                            >
                                 <p className="font-mono text-sm">
                                     {walletAddress
                                         ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(
-                                            -4
-                                        )}`
+                                              -4
+                                          )}`
                                         : ""}
                                 </p>
-                                <Copy
-                                    className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                    onClick={() => copyToClipboard(walletAddress || "")}
-                                />
-                            </div>
+                                <Copy className="w-3 h-3 cursor-pointer text-gray-500 hover:text-gray-700" />
+                            </button>
                         </div>
 
                         <div className="flex items-center justify-between">
@@ -113,20 +111,20 @@ export function ProfileSection({
                                 <h4 className="text-sm font-medium text-slate-400">
                                     Crème'ai Managed Wallet
                                 </h4>
-                                <div className="flex items-center gap-2 mt-1">
+                                <button
+                                    className="flex items-center gap-2 mt-1"
+                                    onClick={() => copyToClipboard(managedWalletAddress || "")}
+                                >
                                     <p className="font-mono text-sm">
                                         {managedWalletAddress
                                             ? `${managedWalletAddress.slice(
-                                                0,
-                                                6
-                                            )}...${managedWalletAddress.slice(-4)}`
+                                                  0,
+                                                  6
+                                              )}...${managedWalletAddress.slice(-4)}`
                                             : ""}
                                     </p>
-                                    <Copy
-                                        className="w-4 h-4 cursor-pointer text-gray-500 hover:text-gray-700"
-                                        onClick={() => copyToClipboard(managedWalletAddress || "")}
-                                    />
-                                </div>
+                                    <Copy className="w-3 h-3 cursor-pointer text-gray-500 hover:text-gray-700" />
+                                </button>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Button

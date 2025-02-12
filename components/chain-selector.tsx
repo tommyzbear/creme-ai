@@ -1,6 +1,6 @@
 "use client";
 
-import { NetworkIcon } from "@/components/network-icon";
+import { NetworkIcon } from "@/components/ui/network-icon";
 
 import { SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -11,7 +11,7 @@ import { config } from "@/lib/wallet/config";
 import { usePortfolioStore } from "@/stores/portfolio-store";
 import { useState } from "react";
 
-export function SwitchChainSidebar() {
+export function ChainSelector() {
     const { wallets, ready } = useWallets();
     const { toast } = useToast();
     const { currentChainId, setCurrentChainId } = usePortfolioStore();
@@ -28,7 +28,9 @@ export function SwitchChainSidebar() {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: `Failed to switch network ${error.message}`,
+                description: `Failed to switch network ${
+                    error instanceof Error ? error.message : "Unknown error"
+                }`,
             });
         }
     };

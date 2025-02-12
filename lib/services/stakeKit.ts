@@ -228,6 +228,7 @@ export class StakeKitClient {
     return this.request('GET', `/v1/transactions/${txId}`)
   }
 
+  
   async processTransaction(
     transactions: any[], 
     wallet: ethers.Signer

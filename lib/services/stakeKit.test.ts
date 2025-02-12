@@ -1,5 +1,6 @@
 import { StakeKitClient } from './stakeKit'
 import { ethers } from 'ethers'
+import { createSafe } from './safe'
 async function runTests() {
   const client = new StakeKitClient({
     apiKey: process.env.STAKEKIT_API_KEY || '',
@@ -10,6 +11,8 @@ async function runTests() {
 
   const signer = new ethers.Wallet(process.env.TESTWALLET_PRIVATE_KEY || '', provider);
 
+  const safe = await createSafe(signer.address, provider)
+  console.log('Safe created:', safe)
 
   try {
     //const yields = await client.getAllYieldOpportunities()
@@ -44,3 +47,4 @@ async function runTests() {
 
 // Execute the tests
 runTests().catch(console.error)
+

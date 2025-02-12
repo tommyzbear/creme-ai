@@ -68,6 +68,9 @@ importers:
       '@radix-ui/react-visually-hidden':
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.0.3(@types/react@19.0.8))(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@stakekit/api-hooks':
+        specifier: ^0.0.95
+        version: 0.0.95(@tanstack/react-query@5.66.0(react@19.0.0))(react@19.0.0)
       '@supabase/supabase-js':
         specifier: ^2.48.1
         version: 2.48.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -1602,6 +1605,21 @@ packages:
 
   '@stablelib/x25519@1.0.3':
     resolution: {integrity: sha512-KnTbKmUhPhHavzobclVJQG5kuivH+qDLpe84iRqX3CLrKp881cF160JvXJ+hjn1aMyCwYOKeIZefIH/P5cJoRw==}
+
+  '@stakekit/api-hooks@0.0.95':
+    resolution: {integrity: sha512-tllS1wUqcyKtXzKVY48PxLQU6ee7K5zD0jpNNIjOrG79rvU0afWwoE4Mgh4XKQ+PI1C13zL2BtPrKe6NzjL5QA==}
+    peerDependencies:
+      '@faker-js/faker': ^8
+      '@tanstack/react-query': '>=4'
+      msw: ^2
+      react: '>=18'
+    peerDependenciesMeta:
+      '@faker-js/faker':
+        optional: true
+      '@tanstack/react-query':
+        optional: true
+      msw:
+        optional: true
 
   '@supabase/auth-js@2.67.3':
     resolution: {integrity: sha512-NJDaW8yXs49xMvWVOkSIr8j46jf+tYHV0wHhrwOaLLMZSFO4g6kKAf+MfzQ2RaD06OCUkUHIzctLAxjTgEVpzw==}
@@ -7154,6 +7172,12 @@ snapshots:
       '@stablelib/keyagreement': 1.0.1
       '@stablelib/random': 1.0.2
       '@stablelib/wipe': 1.0.1
+
+  '@stakekit/api-hooks@0.0.95(@tanstack/react-query@5.66.0(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      react: 19.0.0
+    optionalDependencies:
+      '@tanstack/react-query': 5.66.0(react@19.0.0)
 
   '@supabase/auth-js@2.67.3':
     dependencies:

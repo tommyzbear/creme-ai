@@ -40,7 +40,7 @@ export default function HomePage() {
         <div className="flex flex-row w-full h-full gap-2">
             <ChatContainer
                 className={cn(
-                    "frosted-glass h-full rounded-6xl",
+                    "frosted-glass h-full rounded-6xl 4xl:rounded-9xl",
                     lastFocusedSection === "chat" ? "w-2/3" : "w-1/2"
                 )}
                 onFocus={() => setLastFocusedSection("chat")}
@@ -49,7 +49,7 @@ export default function HomePage() {
                 startNewChat={startNewChat}
             />
             <PortfolioContainer
-                className="frosted-glass flex-1 w-full h-full rounded-6xl select-none"
+                className="frosted-glass flex-1 w-full h-full rounded-6xl 4xl:rounded-9xl select-none"
                 onFocus={() => setLastFocusedSection("portfolio")}
                 lastFocus={lastFocusedSection}
             />

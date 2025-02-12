@@ -32,11 +32,7 @@ interface TokensTableProps {
 
 type SortField = "symbol" | "value" | "percentage";
 
-export function TokensTable({
-    tokens,
-    isLoading,
-    isExpanded,
-}: TokensTableProps) {
+export function TokensTable({ tokens, isLoading, isExpanded }: TokensTableProps) {
     const [copiedSymbol, setCopiedSymbol] = useState<string | null>(null);
     const [showAll, setShowAll] = useState(false);
     const [sortConfig, setSortConfig] = useState<{
@@ -99,7 +95,7 @@ export function TokensTable({
                 <TableCell
                     className={cn(
                         "p-0 text-right transition-all duration-300 overflow-hidden",
-                        isExpanded ? "w-[100px]" : "w-0 p-0"
+                        isExpanded ? "w-[100px] 4xl:w-[200px]" : "4xl:w-[200px] w-0 p-0"
                     )}
                 >
                     <Skeleton className="h-4 w-16 ml-auto" />
@@ -201,7 +197,7 @@ export function TokensTable({
                                 className={cn(
                                     "text-right px-0",
                                     "transition-all duration-300 overflow-hidden whitespace-nowrap",
-                                    isExpanded ? "w-[100px]" : "w-0 p-0"
+                                    isExpanded ? "w-[100px] 4xl:w-[200px]" : "4xl:w-[200px] w-0 p-0"
                                 )}
                             >
                                 Amount
@@ -267,7 +263,9 @@ export function TokensTable({
                                     <TableCell
                                         className={cn(
                                             "p-0 text-right transition-all duration-300 overflow-hidden",
-                                            isExpanded ? "w-[100px]" : "w-0 p-0"
+                                            isExpanded
+                                                ? "w-[100px] 4xl:w-[200px]"
+                                                : "4xl:w-[200px] w-0 p-0"
                                         )}
                                     >
                                         {formatNumber(token.balance)}

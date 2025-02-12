@@ -1,17 +1,22 @@
 import Safe, { SigningMethod } from '@safe-global/protocol-kit'
 import { ALCHEMY_RPC, getAlchemyRpcByChainId } from './alchemy'
 import { arbitrum, optimism, base, mainnet, Chain } from 'viem/chains'
-import { createPublicClient, encodeFunctionData, getContract, toBytes } from 'viem'
+import { createPublicClient, encodeFunctionData, getContract, keccak256, toBytes } from 'viem'
 import { http } from 'viem'
 import { MetaTransactionData, SafeSignature } from '@safe-global/types-kit'
 import { OperationType } from '@safe-global/types-kit'
-import { COWSWAP_GPv2VAULT_RELAYER_ADDRESS } from '../constants/constants'
+import { COWSWAP_GPv2VAULT_RELAYER_ADDRESS, WETH_ADDRESS_ARBITRUM } from '../constants/constants'
 import WETH_ABI from '../abi/weth'
 import { getWethAddressByChainId } from '../utils'
 import SafeApiKit from '@safe-global/api-kit'
 import { privy, privyClient } from '../privy'
 import { adjustVInSignature, EthSafeSignature } from '@safe-global/protocol-kit/dist/src/utils'
-import { TransactionParams } from '@cowprotocol/cow-sdk'
+import { ETH_ADDRESS, TransactionParams } from '@cowprotocol/cow-sdk'
+import { allow, exportToSafeTransactionBuilder, apply } from 'defi-kit/arb1'
+import { encodeBytes32String } from 'defi-kit'
+import { ModuleProxyFactory__factory } from '@/evm/typechain-types'
+import { Roles__factory } from '@/evm/typechain-types'
+import { utils } from 'ethers'
 
 const SIGNER_ADDRESS = process.env.AGENT_SIGNER_ADDRESS
 const SIGNER_PRIVATE_KEY = process.env.AGENT_SIGNER_PRIVATE_KEY
@@ -336,8 +341,209 @@ const customConfirmation = async (signature: string, safeTxHash: string, chainId
     throw new Error(jsonResponse.message)
 }
 
+/////////////////////////////////////////////////////////////
+// Setup Zodiac Role
+/////////////////////////////////////////////////////////////
+const ROLES_MASTERCOPY_ADDRESS = "0x9646fDAD06d3e24444381f44362a3B0eB343D337"
+const PROXY_FACTORY_ADDRESS = "0x000000000000aDdB49795b0f9bA5BC298cDda236"
+const SALT_NONCE = "0x0000000000000000000000000000000000000000000000000000000000000000"
+const DEFAULT_MULTISEND_ADDRESSES = [
+    "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526", // https://github.com/safe-global/safe-deployments/blob/5ec81e8d7a85d66a33adbe0c098068c0a96d917c/src/assets/v1.4.1/multi_send.json
+    "0x9641d764fc13c8B624c04430C7356C1C7C8102e2", // https://github.com/safe-global/safe-deployments/blob/5ec81e8d7a85d66a33adbe0c098068c0a96d917c/src/assets/v1.4.1/multi_send_call_only.json
+] as const
+const RolesInterface = Roles__factory.createInterface()
+const setupZodiacRole = async (owner: `0x${string}`, avatar: `0x${string}`, target: `0x${string}`, enableOnTarget = true,) => {
+    // call for deploying the Roles mod proxy instance
+    const setUpCalldata = Roles__factory.createInterface().encodeFunctionData(
+        "setUp",
+        [
+            utils.defaultAbiCoder.encode(
+                ["address", "address", "address"],
+                [owner, avatar, target]
+            ),
+        ]
+    )
+    const deployModuleCalldata =
+        ModuleProxyFactory__factory.createInterface().encodeFunctionData(
+            "deployModule",
+            [ROLES_MASTERCOPY_ADDRESS, setUpCalldata, SALT_NONCE]
+        )
+    const deployModuleCall = {
+        to: PROXY_FACTORY_ADDRESS,
+        data: deployModuleCalldata,
+        value: "0",
+    }
+
+    // calculate deterministic proxy address for extra config calls
+    const proxyAddress = calculateProxyAddress(setUpCalldata, SALT_NONCE)
+
+    // calls for setting up multiSend transaction unwrapping
+    const MULTISEND_SELECTOR = "0x8d80ff0a"
+    const MULTISEND_UNWRAPPER = "0x93B7fCbc63ED8a3a24B59e1C3e6649D50B7427c0"
+    const setTransactionUnwrapperCalls = DEFAULT_MULTISEND_ADDRESSES.map((address) => ({
+        to: proxyAddress,
+        data: RolesInterface.encodeFunctionData("setTransactionUnwrapper", [
+            address,
+            MULTISEND_SELECTOR,
+            MULTISEND_UNWRAPPER,
+        ]),
+        value: "0",
+    }))
+
+    // calls for configuring members and permissions for all roles
+    // const setUpRolesCalls = setUpRoles({ address: proxyAddress, roles })
+
+    const enableOnTargetCall = {
+        to: target,
+        data: RolesInterface.encodeFunctionData("enableModule", [proxyAddress]),
+        value: "0",
+    }
+
+    const transactions = [
+        deployModuleCall,
+        ...setTransactionUnwrapperCalls,
+        // ...setUpRolesCalls,
+        ...(enableOnTarget ? [enableOnTargetCall] : []),
+    ]
+
+    const claims = await privy.getClaims();
+    const delegatedWallets = await privy.getDelegatedWallets(claims.userId);
+
+    const safe = await Safe.init({
+        provider: getAlchemyRpcByChainId(arbitrum.id),
+        signer: SIGNER_PRIVATE_KEY,
+        safeAddress: "0xd9CfA3466C6f075dEE7055082709fC000358DD81",
+    });
+
+    const safeTx = await safe.createTransaction({
+        transactions: transactions,
+        onlyCalls: true,
+    });
+
+    const safeTxHash = await safe.getTransactionHash(safeTx)
+    const signature = await safe.signHash(safeTxHash)
+
+    // Now the transaction with the signature is sent to the Transaction Service with the Api Kit:
+    const apiKit = new SafeApiKit({
+        chainId: BigInt(arbitrum.id)
+    })
+
+    await apiKit.proposeTransaction({
+        safeAddress: "0xd9CfA3466C6f075dEE7055082709fC000358DD81",
+        safeTransactionData: safeTx.data,
+        safeTxHash,
+        senderSignature: signature.data,
+        senderAddress: SIGNER_ADDRESS as `0x${string}`
+    })
+
+    // If the user has a delegated wallet, then provide the 2nd signature for the transaction and auto-execute
+    if (delegatedWallets.length > 0) {
+        console.log("Delegated wallet found", delegatedWallets[0].address)
+        // We assume there is only one pending transaction
+        const safeSignature = await customSignHash(delegatedWallets[0].address, safeTxHash)
+        await customConfirmation(safeSignature.data, safeTxHash, arbitrum.id)
+
+        // As only one more signater is required, AI agent can execute the transaction:
+        // const signatures = await apiKit.getTransactionConfirmations(safeTxHash)
+        // Need to refetch latest transaction that contains all signatures
+        const safeTransaction = await apiKit.getTransaction(safeTxHash)
+        const txResponse = await safe.executeTransaction(safeTransaction);
+        console.log(`Transaction executed successfully [${txResponse.hash}]`);
+        return txResponse
+    }
+}
+
+const calculateProxyAddress = (initData: string, saltNonce: string) => {
+    const byteCode =
+        "0x602d8060093d393df3363d3d373d3d3d363d73" +
+        ROLES_MASTERCOPY_ADDRESS.toLowerCase().slice(2) +
+        "5af43d82803e903d91602b57fd5bf3"
+
+    const salt = utils.solidityKeccak256(
+        ["bytes32", "uint256"],
+        [utils.solidityKeccak256(["bytes"], [initData]), saltNonce]
+    )
+
+    return utils.getCreate2Address(
+        PROXY_FACTORY_ADDRESS,
+        salt,
+        keccak256(byteCode)
+    ) as `0x${string}`
+}
+
+
+/////////////////////////////////////////////////////////////
+// Grant Zodiac Role
+/////////////////////////////////////////////////////////////
+const SOL_ADDRESS = "0x2bcC6D6CdBbDC0a4071e48bb3B969b06B3330c07"
+const ROLE_KEY = "creme"
+const grantZodiacRole = async () => {
+    const claims = await privy.getClaims();
+    const delegatedWallets = await privy.getDelegatedWallets(claims.userId);
+
+    const permissions = await allow.cowswap.swap({ buy: [ETH_ADDRESS, SOL_ADDRESS, WETH_ADDRESS_ARBITRUM], sell: [SOL_ADDRESS, WETH_ADDRESS_ARBITRUM] })
+    const roleKey = encodeBytes32String(ROLE_KEY)
+
+    const calls = await apply(roleKey, [permissions], {
+        address: "0xBBeC1a24B1E0550486520Da31268f4603245fF8A",
+        mode: 'replace', // keep the current permissions and add the new ones
+        log: console.debug,
+    })
+
+    // Log the JSON that can be uploaded to the Safe Transaction Builder app for execution
+    const safeCalls = exportToSafeTransactionBuilder(calls)
+
+    const safe = await Safe.init({
+        provider: getAlchemyRpcByChainId(arbitrum.id),
+        signer: SIGNER_PRIVATE_KEY,
+        safeAddress: "0xd9CfA3466C6f075dEE7055082709fC000358DD81",
+    });
+
+    const safeTx = await safe.createTransaction({
+        transactions: safeCalls.transactions,
+        onlyCalls: true,
+    });
+
+    const safeTxHash = await safe.getTransactionHash(safeTx)
+    const signature = await safe.signHash(safeTxHash)
+
+    // Now the transaction with the signature is sent to the Transaction Service with the Api Kit:
+    const apiKit = new SafeApiKit({
+        chainId: BigInt(arbitrum.id)
+    })
+
+    await apiKit.proposeTransaction({
+        safeAddress: "0xd9CfA3466C6f075dEE7055082709fC000358DD81",
+        safeTransactionData: safeTx.data,
+        safeTxHash,
+        senderSignature: signature.data,
+        senderAddress: SIGNER_ADDRESS as `0x${string}`
+    })
+
+    // If the user has a delegated wallet, then provide the 2nd signature for the transaction and auto-execute
+    if (delegatedWallets.length > 0) {
+        console.log("Delegated wallet found", delegatedWallets[0].address)
+        // We assume there is only one pending transaction
+        const safeSignature = await customSignHash(delegatedWallets[0].address, safeTxHash)
+        await customConfirmation(safeSignature.data, safeTxHash, arbitrum.id)
+
+        // As only one more signater is required, AI agent can execute the transaction:
+        // const signatures = await apiKit.getTransactionConfirmations(safeTxHash)
+        // Need to refetch latest transaction that contains all signatures
+        const safeTransaction = await apiKit.getTransaction(safeTxHash)
+        const txResponse = await safe.executeTransaction(safeTransaction);
+        console.log(`Transaction executed successfully [${txResponse.hash}]`);
+        return txResponse
+    }
+
+    // const txResponse = await safe.executeTransaction(safeTx);
+    // console.log(`Transaction executed successfully [${txResponse.hash}]`);
+}
+
 export const safeService = {
     createSafe,
     wrapETHAndApprove,
-    preSignCowSwapTransaction
+    preSignCowSwapTransaction,
+    grantZodiacRole,
+    setupZodiacRole
 }

@@ -68,7 +68,7 @@ const config: Config = {
                 },
             },
             fontSize: {
-                xs: ".5rem",
+                xs: ".52rem",
                 sm: ".75rem",
                 tiny: ".75rem",
                 base: ".875rem",

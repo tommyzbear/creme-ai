@@ -45,13 +45,14 @@ export const ChatHistory = forwardRef<HTMLDivElement, ChatHistoryProps>(
                                 key={session.session_id}
                                 onClick={() => onSelectSession(session.session_id)}
                                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-2xl text-sm transition-colors
-                                ${session.session_id === currentSessionId
+                                ${
+                                    session.session_id === currentSessionId
                                         ? "bg-gradient-to-r bg-white/70 shadow-md text-black"
                                         : "hover:bg-accent/10 "
-                                    }`}
+                                }`}
                             >
                                 <MessageSquare className="h-4 w-4" />
-                                <div className="flex-1 text-left truncate ">
+                                <div className="flex-1 text-left truncate">
                                     <div className="font-medium">{session.session_name}</div>
                                     <div className="text-[.55rem] font-medium">
                                         {formatDistanceToNow(new Date(session.timestamp), {

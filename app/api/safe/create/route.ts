@@ -1,22 +1,10 @@
-import { privyClient } from '@/lib/privy';
-import { cookies } from 'next/headers';
+import { privy } from '@/lib/privy';
 import { safeService } from '@/lib/services/safe';
 import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
     try {
-        const cookieStore = await cookies();
-        const cookieAuthToken = cookieStore.get("privy-token");
-
-        if (!cookieAuthToken) {
-            throw new Error('Unauthorized');
-        }
-
-        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
-
-        if (!claims) {
-            throw new Error('Unauthorized');
-        }
+        const claims = await privy.getClaims();
 
         const { embeddedWalletAddress, ownerAddress } = await req.json();
 

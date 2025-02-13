@@ -470,10 +470,72 @@ const customConfirmation = async (signature: string, safeTxHash: string, chainId
     throw new Error(jsonResponse.message)
 }
 
+/////////////////////////////////////////////////////////////
+// Initiate Transaction
+/////////////////////////////////////////////////////////////
+const initiateTransaction = async (chain: Chain, safeAddress: string, transaction: TransactionParams) => {
+    const claims = await privy.getClaims();
+    const delegatedWallets = await privy.getDelegatedWallets(claims.userId);
+
+    const safe = await Safe.init({
+        provider: getAlchemyRpcByChainId(chain.id),
+        signer: SIGNER_PRIVATE_KEY,
+        safeAddress: safeAddress,
+    });
+
+    console.log("Transaction:", {
+        to: transaction.to,
+        value: transaction.value,
+        data: transaction.data,
+        operation: OperationType.Call,
+    })
+
+    const safeTx = await safe.createTransaction({
+        transactions: [{
+            to: transaction.to,
+            value: transaction.value,
+            data: transaction.data,
+            operation: OperationType.Call,
+        } as MetaTransactionData],
+        onlyCalls: true,
+    });
+
+    console.log("Safe transaction:", safeTx)
+
+    const safeTxHash = await safe.getTransactionHash(safeTx)
+    const signature = await safe.signHash(safeTxHash)
+
+    const apiKit = new SafeApiKit({
+        chainId: BigInt(chain.id)
+    })
+
+    await apiKit.proposeTransaction({
+        safeAddress: safeAddress,
+        safeTransactionData: safeTx.data,
+        safeTxHash,
+        senderSignature: signature.data,
+        senderAddress: SIGNER_ADDRESS as `0x${string}`
+    })
+
+    // If the user has a delegated wallet, then provide the 2nd signature for the transaction and auto-execute
+    if (delegatedWallets.length > 0) {
+        console.log("Delegated wallet found", delegatedWallets[0].address)
+        const safeSignature = await customSignHash(delegatedWallets[0].address, safeTxHash)
+        await customConfirmation(safeSignature.data, safeTxHash, chain.id)
+
+        const safeTransaction = await apiKit.getTransaction(safeTxHash)
+        const txResponse = await safe.executeTransaction(safeTransaction);
+        console.log(`Transaction executed successfully [${txResponse.hash}]`);
+
+        return txResponse
+    }
+}
+
 export const safeService = {
     createSafe,
     wrapETHAndApprove,
     preSignCowSwapTransaction,
     processEnsoTransaction,
-    processStakeKitTransaction
+    processStakeKitTransaction,
+    initiateTransaction
 }

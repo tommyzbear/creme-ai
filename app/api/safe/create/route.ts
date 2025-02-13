@@ -1,7 +1,6 @@
 import { privyClient } from '@/lib/privy';
 import { cookies } from 'next/headers';
 import { safeService } from '@/lib/services/safe';
-import { arbitrum, base, mainnet, optimism } from 'viem/chains';
 import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {

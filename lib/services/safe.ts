@@ -30,7 +30,6 @@ const createSafe = async (embeddedWalletAddress: string, ownerAddress: string) =
         throw new Error('Missing required environment variables')
     }
 
-
     const deploymentResults = []
     // this should ensure same safe address for all chains
     const predictedSafeConfig = {
@@ -41,53 +40,58 @@ const createSafe = async (embeddedWalletAddress: string, ownerAddress: string) =
     }
 
     for (const chain of SUPPORTED_CHAINS) {
-        const safe = await Safe.init({
-            provider: getAlchemyRpcByChainId(chain.id),
-            signer: SIGNER_PRIVATE_KEY,
-            predictedSafe: predictedSafeConfig
-        })
+        try {
+            const safe = await Safe.init({
+                provider: getAlchemyRpcByChainId(chain.id),
+                signer: SIGNER_PRIVATE_KEY,
+                predictedSafe: predictedSafeConfig
+            })
 
-        if (!safe) {
-            throw new Error('Failed to create safe')
+            if (!safe) {
+                throw new Error('Failed to create safe')
+            }
+
+            const isSafeDeployed = await safe.isSafeDeployed()
+            if (isSafeDeployed) {
+                console.log('Safe already deployed')
+                continue
+            }
+
+            const safeAddress = await safe.getAddress();
+            console.log('Safe address:', safeAddress);
+
+            const deploymentTransaction = await safe.createSafeDeploymentTransaction();
+            console.log('Deployment transaction:', deploymentTransaction);
+
+            const client = await safe.getSafeProvider().getExternalSigner();
+
+            if (!client) {
+                throw new Error('Failed to get external signer')
+            }
+
+            const transactionHash = await client.sendTransaction({
+                to: deploymentTransaction.to as `0x${string}`,
+                value: BigInt(deploymentTransaction.value),
+                data: deploymentTransaction.data as `0x${string}`,
+                chain: chain,
+            });
+            console.log('Transaction hash:', transactionHash);
+
+            const publicClient = createPublicClient({
+                chain: chain,
+                transport: http(),
+            });
+
+            const receipt = await publicClient.waitForTransactionReceipt({
+                hash: transactionHash,
+            });
+
+            console.log('Receipt:', receipt);
+            deploymentResults.push({ safe, safeAddress, deploymentTransaction, chain })
+        } catch (error) {
+            console.error('Failed to create safe for chain:', chain.id, error);
+            deploymentResults.push({ error: error })
         }
-
-        const isSafeDeployed = await safe.isSafeDeployed()
-        if (isSafeDeployed) {
-            console.log('Safe already deployed')
-            continue
-        }
-
-        const safeAddress = await safe.getAddress();
-        console.log('Safe address:', safeAddress);
-
-        const deploymentTransaction = await safe.createSafeDeploymentTransaction();
-        console.log('Deployment transaction:', deploymentTransaction);
-
-        const client = await safe.getSafeProvider().getExternalSigner();
-
-        if (!client) {
-            throw new Error('Failed to get external signer')
-        }
-
-        const transactionHash = await client.sendTransaction({
-            to: deploymentTransaction.to as `0x${string}`,
-            value: BigInt(deploymentTransaction.value),
-            data: deploymentTransaction.data as `0x${string}`,
-            chain: chain,
-        });
-        console.log('Transaction hash:', transactionHash);
-
-        const publicClient = createPublicClient({
-            chain: chain,
-            transport: http(),
-        });
-
-        const receipt = await publicClient.waitForTransactionReceipt({
-            hash: transactionHash,
-        });
-
-        console.log('Receipt:', receipt);
-        deploymentResults.push({ safe, safeAddress, deploymentTransaction, chain })
     }
 
     return deploymentResults

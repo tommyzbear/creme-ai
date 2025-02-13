@@ -14,18 +14,15 @@ importers:
       '@cowprotocol/cow-sdk':
         specifier: ^5.10.0
         version: 5.10.0(encoding@0.1.13)(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(ipfs-only-hash@4.0.0(encoding@0.1.13))(multiformats@9.9.0)
+      '@ensofinance/sdk':
+        specifier: ^1.0.13
+        version: 1.0.13
       '@ethersproject/abstract-signer':
         specifier: ^5.7.0
         version: 5.7.0
       '@ethersproject/providers':
         specifier: ^5.7.2
         version: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@ensofinance/sdk':
-        specifier: ^1.0.13
-        version: 1.0.13
-      '@ensofinance/sdk':
-        specifier: ^1.0.13
-        version: 1.0.13
       '@hookform/resolvers':
         specifier: ^3.10.0
         version: 3.10.0(react-hook-form@7.54.2(react@19.0.0))
@@ -80,6 +77,15 @@ importers:
       '@radix-ui/react-visually-hidden':
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.0.3(@types/react@19.0.8))(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@safe-global/api-kit':
+        specifier: ^2.5.9
+        version: 2.5.9(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
+      '@safe-global/protocol-kit':
+        specifier: ^5.2.2
+        version: 5.2.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
+      '@safe-global/types-kit':
+        specifier: ^1.0.2
+        version: 1.0.2(typescript@5.7.3)(zod@3.24.1)
       '@supabase/supabase-js':
         specifier: ^2.48.1
         version: 2.48.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -1550,11 +1556,11 @@ packages:
   '@rushstack/eslint-patch@1.10.5':
     resolution: {integrity: sha512-kkKUDVlII2DQiKy7UstOR1ErJP8kUKAQ4oa+SQtM0K+lPdmmjj0YnnxBgtTVYH7mUKtbsxeFC9y0AmK7Yb78/A==}
 
-  '@safe-global/api-kit@2.5.8':
-    resolution: {integrity: sha512-+509+k/QAkqbCdR3XpD46b2Qy7gxKTeY+buNGzd35KgS+LaFbgj4b4fDH9xYgEXEFRlDAxmCmwAi8bc+9+ByOA==}
+  '@safe-global/api-kit@2.5.9':
+    resolution: {integrity: sha512-AGf8X2NHK355ie5AyBkPq5D+eV66i3VIN4zhnHCKsuyPa6p7SHsNBNiauE2QyPrv3UOKXTJhZW7OifKjDQeIsg==}
 
-  '@safe-global/protocol-kit@5.2.1':
-    resolution: {integrity: sha512-7jY+p2+GQU9FPKMMgHDr32gPC/1BKtYVzvQHniZuPSJVcb26E0CBwZb7IUyRiUd+kJN8OF13zRFbhQdH99Akhw==}
+  '@safe-global/protocol-kit@5.2.2':
+    resolution: {integrity: sha512-e0Veo7K3fzOp24XViuzcs2ErvWpR3G1sg9OjiIv4MuwQdOr0IhAU7GiIZflMe0TC0Y1Ebdeb5w+tk6EdUEiaKQ==}
 
   '@safe-global/safe-apps-provider@0.18.5':
     resolution: {integrity: sha512-9v9wjBi3TwLsEJ3C2ujYoexp3pFJ0omDLH/GX91e2QB+uwCKTBYyhxFSrTQ9qzoyQd+bfsk4gjOGW87QcJhf7g==}
@@ -1569,8 +1575,8 @@ packages:
     resolution: {integrity: sha512-7ojVK/crhOaGowEO8uYWaopZzcr5rR76emgllGIfjCLR70aY4PbASpi9Pbs+7jIRzPDBBkM0RBo+zYx5UduX8Q==}
     engines: {node: '>=16'}
 
-  '@safe-global/safe-modules-deployments@2.2.5':
-    resolution: {integrity: sha512-rkKqj6gGKokjBX2JshH1EwjPkzFD14oOk2vY3LSxKhpkQyjdqxcj+OlWkjzpi613HzCtxY0mHgMiyLID7nzueA==}
+  '@safe-global/safe-modules-deployments@2.2.6':
+    resolution: {integrity: sha512-9iDZ4Xve0nXUExKv3sbHGSDMyiA17WrS4t/fzQmu1cutS2rpFi4AOV6Kxz5xt7OuBSeIjkRKMSQcC1cbbIyvoQ==}
 
   '@safe-global/types-kit@1.0.2':
     resolution: {integrity: sha512-KiRlU1nlWuj4Qr+nLxgO/yRpJamVUOonnAkLrSMrzfGwXcfLWXJJtoD9sv/pvTIHMWSOlzgkrc1KXqY3K68SGg==}
@@ -1700,21 +1706,6 @@ packages:
 
   '@stablelib/x25519@1.0.3':
     resolution: {integrity: sha512-KnTbKmUhPhHavzobclVJQG5kuivH+qDLpe84iRqX3CLrKp881cF160JvXJ+hjn1aMyCwYOKeIZefIH/P5cJoRw==}
-
-  '@stakekit/api-hooks@0.0.95':
-    resolution: {integrity: sha512-tllS1wUqcyKtXzKVY48PxLQU6ee7K5zD0jpNNIjOrG79rvU0afWwoE4Mgh4XKQ+PI1C13zL2BtPrKe6NzjL5QA==}
-    peerDependencies:
-      '@faker-js/faker': ^8
-      '@tanstack/react-query': '>=4'
-      msw: ^2
-      react: '>=18'
-    peerDependenciesMeta:
-      '@faker-js/faker':
-        optional: true
-      '@tanstack/react-query':
-        optional: true
-      msw:
-        optional: true
 
   '@supabase/auth-js@2.67.3':
     resolution: {integrity: sha512-NJDaW8yXs49xMvWVOkSIr8j46jf+tYHV0wHhrwOaLLMZSFO4g6kKAf+MfzQ2RaD06OCUkUHIzctLAxjTgEVpzw==}
@@ -7445,9 +7436,9 @@ snapshots:
 
   '@rushstack/eslint-patch@1.10.5': {}
 
-  '@safe-global/api-kit@2.5.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)':
+  '@safe-global/api-kit@2.5.9(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)':
     dependencies:
-      '@safe-global/protocol-kit': 5.2.1(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
+      '@safe-global/protocol-kit': 5.2.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
       '@safe-global/types-kit': 1.0.2(typescript@5.7.3)(zod@3.24.1)
       node-fetch: 2.7.0(encoding@0.1.13)
       viem: 2.22.17(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
@@ -7458,10 +7449,10 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@safe-global/protocol-kit@5.2.1(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)':
+  '@safe-global/protocol-kit@5.2.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)':
     dependencies:
       '@safe-global/safe-deployments': 1.37.28
-      '@safe-global/safe-modules-deployments': 2.2.5
+      '@safe-global/safe-modules-deployments': 2.2.6
       '@safe-global/types-kit': 1.0.2(typescript@5.7.3)(zod@3.24.1)
       abitype: 1.0.8(typescript@5.7.3)(zod@3.24.1)
       semver: 7.7.0
@@ -7501,7 +7492,7 @@ snapshots:
 
   '@safe-global/safe-gateway-typescript-sdk@3.22.9': {}
 
-  '@safe-global/safe-modules-deployments@2.2.5': {}
+  '@safe-global/safe-modules-deployments@2.2.6': {}
 
   '@safe-global/types-kit@1.0.2(typescript@5.7.3)(zod@3.24.1)':
     dependencies:
@@ -7700,12 +7691,6 @@ snapshots:
       '@stablelib/keyagreement': 1.0.1
       '@stablelib/random': 1.0.2
       '@stablelib/wipe': 1.0.1
-
-  '@stakekit/api-hooks@0.0.95(@tanstack/react-query@5.66.0(react@19.0.0))(react@19.0.0)':
-    dependencies:
-      react: 19.0.0
-    optionalDependencies:
-      '@tanstack/react-query': 5.66.0(react@19.0.0)
 
   '@supabase/auth-js@2.67.3':
     dependencies:

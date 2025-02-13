@@ -23,8 +23,6 @@ const getQuote = async (chainId: number, inputTokens: { tokenAddress: string, am
         // pathVizImage: true // get pathviz graph
     };
 
-    console.log("quote payload \n", quoteRequestBody)
-
     const response = await fetch(
         quoteUrl,
         {

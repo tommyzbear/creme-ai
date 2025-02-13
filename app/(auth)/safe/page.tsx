@@ -6,11 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { parseEther } from "viem";
+import { WethToStethSwap } from "@/components/WethToStethSwap";
+import { StakeKitDefi } from "@/components/StakeKitDefi";
+import { useSafeStore } from '@/store/safeStore';
+import { TokensTable } from "@/components/tokens-table";
+import { TokensLending } from "@/components/tokens-lending";
+import { TokensLiquidityProvider } from "@/components/tokens-liquidity-provider";
+import { TokensUnstake } from "@/components/tokens-unstake";
 
 export default function SafePage() {
     const { user } = usePrivy();
@@ -18,11 +25,31 @@ export default function SafePage() {
     const { toast } = useToast();
     const [isCreating, setIsCreating] = useState(false);
     const [isWrapping, setIsWrapping] = useState(false);
-    const [selectedChain, setSelectedChain] = useState("eip155:1");
-    const [safeAddress, setSafeAddress] = useState("");
     const [ethAmount, setEthAmount] = useState("");
+    const {
+        safeAddress,
+        setSafeAddress,
+        fetchSafeAddress,
+        selectedChain,
+        setSelectedChain,
+        balances,
+        fetchBalances,
+        isLoading
+    } = useSafeStore();
 
     const managedWallet = wallets.find(w => w.walletClientType === "privy");
+
+    useEffect(() => {
+        if (!safeAddress) {
+            fetchSafeAddress();
+        }
+    }, [fetchSafeAddress, safeAddress]);
+
+    useEffect(() => {
+        if (safeAddress) {
+            fetchBalances();
+        }
+    }, [fetchBalances, safeAddress, selectedChain]);
 
     const handleCreateSafe = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,7 +79,6 @@ export default function SafePage() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    chainId: selectedChain,
                     embeddedWalletAddress: managedWallet.address,
                     ownerAddress: user.wallet.address,
                 }),
@@ -122,133 +148,164 @@ export default function SafePage() {
     };
 
     return (
-        <div className="container max-w-4xl py-8 space-y-8">
-            <h1 className="text-3xl font-bold">Safe Management</h1>
-
-            <div className="grid gap-8 md:grid-cols-2">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Create Safe</CardTitle>
-                        <CardDescription>
-                            Create a new Safe wallet with multiple owners
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleCreateSafe} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="chain">Chain</Label>
-                                <Select
-                                    value={selectedChain}
-                                    onValueChange={setSelectedChain}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select chain" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="eip155:1">Ethereum</SelectItem>
-                                        <SelectItem value="eip155:10">Optimism</SelectItem>
-                                        <SelectItem value="eip155:42161">Arbitrum</SelectItem>
-                                        <SelectItem value="eip155:8453">Base</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <Button type="submit" disabled={isCreating} className="w-full">
-                                {isCreating ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Creating...
-                                    </>
-                                ) : (
-                                    "Create Safe"
-                                )}
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Wrap ETH</CardTitle>
-                        <CardDescription>
-                            Wrap ETH to WETH and approve for trading
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleWrapEth} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="safeAddress">Safe Address</Label>
-                                <Input
-                                    id="safeAddress"
-                                    value={safeAddress}
-                                    onChange={(e) => setSafeAddress(e.target.value)}
-                                    placeholder="0x..."
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="ethAmount">ETH Amount</Label>
-                                <Input
-                                    id="ethAmount"
-                                    type="number"
-                                    step="0.000000000000000001"
-                                    value={ethAmount}
-                                    onChange={(e) => setEthAmount(e.target.value)}
-                                    placeholder="0.0"
-                                />
-                            </div>
-
-                            <Button type="submit" disabled={isWrapping} className="w-full">
-                                {isWrapping ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Wrapping...
-                                    </>
-                                ) : (
-                                    "Wrap ETH"
-                                )}
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
+        <div className="container w-full py-8 space-y-8">
+            <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-bold">Safe Management</h1>
+                <div className="flex items-center gap-4">
+                    <div className="w-[200px]">
+                        <Select
+                            value={selectedChain}
+                            onValueChange={setSelectedChain}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select chain" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="eip155:1">Ethereum</SelectItem>
+                                <SelectItem value="eip155:10">Optimism</SelectItem>
+                                <SelectItem value="eip155:42161">Arbitrum</SelectItem>
+                                <SelectItem value="eip155:8453">Base</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {/* {!safeAddress && ( */}
+                    <Button onClick={handleCreateSafe} disabled={isCreating}>
+                        {isCreating ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Creating...
+                            </>
+                        ) : (
+                            "Deploy Safe"
+                        )}
+                    </Button>
+                    {/* )} */}
+                </div>
             </div>
 
-            {safeAddress && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Safe Details</CardTitle>
-                        <CardDescription>
-                            Your newly created Safe wallet details
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-2">
-                            <div>
-                                <Label>Safe Address</Label>
-                                <p className="font-mono text-sm mt-1">{safeAddress}</p>
-                            </div>
-                            <Separator />
-                            <div>
-                                <Label>Chain</Label>
-                                <p className="text-sm mt-1">
-                                    {selectedChain === "eip155:1" && "Ethereum"}
-                                    {selectedChain === "eip155:10" && "Optimism"}
-                                    {selectedChain === "eip155:42161" && "Arbitrum"}
-                                    {selectedChain === "eip155:8453" && "Base"}
-                                </p>
-                            </div>
-                            <Separator />
-                            <div>
-                                <Label>Owners</Label>
-                                <div className="space-y-1 mt-1">
-                                    <p className="font-mono text-sm">{user?.wallet?.address}</p>
-                                    <p className="font-mono text-sm">{managedWallet?.address}</p>
+            <div className="overflow-y-auto h-full space-y-8">
+                {safeAddress && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Safe Details</CardTitle>
+                            <CardDescription>
+                                Your newly created Safe wallet details
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <div>
+                                        <Label>Safe Address</Label>
+                                        <p className="font-mono text-sm mt-1">{safeAddress}</p>
+                                    </div>
+                                    <Separator />
+                                    <div>
+                                        <Label>Chain</Label>
+                                        <p className="text-sm mt-1">
+                                            {selectedChain === "eip155:1" && "Ethereum"}
+                                            {selectedChain === "eip155:10" && "Optimism"}
+                                            {selectedChain === "eip155:42161" && "Arbitrum"}
+                                            {selectedChain === "eip155:8453" && "Base"}
+                                        </p>
+                                    </div>
+                                    <Separator />
+                                    <div>
+                                        <Label>Owners</Label>
+                                        <div className="space-y-1 mt-1">
+                                            <p className="font-mono text-sm">{user?.wallet?.address}</p>
+                                            <p className="font-mono text-sm">{managedWallet?.address}</p>
+                                        </div>
+                                    </div>
+                                    <Separator />
+                                    <div>
+                                        <Label>Portfolio Balances</Label>
+                                        <div className="mt-2 space-y-2">
+                                            <TokensTable
+                                                tokens={balances}
+                                                totalValue={balances.reduce((acc, token) => acc + Number(token.value), 0)}
+                                                isLoading={isLoading}
+                                                isExpanded={true}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
+                        </CardContent>
+                    </Card>
+                )}
+
+                <div className="h-full overflow-y-auto space-y-8 pb-8">
+                    <div className="grid gap-8 md:grid-cols-2">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Wrap ETH</CardTitle>
+                                <CardDescription>
+                                    Wrap ETH to WETH and approve for trading
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <form onSubmit={handleWrapEth} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="safeAddress">Safe Address</Label>
+                                        <Input
+                                            id="safeAddress"
+                                            value={safeAddress}
+                                            onChange={(e) => setSafeAddress(e.target.value)}
+                                            placeholder="0x..."
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="ethAmount">ETH Amount</Label>
+                                        <Input
+                                            id="ethAmount"
+                                            type="number"
+                                            step="0.000000000000000001"
+                                            value={ethAmount}
+                                            onChange={(e) => setEthAmount(e.target.value)}
+                                            placeholder="0.0"
+                                        />
+                                    </div>
+
+                                    <Button type="submit" disabled={isWrapping} className="w-full">
+                                        {isWrapping ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Wrapping...
+                                            </>
+                                        ) : (
+                                            "Wrap ETH"
+                                        )}
+                                    </Button>
+                                </form>
+                            </CardContent>
+                        </Card>
+                    </div>
+                    <div className="grid gap-8 md:grid-cols-2 hidden">
+                        <WethToStethSwap />
+                        <StakeKitDefi />
+                    </div>
+
+                    <div className="grid gap-8 md:grid-cols-3">
+                        <TokensLending
+                            balances={balances}
+                            safeAddress={safeAddress}
+                            selectedChain={selectedChain}
+                        />
+                        <TokensLiquidityProvider
+                            balances={balances}
+                            safeAddress={safeAddress}
+                            selectedChain={selectedChain}
+                        />
+                        <TokensUnstake
+                            balances={balances.filter((token) => token.type === "defi")}
+                            safeAddress={safeAddress}
+                            selectedChain={selectedChain}
+                        />
+                    </div>
+                </div>
+            </div>
         </div>
     );
 } 

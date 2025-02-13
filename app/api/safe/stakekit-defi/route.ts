@@ -1,13 +1,13 @@
 import { privy } from '@/lib/privy';
-import { safeService } from '@/lib/services/safe';
 import { arbitrum, base, mainnet, optimism } from 'viem/chains';
+import { StakeKitClient } from '@/lib/services/stakeKit';
 
 export async function POST(req: Request) {
     try {
         await privy.getClaims();
 
-        const { chainId, inputAmount, safeAddress } = await req.json();
-
+        const { chainId, inputAmount, DeFiOption, safeAddress } = await req.json();
+        console.log(chainId, inputAmount, DeFiOption, safeAddress)
         let chain;
         switch (chainId) {
             case 'eip155:1':
@@ -26,21 +26,24 @@ export async function POST(req: Request) {
                 throw new Error(`Unsupported chain: ${chainId}`);
         }
 
-        await safeService.wrapETHAndApprove(
-            chain,
-            inputAmount,
-            safeAddress
-        );
+        const stakeKitClient = new StakeKitClient({
+            apiKey: process.env.STAKEKIT_API_KEY || '',
+            network: chain.name
+        })
+
+        const seesion = await stakeKitClient.createTransactionSession('enter', DeFiOption, safeAddress, inputAmount)
+        const txHash = await stakeKitClient.processTransaction(seesion.transactions, safeAddress, chain)
 
         return Response.json({
-            success: true
+            success: true,
+            txHash
         });
     } catch (error) {
-        console.error('Failed to wrap ETH:', error);
+        console.error('Failed to swap WETH to stETH:', error);
         return new Response(
             JSON.stringify({
                 success: false,
-                error: error instanceof Error ? error.message : 'Failed to wrap ETH'
+                error: error instanceof Error ? error.message : 'Failed to swap WETH to stETH'
             }),
             {
                 status: 500,

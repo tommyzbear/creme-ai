@@ -1,12 +1,17 @@
 import { privy } from '@/lib/privy';
-import { safeService } from '@/lib/services/safe';
 import { arbitrum, base, mainnet, optimism } from 'viem/chains';
+import { ensoService } from '@/lib/services/enso';
 
 export async function POST(req: Request) {
     try {
+        // Authenticate user
         await privy.getClaims();
 
-        const { chainId, inputAmount, safeAddress } = await req.json();
+        const { chainId, tokens }: { chainId: string, tokens: `0x${string}`[] } = await req.json();
+
+        if (tokens.length === 0) {
+            throw new Error('No tokens provided');
+        }
 
         let chain;
         switch (chainId) {
@@ -26,21 +31,19 @@ export async function POST(req: Request) {
                 throw new Error(`Unsupported chain: ${chainId}`);
         }
 
-        await safeService.wrapETHAndApprove(
-            chain,
-            inputAmount,
-            safeAddress
-        );
+        const tokenData = await ensoService.getTokenData(chain.id, undefined, tokens.filter(token => token.length === 42));
 
-        return Response.json({
-            success: true
-        });
+        if (tokenData.length === 0) {
+            throw new Error(`No tokens found, for ${tokens.join(', ')}`);
+        }
+
+        return Response.json(tokenData);
     } catch (error) {
-        console.error('Failed to wrap ETH:', error);
+        console.error('Failed to get tokens:', error);
         return new Response(
             JSON.stringify({
                 success: false,
-                error: error instanceof Error ? error.message : 'Failed to wrap ETH'
+                error: error instanceof Error ? error.message : 'Failed to get tokens'
             }),
             {
                 status: 500,

@@ -183,7 +183,6 @@ export async function searchTweets(
 ): Promise<CookieResponse<SearchTweetResult[]>> {
     try {
         const url = `${API_BASE_URL}/v1/hackathon/search/${encodeURIComponent(searchQuery)}?from=${from}&to=${to}`
-        console.log("url", url)
 
         const response = await fetch(url, {
             headers: {

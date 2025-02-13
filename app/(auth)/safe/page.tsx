@@ -17,6 +17,7 @@ import { useSafeStore } from '@/store/safeStore';
 import { TokensTable } from "@/components/tokens-table";
 import { TokensLending } from "@/components/tokens-lending";
 import { TokensLiquidityProvider } from "@/components/tokens-liquidity-provider";
+import { TokensUnstake } from "@/components/tokens-unstake";
 
 export default function SafePage() {
     const { user } = usePrivy();
@@ -286,7 +287,7 @@ export default function SafePage() {
                         <StakeKitDefi />
                     </div>
 
-                    <div className="grid gap-8 md:grid-cols-2">
+                    <div className="grid gap-8 md:grid-cols-3">
                         <TokensLending
                             balances={balances}
                             safeAddress={safeAddress}
@@ -294,6 +295,11 @@ export default function SafePage() {
                         />
                         <TokensLiquidityProvider
                             balances={balances}
+                            safeAddress={safeAddress}
+                            selectedChain={selectedChain}
+                        />
+                        <TokensUnstake
+                            balances={balances.filter((token) => token.type === "defi")}
                             safeAddress={safeAddress}
                             selectedChain={selectedChain}
                         />

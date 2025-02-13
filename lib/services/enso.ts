@@ -11,7 +11,7 @@ export const enso = new EnsoClient({ apiKey: API_KEY });
 const WHITELISTED_LENDING_PROTOCOLS = ["aave-v3", "radiant-v2"]
 const WHITELISTED_LP_PROTOCOLS = ["balancer-v2", "sushiswap", "camelot-v2"]
 
-const getTokenData = async (chainId: number, underlyingTokens?: Address | Address[], address?: Address) => {
+const getTokenData = async (chainId: number, underlyingTokens?: Address | Address[], address?: Address | Address[]) => {
     const tokenData = await enso.getTokenData({
         underlyingTokens,
         address,
@@ -19,7 +19,7 @@ const getTokenData = async (chainId: number, underlyingTokens?: Address | Addres
         includeMetadata: true,
     })
 
-    return tokenData.data.map((token) => ({ ...token, address: token.address.toLowerCase() as Address }));
+    return tokenData.data;
 }
 
 const getSupportedProtocols = async () => {

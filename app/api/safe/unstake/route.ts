@@ -1,25 +1,28 @@
-import { privyClient } from '@/lib/privy';
-import { cookies } from 'next/headers';
+import { privy } from '@/lib/privy';
 import { safeService } from '@/lib/services/safe';
 import { arbitrum, base, mainnet, optimism } from 'viem/chains';
-import { enso } from '@/lib/services/enso';
+import { enso, ensoService } from '@/lib/services/enso';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
     try {
-        const cookieStore = await cookies();
-        const cookieAuthToken = cookieStore.get("privy-token");
+        const claims = await privy.getClaims();
 
-        if (!cookieAuthToken) {
-            throw new Error('Unauthorized');
+        const { data } = await supabase
+            .from('safe_wallets')
+            .select('*')
+            .eq('user_id', claims.userId)
+            .single();
+
+        if (!data) {
+            throw new Error('Safe wallet not found');
         }
 
-        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
+        const { chainId, safeAddress, tokenIn } = await req.json();
 
-        if (!claims) {
-            throw new Error('Unauthorized');
+        if (safeAddress !== data.address) {
+            throw new Error('Please provide your own safe address');
         }
-
-        const { chainId, inputAmount, safeAddress } = await req.json();
 
         let chain;
         switch (chainId) {
@@ -39,15 +42,35 @@ export async function POST(req: Request) {
                 throw new Error(`Unsupported chain: ${chainId}`);
         }
 
+        const tokenData = await ensoService.getTokenData(chain.id, undefined, tokenIn as `0x${string}`);
+
+        if (tokenData.length === 0 || tokenData[0].underlyingTokens.length === 0) {
+            throw new Error(`No Defi token found, for ${tokenIn}`);
+        }
+
+        const underlyingToken = tokenData[0].underlyingTokens.find((token) => token.type === "base");
+
+        if (!underlyingToken) {
+            throw new Error(`No underlying token found, for ${tokenIn}`)
+        };
+
+        const balances = await ensoService.getBalances(safeAddress, chain.id, false);
+
+        const balance = balances.find((balance) => balance.token === tokenIn);
+
+        if (!balance) {
+            throw new Error(`No balance found for ${tokenIn}`);
+        }
+
         // Get route data from Enso
         const routeRequest = {
             fromAddress: safeAddress,
             receiver: safeAddress,
             spender: safeAddress,
             chainId: chain.id,
-            amountIn: inputAmount,
-            tokenIn: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1" as `0x${string}`, // WETH on arbitrum
-            tokenOut: "0x5979D7b546E38E414F7E9822514be443A4800529" as `0x${string}`, // wstETH on arbitrum
+            amountIn: balance.amount,
+            tokenIn: tokenIn as `0x${string}`,
+            tokenOut: underlyingToken.address,
             routingStrategy: "delegate" as const,
         };
 
@@ -69,11 +92,11 @@ export async function POST(req: Request) {
             txHash
         });
     } catch (error) {
-        console.error('Failed to swap WETH to stETH:', error);
+        console.error('Failed to lend tokens:', error);
         return new Response(
             JSON.stringify({
                 success: false,
-                error: error instanceof Error ? error.message : 'Failed to swap WETH to stETH'
+                error: error instanceof Error ? error.message : 'Failed to lend tokens'
             }),
             {
                 status: 500,

@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { toast } from '@/hooks/use-toast'
 import { TokenData } from '@/lib/services/alchemy'
-
+import { TokenData as EnsoTokenData } from '@ensofinance/sdk'
 interface SafeStore {
     safeAddress: string
     selectedChain: string
@@ -59,7 +59,38 @@ export const useSafeStore = create<SafeStore>((set, get) => ({
                     throw new Error('Failed to fetch balances');
                 }
                 const data = await response.json();
-                set({ balances: data, isLoading: false });
+
+                if (data.length === 0) {
+                    set({ balances: [], isLoading: false });
+                    return;
+                }
+
+                const tokenResponse = await fetch("/api/safe/get-tokens", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        chainId: selectedChain,
+                        tokens: data.map((token: TokenData) => token.contractAddress)
+                    }),
+                });
+
+                if (!tokenResponse.ok) {
+                    set({ isLoading: false });
+                    throw new Error('Failed to fetch tokens details from Enso');
+                }
+
+                const tokenData = await tokenResponse.json();
+                const balances = data.map((token: TokenData) => {
+                    const tokenDetails = tokenData.find((t: EnsoTokenData) => t.address.toLowerCase() === token.contractAddress);
+                    return {
+                        ...token,
+                        type: tokenDetails?.type
+                    };
+                });
+
+                set({ balances: balances, isLoading: false });
             } catch (error) {
                 console.error('Failed to fetch balances:', error);
                 set({ balances: [], isLoading: false });

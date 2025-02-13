@@ -26,8 +26,6 @@ export async function getWalletTokens(address: string): Promise<TokenBalance[]> 
         )
         const data = await response.json()
 
-        console.log("data", data)
-
         if (data.status === "1" && data.result) {
             // Filter out tokens with zero balance
             return data.result

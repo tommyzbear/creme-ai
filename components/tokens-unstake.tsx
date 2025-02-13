@@ -6,30 +6,30 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { TokenData } from "@/lib/services/alchemy";
 
-interface TokensLiquidityProviderProps {
+interface TokensUnstakeProps {
     balances: TokenData[]
     safeAddress: string
     selectedChain: string
 }
 
-export function TokensLiquidityProvider({ balances, safeAddress, selectedChain }: TokensLiquidityProviderProps) {
+export function TokensUnstake({ balances, safeAddress, selectedChain }: TokensUnstakeProps) {
     const { toast } = useToast();
-    const [isLPing, setIsLPing] = useState(false);
+    const [isUnstaking, setIsUnstaking] = useState(false);
     const [selectedToken, setSelectedToken] = useState<string>("");
 
-    const handleLP = async () => {
+    const handleUnstake = async () => {
         if (!selectedToken || !safeAddress) {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Please select a token to lend",
+                description: "Please select a token to unstake",
             });
             return;
         }
 
-        setIsLPing(true);
+        setIsUnstaking(true);
         try {
-            const response = await fetch("/api/safe/liquidity-provider", {
+            const response = await fetch("/api/safe/unstake", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -46,25 +46,25 @@ export function TokensLiquidityProvider({ balances, safeAddress, selectedChain }
             setSelectedToken("");
             toast({
                 title: "Success",
-                description: "Successfully LP-ed tokens",
+                description: "Successfully unstaked tokens",
             });
         } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: error instanceof Error ? error.message : "Failed to LP tokens",
+                description: error instanceof Error ? error.message : "Failed to unstake tokens",
             });
         } finally {
-            setIsLPing(false);
+            setIsUnstaking(false);
         }
     };
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Provide Liquidity</CardTitle>
+                <CardTitle>Unstake Tokens</CardTitle>
                 <CardDescription>
-                    Provide liquidity to a pool
+                    Unstake your tokens
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -73,7 +73,7 @@ export function TokensLiquidityProvider({ balances, safeAddress, selectedChain }
                     onValueChange={setSelectedToken}
                 >
                     <SelectTrigger>
-                        <SelectValue placeholder="Select token to provide liquidity" />
+                        <SelectValue placeholder="Select token to unstake" />
                     </SelectTrigger>
                     <SelectContent>
                         {balances.map((token) => (
@@ -85,17 +85,17 @@ export function TokensLiquidityProvider({ balances, safeAddress, selectedChain }
                 </Select>
 
                 <Button
-                    onClick={handleLP}
-                    disabled={isLPing || !selectedToken}
+                    onClick={handleUnstake}
+                    disabled={isUnstaking || !selectedToken}
                     className="w-full"
                 >
-                    {isLPing ? (
+                    {isUnstaking ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            LPing...
+                            Unstaking...
                         </>
                     ) : (
-                        "Provide Liquidity"
+                        "Unstake Tokens"
                     )}
                 </Button>
             </CardContent>

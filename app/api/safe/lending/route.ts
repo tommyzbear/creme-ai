@@ -77,7 +77,6 @@ export async function POST(req: Request) {
         }
 
         // Create and sign transaction using Safe
-        //console.log(routeData)
         const txHash = await safeService.processEnsoTransaction(
             chain,
             safeAddress,

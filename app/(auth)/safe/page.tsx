@@ -11,7 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { parseEther } from "viem";
-
+import { WethToStethSwap } from "@/components/WethToStethSwap";
+import { StakeKitDefi } from "@/components/StakeKitDefi";
 export default function SafePage() {
     const { user } = usePrivy();
     const { wallets } = useWallets();
@@ -249,6 +250,12 @@ export default function SafePage() {
                     </CardContent>
                 </Card>
             )}
+            <div className="grid gap-8 md:grid-cols-2">
+                <WethToStethSwap />
+            </div>            
+            <div className="grid gap-8 md:grid-cols-2">
+                <StakeKitDefi />
+            </div>
         </div>
     );
 } 

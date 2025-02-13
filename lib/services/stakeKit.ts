@@ -1,5 +1,6 @@
 import { fetch } from 'cross-fetch'
-import { ethers } from 'ethers'
+import { safeService } from './safe'
+import { Chain } from 'viem'
 
 export interface StakeKitConfig {
   apiKey: string
@@ -231,10 +232,12 @@ export class StakeKitClient {
   
   async processTransaction(
     transactions: any[], 
-    wallet: ethers.Signer
+    walletAddress: string,
+    chain: Chain,
   ) {
-  for (const tx of transactions) {
-    if (tx.status === "SKIPPED") continue;
+    const txs: string[] = []
+    for (const tx of transactions) {
+      if (tx.status === "SKIPPED") continue;
 
     console.log(`Earn Agent => TX => ${tx.type}`);
     let unsignedTx: any;
@@ -255,13 +258,14 @@ export class StakeKitClient {
     }
     const jsonTx = JSON.parse(unsignedTx.unsignedTransaction);
     console.log(jsonTx);
-    const signedTx = await wallet.signTransaction(jsonTx);
-    console.log(signedTx);
-    const submitResult = await this.request('POST', `/v1/transactions/${tx.id}/submit`, { signedTransaction: signedTx });
-    console.log(" TX submitted =>", submitResult);
-    
-  }
-}
+    const txHash = await safeService.processStakeKitTransaction(chain, walletAddress, jsonTx)
+    if (txHash) {
+        txs.push(txHash)
+      }
+    }
+    return txs
+  } 
+
   // 提交已签名交易
   async submitSignedTransaction(txId: string, signedTx: string): Promise<SignedTransactionResponse> {
     return this.request('POST', `/v1/transactions/${txId}/submit`, {
@@ -270,7 +274,7 @@ export class StakeKitClient {
   }
 
   // 过滤和排序收益机会
-  filterAndSortYields(yields: YieldOpportunity[], tokenAddress?: string): YieldOpportunity[] {
+  async filterAndSortYields(yields: YieldOpportunity[], tokenAddress?: string): Promise<YieldOpportunity[]> {
     return yields
       .filter(y => {
         const noCooldown = !y.metadata.cooldownPeriod || y.metadata.cooldownPeriod.days === 0

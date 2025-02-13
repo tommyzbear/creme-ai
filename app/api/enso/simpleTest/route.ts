@@ -16,7 +16,7 @@ export async function GET() {
             "chainId": 42161
         });
 
-        const txResponse = await safeService.initiateTransaction(arbitrum, "0xd9CfA3466C6f075dEE7055082709fC000358DD81", routerData?.tx);
+        const txResponse = await safeService.processEnsoTransaction(arbitrum, "0xd9CfA3466C6f075dEE7055082709fC000358DD81", routerData?.tx);
 
         return Response.json(txResponse);
     } catch (error) {

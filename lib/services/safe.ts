@@ -246,6 +246,7 @@ const preSignCowSwapTransaction = async (chain: Chain, safeAddress: string, tran
         console.log(`Transaction executed successfully [${txResponse.hash}]`);
     }
 }
+
 const processStakeKitTransaction = async (chain: Chain, safeAddress: string,
     transaction: MetaTransactionData) => {
     const claims = await privy.getClaims();
@@ -309,23 +310,11 @@ const processEnsoTransaction = async (chain: Chain, safeAddress: string, transac
     const claims = await privy.getClaims();
     const delegatedWallets = await privy.getDelegatedWallets(claims.userId);
 
-    const publicClient = createPublicClient({
-        chain: chain,
-        transport: http(),
-    });
-
-    // Log initial balances for debugging
-    console.log(
-        `ETH balance before: [${await publicClient.getBalance({
-            address: safeAddress as `0x${string}`,
-        })}]`
-    );
-    console.log('to', transaction.to)
+    // Need to convert to checksum address
     transaction.to = ethers.utils.getAddress(transaction.to)
-    console.log('checksumed to', transaction.to)
 
-    console.log('data', transaction.data)
-    console.log('value', transaction.value)
+    console.log('transaction', transaction)
+
     const safe = await Safe.init({
         provider: getAlchemyRpcByChainId(chain.id),
         signer: SIGNER_PRIVATE_KEY,
@@ -338,8 +327,6 @@ const processEnsoTransaction = async (chain: Chain, safeAddress: string, transac
         data: transaction.data,
         operation: OperationType.DelegateCall,
     };
-
-
 
     const safeTx = await safe.createTransaction({
         transactions: [ensoSignTx],

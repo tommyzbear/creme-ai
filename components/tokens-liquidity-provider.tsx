@@ -6,13 +6,13 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { TokenData } from "@/lib/services/alchemy";
 
-interface TokensLendingProps {
+interface TokensLiquidityProviderProps {
     balances: TokenData[]
     safeAddress: string
     selectedChain: string
 }
 
-export function TokensLending({ balances, safeAddress, selectedChain }: TokensLendingProps) {
+export function TokensLiquidityProvider({ balances, safeAddress, selectedChain }: TokensLiquidityProviderProps) {
     const { toast } = useToast();
     const [isLending, setIsLending] = useState(false);
     const [selectedToken, setSelectedToken] = useState<string>("");
@@ -29,7 +29,7 @@ export function TokensLending({ balances, safeAddress, selectedChain }: TokensLe
 
         setIsLending(true);
         try {
-            const response = await fetch("/api/safe/lending", {
+            const response = await fetch("/api/safe/liquidity-provider", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -46,13 +46,13 @@ export function TokensLending({ balances, safeAddress, selectedChain }: TokensLe
             setSelectedToken("");
             toast({
                 title: "Success",
-                description: "Successfully lent tokens",
+                description: "Successfully LP-ed tokens",
             });
         } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: error instanceof Error ? error.message : "Failed to lend tokens",
+                description: error instanceof Error ? error.message : "Failed to LP tokens",
             });
         } finally {
             setIsLending(false);
@@ -62,9 +62,9 @@ export function TokensLending({ balances, safeAddress, selectedChain }: TokensLe
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Lend Tokens</CardTitle>
+                <CardTitle>Provide Liquidity</CardTitle>
                 <CardDescription>
-                    Lend your tokens to earn interest
+                    Provide liquidity to a pool
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -73,7 +73,7 @@ export function TokensLending({ balances, safeAddress, selectedChain }: TokensLe
                     onValueChange={setSelectedToken}
                 >
                     <SelectTrigger>
-                        <SelectValue placeholder="Select token to lend" />
+                        <SelectValue placeholder="Select token to provide liquidity" />
                     </SelectTrigger>
                     <SelectContent>
                         {balances.map((token) => (
@@ -92,10 +92,10 @@ export function TokensLending({ balances, safeAddress, selectedChain }: TokensLe
                     {isLending ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Lending...
+                            LPing...
                         </>
                     ) : (
-                        "Lend Tokens"
+                        "Provide Liquidity"
                     )}
                 </Button>
             </CardContent>

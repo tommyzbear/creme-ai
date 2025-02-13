@@ -16,6 +16,7 @@ import { StakeKitDefi } from "@/components/StakeKitDefi";
 import { useSafeStore } from '@/store/safeStore';
 import { TokensTable } from "@/components/tokens-table";
 import { TokensLending } from "@/components/tokens-lending";
+import { TokensLiquidityProvider } from "@/components/tokens-liquidity-provider";
 
 export default function SafePage() {
     const { user } = usePrivy();
@@ -287,6 +288,11 @@ export default function SafePage() {
 
                     <div className="grid gap-8 md:grid-cols-2">
                         <TokensLending
+                            balances={balances}
+                            safeAddress={safeAddress}
+                            selectedChain={selectedChain}
+                        />
+                        <TokensLiquidityProvider
                             balances={balances}
                             safeAddress={safeAddress}
                             selectedChain={selectedChain}

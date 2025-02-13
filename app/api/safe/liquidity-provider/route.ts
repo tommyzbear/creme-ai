@@ -42,10 +42,10 @@ export async function POST(req: Request) {
                 throw new Error(`Unsupported chain: ${chainId}`);
         }
 
-        const lendingTokens = await ensoService.getLendingTokens(chain.id, tokenIn as `0x${string}`);
+        const lendingTokens = await ensoService.getLpTokens(chain.id, tokenIn as `0x${string}`);
 
         if (lendingTokens.length === 0) {
-            throw new Error(`No lending tokens found, for ${tokenIn}`);
+            throw new Error(`No LP tokens found, for ${tokenIn}`);
         }
 
         const lendingToken = lendingTokens[0];
@@ -77,7 +77,6 @@ export async function POST(req: Request) {
         }
 
         // Create and sign transaction using Safe
-        //console.log(routeData)
         const txHash = await safeService.processEnsoTransaction(
             chain,
             safeAddress,
@@ -89,11 +88,11 @@ export async function POST(req: Request) {
             txHash
         });
     } catch (error) {
-        console.error('Failed to lend tokens:', error);
+        console.error('Failed to provide liquidity:', error);
         return new Response(
             JSON.stringify({
                 success: false,
-                error: error instanceof Error ? error.message : 'Failed to lend tokens'
+                error: error instanceof Error ? error.message : 'Failed to provide liquidity'
             }),
             {
                 status: 500,

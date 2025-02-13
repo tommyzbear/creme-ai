@@ -10,8 +10,8 @@ async function testGetRouterData() {
         spender: "0x60bA23C0cC60C11596497e822348590387a56dcc",
         chainId: 42161,
         amountIn: "1000000000000000000",
-        tokenIn: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        tokenOut: "0x912CE59144191C1204E64559FE8253a0e49E6548",
+        tokenIn: "",
+        tokenOut: "",
         routingStrategy: "delegate", // optional
     };
 
@@ -26,7 +26,7 @@ async function testGetApproveData() {
     try {
       const routeRequest = {
           fromAddress: "0x60bA23C0cC60C11596497e822348590387a56dcc",
-          tokenAddress: "0x912CE59144191C1204E64559FE8253a0e49E6548",
+          tokenAddress: "",
           chainId: 42161,
           amount: "1000000000000000000"
       };

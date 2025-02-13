@@ -76,7 +76,6 @@ export default function SafePage() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    chainId: selectedChain,
                     embeddedWalletAddress: managedWallet.address,
                     ownerAddress: user.wallet.address,
                 }),
@@ -149,21 +148,35 @@ export default function SafePage() {
         <div className="container w-full py-8 space-y-8">
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold">Safe Management</h1>
-                <div className="w-[200px]">
-                    <Select
-                        value={selectedChain}
-                        onValueChange={setSelectedChain}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select chain" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="eip155:1">Ethereum</SelectItem>
-                            <SelectItem value="eip155:10">Optimism</SelectItem>
-                            <SelectItem value="eip155:42161">Arbitrum</SelectItem>
-                            <SelectItem value="eip155:8453">Base</SelectItem>
-                        </SelectContent>
-                    </Select>
+                <div className="flex items-center gap-4">
+                    <div className="w-[200px]">
+                        <Select
+                            value={selectedChain}
+                            onValueChange={setSelectedChain}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select chain" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="eip155:1">Ethereum</SelectItem>
+                                <SelectItem value="eip155:10">Optimism</SelectItem>
+                                <SelectItem value="eip155:42161">Arbitrum</SelectItem>
+                                <SelectItem value="eip155:8453">Base</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {/* {!safeAddress && ( */}
+                    <Button onClick={handleCreateSafe} disabled={isCreating}>
+                        {isCreating ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Creating...
+                            </>
+                        ) : (
+                            "Deploy Safe"
+                        )}
+                    </Button>
+                    {/* )} */}
                 </div>
             </div>
 
@@ -221,31 +234,6 @@ export default function SafePage() {
 
                 <div className="h-full overflow-y-auto space-y-8 pb-8">
                     <div className="grid gap-8 md:grid-cols-2">
-                        {!safeAddress && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Create Safe</CardTitle>
-                                    <CardDescription>
-                                        Create a new Safe wallet with multiple owners
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <form onSubmit={handleCreateSafe} className="space-y-4">
-                                        <Button type="submit" disabled={isCreating} className="w-full">
-                                            {isCreating ? (
-                                                <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Creating...
-                                                </>
-                                            ) : (
-                                                "Create Safe"
-                                            )}
-                                        </Button>
-                                    </form>
-                                </CardContent>
-                            </Card>
-                        )}
-
                         <Card>
                             <CardHeader>
                                 <CardTitle>Wrap ETH</CardTitle>

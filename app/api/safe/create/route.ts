@@ -19,44 +19,35 @@ export async function POST(req: Request) {
             throw new Error('Unauthorized');
         }
 
-        const { chainId, embeddedWalletAddress, ownerAddress } = await req.json();
+        const { embeddedWalletAddress, ownerAddress } = await req.json();
 
-        let chain;
-        switch (chainId) {
-            case 'eip155:1':
-                chain = mainnet;
-                break;
-            case 'eip155:10':
-                chain = optimism;
-                break;
-            case 'eip155:42161':
-                chain = arbitrum;
-                break;
-            case 'eip155:8453':
-                chain = base;
-                break;
-            default:
-                throw new Error(`Unsupported chain: ${chainId}`);
-        }
-
-        const { safeAddress, deploymentTransaction } = await safeService.createSafe(
-            chain,
+        const deploymentResults = await safeService.createSafe(
             embeddedWalletAddress,
             ownerAddress
         );
 
-        await supabase
-            .from('safe_wallets')
-            .insert({
-                address: safeAddress,
-                deployment_tx: deploymentTransaction,
-                user_id: claims.userId
-            });
+        for (const result of deploymentResults) {
+            if ('error' in result) {
+                console.error('Failed to create safe:', result.error);
+                continue;
+            }
 
-        return Response.json({
-            success: true,
-            safeAddress
-        });
+            const { safeAddress, deploymentTransaction, chain } = result;
+
+            await supabase
+                .from('safe_wallets')
+                .insert({
+                    address: safeAddress,
+                    deployment_tx: deploymentTransaction,
+                    user_id: claims.userId,
+                    chain_id: chain.id
+                });
+
+            return Response.json({
+                success: true,
+                safeAddress
+            });
+        }
     } catch (error) {
         console.error('Failed to create safe:', error);
         return new Response(

@@ -20,107 +20,77 @@ const SAFE_TRANSACTION_API_ARBITRUM = "https://safe-transaction-arbitrum.safe.gl
 const SAFE_TRANSACTION_API_OPTIMISM = "https://safe-transaction-optimism.safe.global"
 const SAFE_TRANSACTION_API_BASE = "https://safe-transaction-base.safe.global"
 const SAFE_TRANSACTION_API_MAINNET = "https://safe-transaction-mainnet.safe.global"
+const SUPPORTED_CHAINS = [arbitrum, optimism, base, mainnet]
 
 /////////////////////////////////////////////////////////////
 // Create a Safe
 /////////////////////////////////////////////////////////////
-const createSafe = async (chain: Chain, embeddedWalletAddress: string, ownerAddress: string) => {
+const createSafe = async (embeddedWalletAddress: string, ownerAddress: string) => {
     if (!SIGNER_ADDRESS || !SIGNER_PRIVATE_KEY || !embeddedWalletAddress) {
         throw new Error('Missing required environment variables')
     }
 
-    let safe = null
 
-    switch (chain.id) {
-        case arbitrum.id:
-            safe = await Safe.init({
-                provider: ALCHEMY_RPC.ARBITRUM_ONE,
-                signer: SIGNER_PRIVATE_KEY,
-                predictedSafe: {
-                    safeAccountConfig: {
-                        owners: [SIGNER_ADDRESS, embeddedWalletAddress, ownerAddress],
-                        threshold: 2
-                    }
-                }
-            })
-            break
-        case optimism.id:
-            safe = await Safe.init({
-                provider: ALCHEMY_RPC.OPTIMISM_MAINNET,
-                signer: SIGNER_PRIVATE_KEY,
-                predictedSafe: {
-                    safeAccountConfig: {
-                        owners: [SIGNER_ADDRESS, embeddedWalletAddress, ownerAddress],
-                        threshold: 2
-                    }
-                }
-            })
-            break
-        case base.id:
-            safe = await Safe.init({
-                provider: ALCHEMY_RPC.BASE_MAINNET,
-                signer: SIGNER_PRIVATE_KEY,
-                predictedSafe: {
-                    safeAccountConfig: {
-                        owners: [SIGNER_ADDRESS, embeddedWalletAddress, ownerAddress],
-                        threshold: 2
-                    }
-                }
-            })
-            break
-        case mainnet.id:
-            safe = await Safe.init({
-                provider: ALCHEMY_RPC.ETHEREUM_MAINNET,
-                signer: SIGNER_PRIVATE_KEY,
-                predictedSafe: {
-                    safeAccountConfig: {
-                        owners: [SIGNER_ADDRESS, embeddedWalletAddress, ownerAddress],
-                        threshold: 2
-                    }
-                }
-            })
-            break
-        default:
-            throw new Error(`Unsupported chain: ${chain}`)
+    const deploymentResults = []
+    // this should ensure same safe address for all chains
+    const predictedSafeConfig = {
+        safeAccountConfig: {
+            owners: [SIGNER_ADDRESS, embeddedWalletAddress, ownerAddress],
+            threshold: 2
+        }
     }
 
-    if (!safe) {
-        throw new Error('Failed to create safe')
+    for (const chain of SUPPORTED_CHAINS) {
+        const safe = await Safe.init({
+            provider: getAlchemyRpcByChainId(chain.id),
+            signer: SIGNER_PRIVATE_KEY,
+            predictedSafe: predictedSafeConfig
+        })
+
+        if (!safe) {
+            throw new Error('Failed to create safe')
+        }
+
+        const isSafeDeployed = await safe.isSafeDeployed()
+        if (isSafeDeployed) {
+            console.log('Safe already deployed')
+            continue
+        }
+
+        const safeAddress = await safe.getAddress();
+        console.log('Safe address:', safeAddress);
+
+        const deploymentTransaction = await safe.createSafeDeploymentTransaction();
+        console.log('Deployment transaction:', deploymentTransaction);
+
+        const client = await safe.getSafeProvider().getExternalSigner();
+
+        if (!client) {
+            throw new Error('Failed to get external signer')
+        }
+
+        const transactionHash = await client.sendTransaction({
+            to: deploymentTransaction.to as `0x${string}`,
+            value: BigInt(deploymentTransaction.value),
+            data: deploymentTransaction.data as `0x${string}`,
+            chain: chain,
+        });
+        console.log('Transaction hash:', transactionHash);
+
+        const publicClient = createPublicClient({
+            chain: chain,
+            transport: http(),
+        });
+
+        const receipt = await publicClient.waitForTransactionReceipt({
+            hash: transactionHash,
+        });
+
+        console.log('Receipt:', receipt);
+        deploymentResults.push({ safe, safeAddress, deploymentTransaction, chain })
     }
 
-    const safeAddress = await safe.getAddress();
-    console.log('Safe address:', safeAddress);
-
-    const deploymentTransaction = await safe.createSafeDeploymentTransaction();
-    console.log('Deployment transaction:', deploymentTransaction);
-
-    const client = await safe.getSafeProvider().getExternalSigner();
-
-    if (!client) {
-        throw new Error('Failed to get external signer')
-    }
-
-    const transactionHash = await client.sendTransaction({
-        to: deploymentTransaction.to as `0x${string}`,
-        value: BigInt(deploymentTransaction.value),
-        data: deploymentTransaction.data as `0x${string}`,
-        chain: chain,
-    });
-    console.log('Transaction hash:', transactionHash);
-
-    // const walletClient = createWalletClient({ transport: http(ALCHEMY_RPC.ETHEREUM_MAINNET), chain: chain });
-    const publicClient = createPublicClient({
-        chain: chain,
-        transport: http(),
-    });
-
-    const receipt = await publicClient.waitForTransactionReceipt({
-        hash: transactionHash,
-    });
-
-    console.log('Receipt:', receipt);
-
-    return { safe, safeAddress, deploymentTransaction }
+    return deploymentResults
 }
 
 /////////////////////////////////////////////////////////////

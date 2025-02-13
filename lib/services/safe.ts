@@ -272,64 +272,64 @@ const preSignCowSwapTransaction = async (chain: Chain, safeAddress: string, tran
         console.log(`Transaction executed successfully [${txResponse.hash}]`);
     }
 }
-const processStakeKitTransaction = async (chain: Chain, safeAddress: string, 
+const processStakeKitTransaction = async (chain: Chain, safeAddress: string,
     transaction: MetaTransactionData) => {
     const claims = await privy.getClaims();
     const delegatedWallets = await privy.getDelegatedWallets(claims.userId);
-    
+
     const safe = await Safe.init({
         provider: getAlchemyRpcByChainId(chain.id),
         signer: SIGNER_PRIVATE_KEY,
         safeAddress: safeAddress,
     });
-        console.log('transaction', transaction)
-        const value = transaction.value ? transaction.value.toString() : "0"
-        const ensoSignTx: MetaTransactionData = {
-            to: transaction.to,
-            value: value,
-            data: transaction.data,
-            operation: OperationType.Call,
-        };
-        console.log('ensoSignTx', ensoSignTx)
-        const safeTx = await safe.createTransaction({
-            transactions: [ensoSignTx],
-            onlyCalls: true,
-        });
-        console.log('safeTx', safeTx)
-        // Every transaction has a Safe (Smart Account) Transaction Hash different than the final transaction hash
-        const safeTxHash = await safe.getTransactionHash(safeTx)
-        // The AI agent signs this Safe (Smart Account) Transaction Hash
-        const signature = await safe.signHash(safeTxHash)
-    
-        // Now the transaction with the signature is sent to the Transaction Service with the Api Kit:
-        const apiKit = new SafeApiKit({
-            chainId: BigInt(chain.id)
-        })
-    
-        await apiKit.proposeTransaction({
-            safeAddress: safeAddress,
-            safeTransactionData: safeTx.data,
-            safeTxHash,
-            senderSignature: signature.data,
-            senderAddress: SIGNER_ADDRESS as `0x${string}`
-        })
-    
-        // If the user has a delegated wallet, then provide the 2nd signature for the transaction and auto-execute
-        if (delegatedWallets.length > 0) {
-            console.log("Delegated wallet found", delegatedWallets[0].address)
-            // We assume there is only one pending transaction
-            const safeSignature = await customSignHash(delegatedWallets[0].address, safeTxHash)
-            await customConfirmation(safeSignature.data, safeTxHash, chain.id)
-    
-            // As only one more signater is required, AI agent can execute the transaction:
-            // Need to refetch latest transaction that contains all signatures
-            const safeTransaction = await apiKit.getTransaction(safeTxHash)
-            const txResponse = await safe.executeTransaction(safeTransaction);
-            console.log(`Transaction executed successfully [${txResponse.hash}]`);
-            return txResponse.hash;
-        }
-    
-}   
+    console.log('transaction', transaction)
+    const value = transaction.value ? transaction.value.toString() : "0"
+    const ensoSignTx: MetaTransactionData = {
+        to: transaction.to,
+        value: value,
+        data: transaction.data,
+        operation: OperationType.Call,
+    };
+    console.log('ensoSignTx', ensoSignTx)
+    const safeTx = await safe.createTransaction({
+        transactions: [ensoSignTx],
+        onlyCalls: true,
+    });
+    console.log('safeTx', safeTx)
+    // Every transaction has a Safe (Smart Account) Transaction Hash different than the final transaction hash
+    const safeTxHash = await safe.getTransactionHash(safeTx)
+    // The AI agent signs this Safe (Smart Account) Transaction Hash
+    const signature = await safe.signHash(safeTxHash)
+
+    // Now the transaction with the signature is sent to the Transaction Service with the Api Kit:
+    const apiKit = new SafeApiKit({
+        chainId: BigInt(chain.id)
+    })
+
+    await apiKit.proposeTransaction({
+        safeAddress: safeAddress,
+        safeTransactionData: safeTx.data,
+        safeTxHash,
+        senderSignature: signature.data,
+        senderAddress: SIGNER_ADDRESS as `0x${string}`
+    })
+
+    // If the user has a delegated wallet, then provide the 2nd signature for the transaction and auto-execute
+    if (delegatedWallets.length > 0) {
+        console.log("Delegated wallet found", delegatedWallets[0].address)
+        // We assume there is only one pending transaction
+        const safeSignature = await customSignHash(delegatedWallets[0].address, safeTxHash)
+        await customConfirmation(safeSignature.data, safeTxHash, chain.id)
+
+        // As only one more signater is required, AI agent can execute the transaction:
+        // Need to refetch latest transaction that contains all signatures
+        const safeTransaction = await apiKit.getTransaction(safeTxHash)
+        const txResponse = await safe.executeTransaction(safeTransaction);
+        console.log(`Transaction executed successfully [${txResponse.hash}]`);
+        return txResponse.hash;
+    }
+
+}
 
 const processEnsoTransaction = async (chain: Chain, safeAddress: string, transaction: MetaTransactionData) => {
     const claims = await privy.getClaims();

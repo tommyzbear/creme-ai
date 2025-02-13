@@ -11,7 +11,6 @@ import { TokenData, Transfer } from "@/lib/services/alchemy";
 import { cn } from "@/lib/utils";
 import { usePortfolioStore } from "@/stores/portfolio-store";
 import { HoldingsDashboard } from "@/components/holdings-dashboard";
-import { ProfileCard } from "./profile-card";
 
 interface PortfolioContainerProps {
     className?: string;

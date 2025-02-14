@@ -1,13 +1,18 @@
 import { privy } from '@/lib/privy';
 import { arbitrum, base, mainnet, optimism } from 'viem/chains';
-import { StakeKitClient } from '@/lib/services/stakeKit';
+import { ensoService } from '@/lib/services/enso';
 
 export async function POST(req: Request) {
     try {
+        // Authenticate user
         await privy.getClaims();
 
-        const { chainId, inputAmount, DeFiOption, safeAddress } = await req.json();
-        console.log(chainId, inputAmount, DeFiOption, safeAddress)
+        const { chainId, tokens }: { chainId: string, tokens: `0x${string}`[] } = await req.json();
+
+        if (tokens.length === 0) {
+            throw new Error('No tokens provided');
+        }
+
         let chain;
         switch (chainId) {
             case 'eip155:1':
@@ -26,24 +31,19 @@ export async function POST(req: Request) {
                 throw new Error(`Unsupported chain: ${chainId}`);
         }
 
-        const stakeKitClient = new StakeKitClient({
-            apiKey: process.env.STAKEKIT_API_KEY || '',
-            network: chain.name
-        })
+        const tokenData = await ensoService.getTokenData(chain.id, undefined, tokens.filter(token => token.length === 42));
 
-        const seesion = await stakeKitClient.createTransactionSession('enter', DeFiOption, safeAddress, inputAmount)
-        const txHash = await stakeKitClient.processTransaction(seesion.transactions, safeAddress, chain)
+        if (tokenData.length === 0) {
+            throw new Error(`No tokens found, for ${tokens.join(', ')}`);
+        }
 
-        return Response.json({
-            success: true,
-            txHash
-        });
+        return Response.json(tokenData);
     } catch (error) {
-        console.error('Failed to swap WETH to stETH:', error);
+        console.error('Failed to get tokens:', error);
         return new Response(
             JSON.stringify({
                 success: false,
-                error: error instanceof Error ? error.message : 'Failed to swap WETH to stETH'
+                error: error instanceof Error ? error.message : 'Failed to get tokens'
             }),
             {
                 status: 500,

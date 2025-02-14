@@ -20,107 +20,81 @@ const SAFE_TRANSACTION_API_ARBITRUM = "https://safe-transaction-arbitrum.safe.gl
 const SAFE_TRANSACTION_API_OPTIMISM = "https://safe-transaction-optimism.safe.global"
 const SAFE_TRANSACTION_API_BASE = "https://safe-transaction-base.safe.global"
 const SAFE_TRANSACTION_API_MAINNET = "https://safe-transaction-mainnet.safe.global"
+const SUPPORTED_CHAINS = [arbitrum, optimism, base, mainnet]
 
 /////////////////////////////////////////////////////////////
 // Create a Safe
 /////////////////////////////////////////////////////////////
-const createSafe = async (chain: Chain, embeddedWalletAddress: string, ownerAddress: string) => {
+const createSafe = async (embeddedWalletAddress: string, ownerAddress: string) => {
     if (!SIGNER_ADDRESS || !SIGNER_PRIVATE_KEY || !embeddedWalletAddress) {
         throw new Error('Missing required environment variables')
     }
 
-    let safe = null
-
-    switch (chain.id) {
-        case arbitrum.id:
-            safe = await Safe.init({
-                provider: ALCHEMY_RPC.ARBITRUM_ONE,
-                signer: SIGNER_PRIVATE_KEY,
-                predictedSafe: {
-                    safeAccountConfig: {
-                        owners: [SIGNER_ADDRESS, embeddedWalletAddress, ownerAddress],
-                        threshold: 2
-                    }
-                }
-            })
-            break
-        case optimism.id:
-            safe = await Safe.init({
-                provider: ALCHEMY_RPC.OPTIMISM_MAINNET,
-                signer: SIGNER_PRIVATE_KEY,
-                predictedSafe: {
-                    safeAccountConfig: {
-                        owners: [SIGNER_ADDRESS, embeddedWalletAddress, ownerAddress],
-                        threshold: 2
-                    }
-                }
-            })
-            break
-        case base.id:
-            safe = await Safe.init({
-                provider: ALCHEMY_RPC.BASE_MAINNET,
-                signer: SIGNER_PRIVATE_KEY,
-                predictedSafe: {
-                    safeAccountConfig: {
-                        owners: [SIGNER_ADDRESS, embeddedWalletAddress, ownerAddress],
-                        threshold: 2
-                    }
-                }
-            })
-            break
-        case mainnet.id:
-            safe = await Safe.init({
-                provider: ALCHEMY_RPC.ETHEREUM_MAINNET,
-                signer: SIGNER_PRIVATE_KEY,
-                predictedSafe: {
-                    safeAccountConfig: {
-                        owners: [SIGNER_ADDRESS, embeddedWalletAddress, ownerAddress],
-                        threshold: 2
-                    }
-                }
-            })
-            break
-        default:
-            throw new Error(`Unsupported chain: ${chain}`)
+    const deploymentResults = []
+    // this should ensure same safe address for all chains
+    const predictedSafeConfig = {
+        safeAccountConfig: {
+            owners: [SIGNER_ADDRESS, embeddedWalletAddress, ownerAddress],
+            threshold: 2
+        }
     }
 
-    if (!safe) {
-        throw new Error('Failed to create safe')
+    for (const chain of SUPPORTED_CHAINS) {
+        try {
+            const safe = await Safe.init({
+                provider: getAlchemyRpcByChainId(chain.id),
+                signer: SIGNER_PRIVATE_KEY,
+                predictedSafe: predictedSafeConfig
+            })
+
+            if (!safe) {
+                throw new Error('Failed to create safe')
+            }
+
+            const isSafeDeployed = await safe.isSafeDeployed()
+            if (isSafeDeployed) {
+                console.log('Safe already deployed')
+                continue
+            }
+
+            const safeAddress = await safe.getAddress();
+            console.log('Safe address:', safeAddress);
+
+            const deploymentTransaction = await safe.createSafeDeploymentTransaction();
+            console.log('Deployment transaction:', deploymentTransaction);
+
+            const client = await safe.getSafeProvider().getExternalSigner();
+
+            if (!client) {
+                throw new Error('Failed to get external signer')
+            }
+
+            const transactionHash = await client.sendTransaction({
+                to: deploymentTransaction.to as `0x${string}`,
+                value: BigInt(deploymentTransaction.value),
+                data: deploymentTransaction.data as `0x${string}`,
+                chain: chain,
+            });
+            console.log('Transaction hash:', transactionHash);
+
+            const publicClient = createPublicClient({
+                chain: chain,
+                transport: http(),
+            });
+
+            const receipt = await publicClient.waitForTransactionReceipt({
+                hash: transactionHash,
+            });
+
+            console.log('Receipt:', receipt);
+            deploymentResults.push({ safe, safeAddress, deploymentTransaction, chain })
+        } catch (error) {
+            console.error('Failed to create safe for chain:', chain.id, error);
+            deploymentResults.push({ error: error })
+        }
     }
 
-    const safeAddress = await safe.getAddress();
-    console.log('Safe address:', safeAddress);
-
-    const deploymentTransaction = await safe.createSafeDeploymentTransaction();
-    console.log('Deployment transaction:', deploymentTransaction);
-
-    const client = await safe.getSafeProvider().getExternalSigner();
-
-    if (!client) {
-        throw new Error('Failed to get external signer')
-    }
-
-    const transactionHash = await client.sendTransaction({
-        to: deploymentTransaction.to as `0x${string}`,
-        value: BigInt(deploymentTransaction.value),
-        data: deploymentTransaction.data as `0x${string}`,
-        chain: chain,
-    });
-    console.log('Transaction hash:', transactionHash);
-
-    // const walletClient = createWalletClient({ transport: http(ALCHEMY_RPC.ETHEREUM_MAINNET), chain: chain });
-    const publicClient = createPublicClient({
-        chain: chain,
-        transport: http(),
-    });
-
-    const receipt = await publicClient.waitForTransactionReceipt({
-        hash: transactionHash,
-    });
-
-    console.log('Receipt:', receipt);
-
-    return { safe, safeAddress, deploymentTransaction }
+    return deploymentResults
 }
 
 /////////////////////////////////////////////////////////////
@@ -274,86 +248,76 @@ const preSignCowSwapTransaction = async (chain: Chain, safeAddress: string, tran
 }
 
 
-const processStakeKitTransaction = async (chain: Chain, safeAddress: string, 
+
+
+const processStakeKitTransaction = async (chain: Chain, safeAddress: string,
     transaction: MetaTransactionData) => {
     const claims = await privy.getClaims();
     const delegatedWallets = await privy.getDelegatedWallets(claims.userId);
-    
+
     const safe = await Safe.init({
         provider: getAlchemyRpcByChainId(chain.id),
         signer: SIGNER_PRIVATE_KEY,
         safeAddress: safeAddress,
     });
-        console.log('transaction', transaction)
-        const value = transaction.value ? transaction.value.toString() : "0"
-        const ensoSignTx: MetaTransactionData = {
-            to: transaction.to,
-            value: value,
-            data: transaction.data,
-            operation: OperationType.Call,
-        };
-        console.log('ensoSignTx', ensoSignTx)
-        const safeTx = await safe.createTransaction({
-            transactions: [ensoSignTx],
-            onlyCalls: true,
-        });
-        console.log('safeTx', safeTx)
-        // Every transaction has a Safe (Smart Account) Transaction Hash different than the final transaction hash
-        const safeTxHash = await safe.getTransactionHash(safeTx)
-        // The AI agent signs this Safe (Smart Account) Transaction Hash
-        const signature = await safe.signHash(safeTxHash)
-    
-        // Now the transaction with the signature is sent to the Transaction Service with the Api Kit:
-        const apiKit = new SafeApiKit({
-            chainId: BigInt(chain.id)
-        })
-    
-        await apiKit.proposeTransaction({
-            safeAddress: safeAddress,
-            safeTransactionData: safeTx.data,
-            safeTxHash,
-            senderSignature: signature.data,
-            senderAddress: SIGNER_ADDRESS as `0x${string}`
-        })
-    
-        // If the user has a delegated wallet, then provide the 2nd signature for the transaction and auto-execute
-        if (delegatedWallets.length > 0) {
-            console.log("Delegated wallet found", delegatedWallets[0].address)
-            // We assume there is only one pending transaction
-            const safeSignature = await customSignHash(delegatedWallets[0].address, safeTxHash)
-            await customConfirmation(safeSignature.data, safeTxHash, chain.id)
-    
-            // As only one more signater is required, AI agent can execute the transaction:
-            // Need to refetch latest transaction that contains all signatures
-            const safeTransaction = await apiKit.getTransaction(safeTxHash)
-            const txResponse = await safe.executeTransaction(safeTransaction);
-            console.log(`Transaction executed successfully [${txResponse.hash}]`);
-            return txResponse.hash;
-        }
-    
-}   
+    console.log('transaction', transaction)
+    const value = transaction.value ? transaction.value.toString() : "0"
+    const ensoSignTx: MetaTransactionData = {
+        to: transaction.to,
+        value: value,
+        data: transaction.data,
+        operation: OperationType.Call,
+    };
+    console.log('ensoSignTx', ensoSignTx)
+    const safeTx = await safe.createTransaction({
+        transactions: [ensoSignTx],
+        onlyCalls: true,
+    });
+    console.log('safeTx', safeTx)
+    // Every transaction has a Safe (Smart Account) Transaction Hash different than the final transaction hash
+    const safeTxHash = await safe.getTransactionHash(safeTx)
+    // The AI agent signs this Safe (Smart Account) Transaction Hash
+    const signature = await safe.signHash(safeTxHash)
+
+    // Now the transaction with the signature is sent to the Transaction Service with the Api Kit:
+    const apiKit = new SafeApiKit({
+        chainId: BigInt(chain.id)
+    })
+
+    await apiKit.proposeTransaction({
+        safeAddress: safeAddress,
+        safeTransactionData: safeTx.data,
+        safeTxHash,
+        senderSignature: signature.data,
+        senderAddress: SIGNER_ADDRESS as `0x${string}`
+    })
+
+    // If the user has a delegated wallet, then provide the 2nd signature for the transaction and auto-execute
+    if (delegatedWallets.length > 0) {
+        console.log("Delegated wallet found", delegatedWallets[0].address)
+        // We assume there is only one pending transaction
+        const safeSignature = await customSignHash(delegatedWallets[0].address, safeTxHash)
+        await customConfirmation(safeSignature.data, safeTxHash, chain.id)
+
+        // As only one more signater is required, AI agent can execute the transaction:
+        // Need to refetch latest transaction that contains all signatures
+        const safeTransaction = await apiKit.getTransaction(safeTxHash)
+        const txResponse = await safe.executeTransaction(safeTransaction);
+        console.log(`Transaction executed successfully [${txResponse.hash}]`);
+        return txResponse.hash;
+    }
+
+}
     
 const processEnsoTransaction = async (chain: Chain, safeAddress: string, transaction: MetaTransactionData) => {
     const claims = await privy.getClaims();
     const delegatedWallets = await privy.getDelegatedWallets(claims.userId);
 
-    const publicClient = createPublicClient({
-        chain: chain,
-        transport: http(),
-    });
-
-    // Log initial balances for debugging
-    console.log(
-        `ETH balance before: [${await publicClient.getBalance({
-            address: safeAddress as `0x${string}`,
-        })}]`
-    );
-    console.log('to', transaction.to)
+    // Need to convert to checksum address
     transaction.to = ethers.utils.getAddress(transaction.to)
-    console.log('checksumed to', transaction.to)
 
-    console.log('data', transaction.data)
-    console.log('value', transaction.value)
+    console.log('transaction', transaction)
+
     const safe = await Safe.init({
         provider: getAlchemyRpcByChainId(chain.id),
         signer: SIGNER_PRIVATE_KEY,
@@ -366,8 +330,6 @@ const processEnsoTransaction = async (chain: Chain, safeAddress: string, transac
         data: transaction.data,
         operation: OperationType.DelegateCall,
     };
-
-
 
     const safeTx = await safe.createTransaction({
         transactions: [ensoSignTx],

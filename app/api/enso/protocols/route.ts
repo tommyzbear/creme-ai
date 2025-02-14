@@ -1,7 +1,11 @@
+import { privy } from '@/lib/privy';
 import { ensoService } from '@/lib/services/enso';
 
 export async function GET() {
     try {
+        // Check if user is authenticated
+        await privy.getClaims();
+
         const protocols = await ensoService.getSupportedProtocols();
         return Response.json(protocols);
     } catch (error) {

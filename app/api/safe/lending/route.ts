@@ -1,13 +1,28 @@
 import { privy } from '@/lib/privy';
 import { safeService } from '@/lib/services/safe';
 import { arbitrum, base, mainnet, optimism } from 'viem/chains';
-import { enso } from '@/lib/services/enso';
+import { enso, ensoService } from '@/lib/services/enso';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
     try {
-        await privy.getClaims();
+        const claims = await privy.getClaims();
 
-        const { chainId, inputAmount, safeAddress } = await req.json();
+        const { data } = await supabase
+            .from('safe_wallets')
+            .select('*')
+            .eq('user_id', claims.userId)
+            .single();
+
+        if (!data) {
+            throw new Error('Safe wallet not found');
+        }
+
+        const { chainId, safeAddress, tokenIn } = await req.json();
+
+        if (safeAddress !== data.address) {
+            throw new Error('Please provide your own safe address');
+        }
 
         let chain;
         switch (chainId) {
@@ -27,15 +42,31 @@ export async function POST(req: Request) {
                 throw new Error(`Unsupported chain: ${chainId}`);
         }
 
+        const lendingTokens = await ensoService.getLendingTokens(chain.id, tokenIn as `0x${string}`);
+
+        if (lendingTokens.length === 0) {
+            throw new Error(`No lending tokens found, for ${tokenIn}`);
+        }
+
+        const lendingToken = lendingTokens[0];
+
+        const balances = await ensoService.getBalances(safeAddress, chain.id, false);
+
+        const balance = balances.find((balance) => balance.token === tokenIn);
+
+        if (!balance) {
+            throw new Error(`No balance found for ${tokenIn}`);
+        }
+
         // Get route data from Enso
         const routeRequest = {
             fromAddress: safeAddress,
             receiver: safeAddress,
             spender: safeAddress,
             chainId: chain.id,
-            amountIn: inputAmount,
-            tokenIn: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1" as `0x${string}`, // WETH on arbitrum
-            tokenOut: "0x5979D7b546E38E414F7E9822514be443A4800529" as `0x${string}`, // wstETH on arbitrum
+            amountIn: balance.amount,
+            tokenIn: tokenIn as `0x${string}`,
+            tokenOut: lendingToken.address,
             routingStrategy: "delegate" as const,
         };
 
@@ -57,11 +88,11 @@ export async function POST(req: Request) {
             txHash
         });
     } catch (error) {
-        console.error('Failed to swap WETH to stETH:', error);
+        console.error('Failed to lend tokens:', error);
         return new Response(
             JSON.stringify({
                 success: false,
-                error: error instanceof Error ? error.message : 'Failed to swap WETH to stETH'
+                error: error instanceof Error ? error.message : 'Failed to lend tokens'
             }),
             {
                 status: 500,

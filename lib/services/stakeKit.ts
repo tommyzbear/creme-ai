@@ -1,4 +1,3 @@
-import { fetch } from 'cross-fetch'
 import { safeService } from './safe'
 import { Chain } from 'viem'
 
@@ -141,6 +140,56 @@ interface FilteredYieldOpportunity {
   };
 }
 
+export interface BalanceResponse {
+  integrationId: string
+  groupId: string
+  type: string
+  amount: string
+  pricePerShare: string
+  pendingActions: string[]
+  token: {
+    name: string
+    symbol: string
+    decimals: number
+    network: string
+    address: string
+    logoURI: string
+  }
+}
+
+interface ActionListResponse {
+  data: {
+    integrationId: string,
+    status: string,
+    type: string,
+  }[],
+  hasNextPage: boolean,
+  page: number,
+}
+
+interface TokenInfo {
+  address: string;
+  symbol: string;
+  network: string;
+}
+
+interface FilteredYieldOpportunity {
+  id: string;
+  apy: number;
+  token: {
+    symbol: string;
+    address: string;
+    network: string;
+  };
+  metadata: {
+    type: string;
+    name: string;
+    provider: {
+      name: string;
+    };
+  };
+}
+
 export class StakeKitClient {
   private readonly config: Required<StakeKitConfig>
 
@@ -154,17 +203,19 @@ export class StakeKitClient {
 
   // 基础API方法
   private async request<T>(
-    method: 'GET' | 'POST' | 'PATCH', 
-    path: string, 
+    method: 'GET' | 'POST' | 'PATCH',
+    path: string,
     body?: Record<string, unknown>
   ): Promise<T> {
     const url = `${this.config.baseUrl}${path}`;
     console.log('Making request to:', url);
-    
+    ;
+    console.log('Making request to:', url);
+
     const headers = {
         'Content-Type': 'application/json',
         'X-API-KEY': this.config.apiKey
-    };
+    };;
 
     try {
         const response = await fetch(url, {
@@ -291,9 +342,9 @@ async getAvailableYields(network:string, type?:string): Promise<YieldOpportunity
     return this.request('GET', `/v1/transactions/${txId}`)
   }
 
-  
+
   async processTransaction(
-    transactions: any[], 
+    transactions: any[],
     walletAddress: string,
     chain: Chain,
   ) {
@@ -301,28 +352,39 @@ async getAvailableYields(network:string, type?:string): Promise<YieldOpportunity
     for (const tx of transactions) {
       if (tx.status === "SKIPPED") continue;
 
-    console.log(`Earn Agent => TX => ${tx.type}`);
-    let unsignedTx: any;
-    for (let i = 0; i < 3; i++) {
-      try {
-        unsignedTx = await this.request('PATCH', `/v1/transactions/${tx.id}`, {});
-        break;
-      } catch (err) {
-        console.log(`Attempt ${i + 1} => retrying...`);
-        console.log(err);
-        await new Promise((r) => setTimeout(r, 1000));
+      console.log(`Earn Agent => TX => ${tx.type}`);
+      let unsignedTx: any;
+      for (let i = 0; i < 3; i++) {
+        try {
+          unsignedTx = await this.request('PATCH', `/v1/transactions/${tx.id}`, {});
+          break;
+        } catch (err) {
+          console.log(`Attempt ${i + 1} => retrying...`);
+          console.log(err);
+          await new Promise((r) => setTimeout(r, 1000));
+        }
       }
-    }
-    if (!unsignedTx) {
-      console.log("cannot construct TX => skip");
-      console.log(tx);
-      continue;
-    }
-    const jsonTx = JSON.parse(unsignedTx.unsignedTransaction);
-    console.log(jsonTx);
-    const txHash = await safeService.processStakeKitTransaction(chain, walletAddress, jsonTx)
-    if (txHash) {
+      if (!unsignedTx) {
+        console.log("cannot construct TX => skip");
+        console.log(tx);
+        continue;
+      }
+      const jsonTx = JSON.parse(unsignedTx.unsignedTransaction);
+      console.log(jsonTx);
+      const txHash = await safeService.processStakeKitTransaction(chain, walletAddress, jsonTx)
+      if (txHash) {
       await new Promise((r) => setTimeout(r, 1000));
+        for (let i = 0; i < 3; i++) {
+          try {
+            await this.submitTransactionHash(tx.id, txHash)
+            break;
+          } catch (err) {
+            console.log(`Attempt ${i + 1} => retrying...`);
+            console.log(err);
+            await new Promise((r) => setTimeout(r, 1000));
+          }
+        }
+        await new Promise((r) => setTimeout(r, 1000));
         for (let i = 0; i < 3; i++) {
           try {
             await this.submitTransactionHash(tx.id, txHash)
@@ -337,8 +399,9 @@ async getAvailableYields(network:string, type?:string): Promise<YieldOpportunity
       }
     }
     return txs
-  } 
+  }
 
+  // 给token address，过滤和排序收益
   // 给token address，过滤和排序收益
   async filterAndSortYields(yields: YieldOpportunity[], tokenAddress?: string): Promise<YieldOpportunity[]> {
     return yields
@@ -346,7 +409,7 @@ async getAvailableYields(network:string, type?:string): Promise<YieldOpportunity
         const noCooldown = !y.metadata.cooldownPeriod || y.metadata.cooldownPeriod.days === 0
         const noWarmup = !y.metadata.warmupPeriod || y.metadata.warmupPeriod.days === 0
         const noWithdraw = !y.metadata.withdrawPeriod || y.metadata.withdrawPeriod.days === 0
-        const tokenMatch = tokenAddress ? y.token.address === tokenAddress : true  
+        const tokenMatch = tokenAddress ? y.token.address === tokenAddress : true
         return y.status.enter && y.status.exit && noCooldown && noWarmup && noWithdraw && tokenMatch
       })
       .sort((a, b) => b.apy - a.apy)

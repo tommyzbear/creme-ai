@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { parseEther } from "viem";
 import { WethToStethSwap } from "@/components/WethToStethSwap";
 import { StakeKitDefi } from "@/components/StakeKitDefi";
-import { SafePositions } from "@/components/SafePositions";
+import { SafePositions } from "@/components/safe-position";
 
 export default function SafePage() {
     const { user } = usePrivy();

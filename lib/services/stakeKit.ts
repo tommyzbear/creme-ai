@@ -453,21 +453,26 @@ export class StakeKitClient {
   ): Promise<FilteredYieldOpportunity[]> {
     console.log('Getting highest yields for:', { network, tokens, type });
 
-    const yields = await this.getTokenYieldOpportunities(network, tokens);
-    console.log('All yields before filtering:', yields);
+    try {
+      const yields = await this.getTokenYieldOpportunities(network, tokens);
+      console.log('All yields before filtering:', yields);
 
-    // Filter by type if specified
-    const filteredYields = type
-      ? yields.filter(y => y.metadata.type === type)
-      : yields;
+      // Filter by type if specified
+      const filteredYields = type
+        ? yields.filter(y => y.metadata.type === type)
+        : yields;
 
-    console.log('Yields after type filtering:', filteredYields);
+      console.log('Yields after type filtering:', filteredYields);
 
-    // Sort by APY in descending order
-    const sortedYields = filteredYields.sort((a, b) => b.apy - a.apy);
-    console.log('Final sorted yields:', sortedYields);
+      // Sort by APY in descending order
+      const sortedYields = filteredYields.sort((a, b) => b.apy - a.apy);
+      console.log('Final sorted yields:', sortedYields);
 
-    return sortedYields;
+      return sortedYields;
+    } catch (error) {
+      console.error('Error in getHighestYieldForTokens:', error);
+      throw error;
+    }
   }
 
   async createExitRequest(

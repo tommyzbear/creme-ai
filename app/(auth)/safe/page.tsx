@@ -18,7 +18,7 @@ import { TokensTable } from "@/components/tokens-table";
 import { TokensLending } from "@/components/tokens-lending";
 import { TokensLiquidityProvider } from "@/components/tokens-liquidity-provider";
 import { TokensUnstake } from "@/components/tokens-unstake";
-import { SafePositions } from "@/components/SafePositions";
+import { SafePositions } from "@/components/safe-position";
 
 export default function SafePage() {
     const { user } = usePrivy();

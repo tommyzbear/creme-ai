@@ -33,11 +33,6 @@ export function SideContent({ className }: { className?: string }) {
             <div className="flex flex-col gap-1 h-full">
                 <AccountCard onAccountClick={() => setAccountModalOpen(true)} />
                 <Card className="flex-1 overflow-hidden">
-                    {/* <div className="p-6">
-                        <h3 className="text-sm text-black">
-                            AI Manager Insight for the day <br /> or latest summary of tweets?
-                        </h3>
-                    </div> */}
                     <NewsFeed news={news} isLoading={isLoading} />
                 </Card>
                 <Card className="flex-1 overflow-hidden">

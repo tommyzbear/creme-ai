@@ -50,3 +50,8 @@ CREATE TABLE safe_wallets (
     chain_id TEXT NOT NULL,
     user_id TEXT NOT NULL REFERENCES account(id)
 );
+CREATE TABLE user_preferences (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    preferences JSONB NOT NULL,
+    user_id TEXT NOT NULL REFERENCES account(id)
+);

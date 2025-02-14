@@ -70,6 +70,8 @@ export async function POST(req: Request) {
             routingStrategy: "delegate" as const,
         };
 
+        console.log('routeRequest:', routeRequest);
+
         const routeData = await enso.getRouterData(routeRequest);
 
         if (!routeData || !routeData.tx) {

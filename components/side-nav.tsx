@@ -11,11 +11,22 @@ const shrikhand = Shrikhand({
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Home, Settings, ChartNoAxesCombined, History } from "lucide-react";
+import { Home, Settings, ChartNoAxesCombined, History, Vault, PiggyBank } from "lucide-react";
 import { SettingsModal } from "@/components/modals/settings-modal";
 import { AnalyticsModal } from "@/components/modals/analytics-modal";
 import { HistoricalModal } from "@/components/modals/historical-modal";
-export function SideNav({ className }: { className?: string }) {
+import { Preference } from "@/types/data";
+import { PreferencesDialog } from "./modals/preferences-dialog";
+
+interface SideNavProps {
+    className?: string;
+    preferences: Partial<Preference>;
+    setPreferences: (preferences: Partial<Preference>) => void;
+    setShowPreferences: (show: boolean) => void;
+    showPreferences: boolean;
+}
+
+export function SideNav({ className, preferences, setPreferences, setShowPreferences, showPreferences }: SideNavProps) {
     const [showSettings, setShowSettings] = useState(false);
     const [showAnalytics, setShowAnalytics] = useState(false);
     const [showHistory, setShowHistorical] = useState(false);
@@ -43,6 +54,9 @@ export function SideNav({ className }: { className?: string }) {
                     <Link href="/home" className="flex flex-col items-center gap-5 p-3">
                         <Home className="w-6 h-6 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
                     </Link>
+                    <Link href="/safe" className="flex flex-col items-center gap-5 p-3">
+                        <Vault className="w-6 h-6 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
+                    </Link>
                     <div className="p-3 mt-auto flex flex-col justify-center gap-5">
                         <History
                             className="w-6 h-6 text-neutral-400 hover:text-white cursor-pointer transition-colors"
@@ -51,6 +65,10 @@ export function SideNav({ className }: { className?: string }) {
                         <ChartNoAxesCombined
                             className="w-6 h-6 text-neutral-400 hover:text-white cursor-pointer transition-colors"
                             onClick={() => setShowAnalytics(true)}
+                        />
+                        <PiggyBank
+                            className="w-6 h-6 text-neutral-400 hover:text-white cursor-pointer transition-colors"
+                            onClick={() => setShowPreferences(true)}
                         />
                         <Settings
                             className="w-6 h-6 text-neutral-400 hover:text-white cursor-pointer transition-colors"
@@ -62,6 +80,12 @@ export function SideNav({ className }: { className?: string }) {
             <SettingsModal open={showSettings} onOpenChange={setShowSettings} />
             <AnalyticsModal open={showAnalytics} onOpenChange={setShowAnalytics} />
             <HistoricalModal open={showHistory} onOpenChange={setShowHistorical} />
+            <PreferencesDialog
+                preferences={preferences}
+                setPreferences={setPreferences}
+                open={showPreferences}
+                onOpenChange={setShowPreferences}
+            />
         </div>
     );
 }

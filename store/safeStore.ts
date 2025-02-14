@@ -15,7 +15,7 @@ interface SafeStore {
 
 export const useSafeStore = create<SafeStore>((set, get) => ({
     safeAddress: '',
-    selectedChain: 'eip155:1',
+    selectedChain: 'eip155:42161',
     balances: [],
     isLoading: false,
     setSafeAddress: (address) => set({ safeAddress: address }),

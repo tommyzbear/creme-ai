@@ -161,10 +161,10 @@ export default function SafePage() {
                                 <SelectValue placeholder="Select chain" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="eip155:1">Ethereum</SelectItem>
-                                <SelectItem value="eip155:10">Optimism</SelectItem>
-                                <SelectItem value="eip155:42161">Arbitrum</SelectItem>
-                                <SelectItem value="eip155:8453">Base</SelectItem>
+                                <SelectItem value="eip155:1" disabled>Ethereum (soon)</SelectItem>
+                                <SelectItem value="eip155:10" disabled>Optimism (soon)</SelectItem>
+                                <SelectItem value="eip155:42161" >Arbitrum</SelectItem>
+                                <SelectItem value="eip155:8453" disabled>Base (soon)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

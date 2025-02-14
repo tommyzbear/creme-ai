@@ -1,13 +1,5 @@
 "use client";
 
-import { Shrikhand } from "next/font/google";
-const shrikhand = Shrikhand({
-    weight: "400",
-    style: "normal",
-    subsets: ["latin"],
-    display: "swap",
-});
-
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -21,12 +13,20 @@ import { PreferencesDialog } from "./modals/preferences-dialog";
 interface SideNavProps {
     className?: string;
     preferences: Partial<Preference>;
-    setPreferences: (preferences: Partial<Preference>) => void;
+    setPreferences: (
+        preferences: Partial<Preference> | ((prev: Partial<Preference>) => Partial<Preference>)
+    ) => void;
     setShowPreferences: (show: boolean) => void;
     showPreferences: boolean;
 }
 
-export function SideNav({ className, preferences, setPreferences, setShowPreferences, showPreferences }: SideNavProps) {
+export function SideNav({
+    className,
+    preferences,
+    setPreferences,
+    setShowPreferences,
+    showPreferences,
+}: SideNavProps) {
     const [showSettings, setShowSettings] = useState(false);
     const [showAnalytics, setShowAnalytics] = useState(false);
     const [showHistory, setShowHistorical] = useState(false);
@@ -43,7 +43,7 @@ export function SideNav({ className, preferences, setPreferences, setShowPrefere
                 >
                     <span
                         className={cn(
-                            shrikhand.className,
+                            "font-shrikhand not-italic",
                             "rotate-[270deg] text-white text-2xl font-medium whitespace-nowrap"
                         )}
                     >

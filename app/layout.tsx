@@ -1,11 +1,20 @@
 import "./globals.css";
 
 import type { Metadata } from "next";
+import { Shrikhand } from "next/font/google";
 import localFont from "next/font/local";
 import Providers from "@/components/providers";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+
+const shrikhand = Shrikhand({
+    weight: "400",
+    style: "normal",
+    subsets: ["latin"],
+    display: "swap",
+    variable: "--font-shrikhand",
+});
 
 const bricolage = localFont({
     src: "./fonts/Bricolage.ttf",
@@ -72,7 +81,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="en">
-            <body className={`${ibm.variable} ${bricolage.variable} antialiased`}>
+            <body
+                className={`${ibm.variable} ${bricolage.variable} ${shrikhand.variable} antialiased`}
+            >
                 <Providers>{children}</Providers>
                 <Toaster />
                 <Analytics />

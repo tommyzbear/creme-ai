@@ -129,19 +129,19 @@ export interface TweetDbEntity {
 }
 
 export interface TweetEntity {
-    id: string | undefined,
-    username: string | undefined,
-    userId: string | undefined,
-    timestamp: number | undefined,
-    timeParsed: Date | undefined,
-    bookmarkCount: number | undefined,
-    likes: number | undefined,
-    replies: number | undefined,
-    retweets: number | undefined,
-    views: number | undefined,
-    text: string | undefined,
-    quotedTweet: TweetEntity | undefined,
-    retweetedTweet: TweetEntity | undefined,
+    id: string | undefined;
+    username: string | undefined;
+    userId: string | undefined;
+    timestamp: number | undefined;
+    timeParsed: Date | undefined;
+    bookmarkCount: number | undefined;
+    likes: number | undefined;
+    replies: number | undefined;
+    retweets: number | undefined;
+    views: number | undefined;
+    text: string | undefined;
+    quotedTweet: TweetEntity | undefined;
+    retweetedTweet: TweetEntity | undefined;
 }
 
 export interface Tweet {
@@ -211,8 +211,28 @@ export interface UserPreferences {
     user_id: string;
 }
 
+export type ExperienceLevel = "Beginner" | "Intermediate" | "Advanced" | "";
+export type ManagementFrequency = "Daily" | "Weekly" | "Monthly" | "Rarely" | "";
+export type DiversificationImportance =
+    | "Very important"
+    | "Somewhat important"
+    | "Not important"
+    | "";
+export type AutomatedExecutions = "Yes" | "Mixed" | "No" | "";
+export type RiskLevel = 1 | 2 | 3 | 4 | 5 | "";
+
 export interface Preference {
-    userProfile: UserProfile;
+    userProfile: {
+        experienceLevel: ExperienceLevel;
+        portfolioManagementFrequency: ManagementFrequency;
+        assetsHeld: {
+            bitcoin: boolean;
+            ethereum: boolean;
+            altcoins: boolean;
+            stablecoins: boolean;
+            defiTokens: boolean;
+        };
+    };
     investmentGoals: InvestmentGoals;
     preferredStrategies: PreferredStrategies;
     web3Engagement: Web3Engagement;
@@ -229,29 +249,33 @@ interface AssetsHeld {
 }
 
 interface UserProfile {
-    experienceLevel: 'Beginner' | 'Intermediate' | 'Advanced';
-    portfolioManagementFrequency: 'Daily' | 'Weekly' | 'Monthly' | 'Rarely';
+    experienceLevel: ExperienceLevel;
+    portfolioManagementFrequency: ManagementFrequency;
     assetsHeld: AssetsHeld;
 }
 
 interface InvestmentGoals {
-    goals: ('Long-term wealth accumulation' |
-        'Passive income through staking/yield farming' |
-        'High-risk, high-reward investing' |
-        'Portfolio diversification' |
-        'Other')[];
+    goals: (
+        | "Long-term wealth accumulation"
+        | "Passive income through staking/yield farming"
+        | "High-risk, high-reward investing"
+        | "Portfolio diversification"
+        | "Other"
+    )[];
     otherGoal?: string;
-    riskLevel: 1 | 2 | 3 | 4 | 5;
+    riskLevel: RiskLevel;
 }
 
 interface PreferredStrategies {
-    strategies: ('HODLing' |
-        'Active rebalancing' |
-        'Yield farming & liquidity provision' |
-        'Staking for passive income' |
-        'Other')[];
+    strategies: (
+        | "HODLing"
+        | "Active rebalancing"
+        | "Yield farming & liquidity provision"
+        | "Staking for passive income"
+        | "Other"
+    )[];
     otherStrategy?: string;
-    diversificationImportance: 'Very important' | 'Somewhat important' | 'Not important';
+    diversificationImportance: DiversificationImportance;
 }
 
 interface ActiveBlockchainEcosystems {
@@ -269,11 +293,13 @@ interface Web3Engagement {
 }
 
 interface AiCustomizationPreferences {
-    aiRecommendations: ('Market trends & analysis' |
-        'Portfolio rebalancing suggestions' |
-        'Yield optimization opportunities' |
-        'Indicator signals')[];
-    automatedExecutions: 'Yes' | 'Mixed' | 'No';
+    aiRecommendations: (
+        | "Market trends & analysis"
+        | "Portfolio rebalancing suggestions"
+        | "Yield optimization opportunities"
+        | "Indicator signals"
+    )[];
+    automatedExecutions: AutomatedExecutions;
     marketMovementAlerts: boolean;
     additionalFeatures?: string;
 }

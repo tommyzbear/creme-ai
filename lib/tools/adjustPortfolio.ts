@@ -96,6 +96,8 @@ export const adjustPortfolio = {
 
             let updatedPortfolio: AllocationEntry[] = draftPortfolio.portfolio;
 
+            console.log("tokenAdjustment", tokenAdjustment);
+
             // First remove all the tokens that are being set to zero weighting
             if (tokenAdjustment.find((t: { token: string, weight: number }) => t.weight === undefined || t.weight === 0)) {
                 tokenAdjustment.forEach(async (t: { token: string, weight: number }) => {

@@ -41,19 +41,19 @@ export function SideNav({ className }: { className?: string }) {
                 </Link>
                 <div className="flex-1 min-h-0 bg-black/90 flex flex-col rounded-3xl items-center">
                     <Link href="/home" className="flex flex-col items-center gap-5 p-3">
-                        <Home className="w-6 h-6 text-neutral-400 hover:text-white cursor-pointer transition-colors" />
+                        <Home className="w-6 h-6 text-white/50 hover:text-white cursor-pointer transition-colors" />
                     </Link>
                     <div className="p-3 mt-auto flex flex-col justify-center gap-5">
                         <History
-                            className="w-6 h-6 text-neutral-400 hover:text-white cursor-pointer transition-colors"
+                            className="w-6 h-6 text-white/50 hover:text-white cursor-pointer transition-colors"
                             onClick={() => setShowHistorical(true)}
                         />
                         <ChartNoAxesCombined
-                            className="w-6 h-6 text-neutral-400 hover:text-white cursor-pointer transition-colors"
+                            className="w-6 h-6 text-white/50 hover:text-white cursor-pointer transition-colors"
                             onClick={() => setShowAnalytics(true)}
                         />
                         <Settings
-                            className="w-6 h-6 text-neutral-400 hover:text-white cursor-pointer transition-colors"
+                            className="w-6 h-6 text-white/50 hover:text-white cursor-pointer transition-colors"
                             onClick={() => setShowSettings(true)}
                         />
                     </div>

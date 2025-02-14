@@ -11,7 +11,8 @@ export const enso = new EnsoClient({ apiKey: API_KEY });
 const WHITELISTED_LENDING_PROTOCOLS = ["aave-v3", "radiant-v2"]
 const WHITELISTED_LP_PROTOCOLS = ["balancer-v2", "sushiswap", "camelot-v2"]
 
-const getTokenData = async (chainId: number, underlyingTokens?: Address | Address[], address?: Address | Address[]) => {
+
+const getTokenData = async (chainId: number, underlyingTokens?: Address | Address[], address?: Address) => {
     const tokenData = await enso.getTokenData({
         underlyingTokens,
         address,
@@ -19,7 +20,7 @@ const getTokenData = async (chainId: number, underlyingTokens?: Address | Addres
         includeMetadata: true,
     })
 
-    return tokenData.data;
+    return tokenData.data.map((token) => ({ ...token, address: token.address.toLowerCase() as Address }));
 }
 
 const getSupportedProtocols = async () => {
@@ -64,21 +65,42 @@ const getRouterData = async (routeParams: RouteParams) => {
     }
 }
 
-const getBalances = async (address: `0x${string}`, chainId: number, useEoa: boolean = true) => {
-    const balances = await enso.getBalances({
-        eoaAddress: address,
-        chainId,
-        useEoa,
-    })
-
-    return balances;
-}
-
 export const ensoService = {
     getTokenData,
     getSupportedProtocols,
     getLendingTokens,
     getLpTokens,
-    getRouterData,
-    getBalances
+    getRouterData
 }
+
+// export async function getRouterData(  routeParams: RouteParams) {
+//     try {
+//         const response = await enso.getRouterData(routeParams);
+//         return response;
+//     } catch (error) {
+//         console.error('Error in getRouterData:', error);
+//         return null;
+//     }
+// }
+
+//If the EoA doesn't hold enough funds or allowance to execute the transaction, 
+//the route endpoint won't be able to calculate the best route.
+// export async function getQuoteData(quoteParams: QuoteParams) {
+//     try {
+//         const quote = await enso.getQuoteData(quoteParams);
+//         return quote;
+//     } catch (error) {
+//         console.error('Error in getQuoteData:', error);
+//         return null;
+//     }
+// }
+
+// export async function getApproveData(approveParams: ApproveParams) {
+//     try {
+//         const approve = await enso.getApprovalData(approveParams);
+//         return approve;
+//     } catch (error) {
+//         console.error('Error in getApproveData:', error);
+//         return null;
+//     }
+// }

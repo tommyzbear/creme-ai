@@ -1,11 +1,23 @@
-import { privy } from '@/lib/privy';
+import { privyClient } from '@/lib/privy';
+import { cookies } from 'next/headers';
 import { safeService } from '@/lib/services/safe';
 import { arbitrum, base, mainnet, optimism } from 'viem/chains';
 import { enso } from '@/lib/services/enso';
 
 export async function POST(req: Request) {
     try {
-        await privy.getClaims();
+        const cookieStore = await cookies();
+        const cookieAuthToken = cookieStore.get("privy-token");
+
+        if (!cookieAuthToken) {
+            throw new Error('Unauthorized');
+        }
+
+        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
+
+        if (!claims) {
+            throw new Error('Unauthorized');
+        }
 
         const { chainId, inputAmount, safeAddress } = await req.json();
 
@@ -29,9 +41,9 @@ export async function POST(req: Request) {
 
         // Get route data from Enso
         const routeRequest = {
-            fromAddress: safeAddress,
-            receiver: safeAddress,
-            spender: safeAddress,
+            fromAddress: safeAddress ,
+            receiver: safeAddress ,
+            spender: safeAddress ,
             chainId: chain.id,
             amountIn: inputAmount,
             tokenIn: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1" as `0x${string}`, // WETH on arbitrum
@@ -46,6 +58,7 @@ export async function POST(req: Request) {
         }
 
         // Create and sign transaction using Safe
+        //console.log(routeData)
         const txHash = await safeService.processEnsoTransaction(
             chain,
             safeAddress,

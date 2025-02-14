@@ -53,7 +53,7 @@ const INDEX_CONSTITUENTS: TokenAllocation[] = [
         token: "Chainlink",
         symbol: "LINK",
         percentage: 12.37,
-        address: "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4",
+        address: "0xf97f4df75117a78c1a5a0dbb814af92458539fb4",
         decimals: 18
     }
 ];

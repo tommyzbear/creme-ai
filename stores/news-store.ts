@@ -17,6 +17,7 @@ export const useNewsStore = create<NewsStore>((set) => ({
             set({ isLoading: true });
             const response = await fetch("/api/news");
             const news = await response.json();
+            console.log(news);
             set({ news, isLoading: false });
         } catch (error) {
             console.error("Error fetching news:", error);

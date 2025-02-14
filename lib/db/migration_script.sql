@@ -47,6 +47,5 @@ CREATE TABLE safe_wallets (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     address TEXT NOT NULL,
     deployment_tx TEXT NOT NULL,
-    chain_id TEXT NOT NULL,
     user_id TEXT NOT NULL REFERENCES account(id)
 );

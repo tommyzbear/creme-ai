@@ -63,6 +63,8 @@ export const swapTokens = {
             const inputTokenInfo = SUPPORTED_TOKENS_BY_CHAIN[caip2][inputToken];
             const outputTokenInfo = SUPPORTED_TOKENS_BY_CHAIN[caip2][outputToken];
 
+            console.log("inputTokenInfo", inputTokenInfo);
+            console.log("outputTokenInfo", outputTokenInfo);
             const amountInDecimals = inputTokenInfo.decimals === 18 ? parseEther(amount.toString()).toString(10) : parseUnits(amount.toString(), inputTokenInfo.decimals).toString(10);
 
             const quote = await odosClient.getQuote(

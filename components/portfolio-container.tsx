@@ -11,6 +11,7 @@ import { TokenData, Transfer } from "@/lib/services/alchemy";
 import { cn } from "@/lib/utils";
 import { usePortfolioStore } from "@/stores/portfolio-store";
 import { HoldingsDashboard } from "@/components/holdings-dashboard";
+import { ProfileCard } from "./profile-card";
 
 interface PortfolioContainerProps {
     className?: string;
@@ -83,7 +84,6 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
         if (
             relevantTokens.length === 0 &&
             relevantTransactions.length === 0 &&
-            selectedWalletAddress &&
             !fetchAttempted[selectedWalletAddress]
         ) {
             setFetchAttempted((prev) => ({ ...prev, [selectedWalletAddress]: true }));
@@ -121,26 +121,21 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
         if (selectedWalletAddress) {
             const isManaged = selectedWalletAddress !== user?.wallet?.address;
             const relevantTokens = isManaged ? managedWalletTokens : userWalletTokens;
-            const relevantTransactions = isManaged
-                ? managedWalletTransactions
-                : userWalletTransactions;
+            const relevantTransactions = isManaged ? managedWalletTransactions : userWalletTransactions;
 
             if (
                 relevantTokens.length === 0 &&
                 relevantTransactions.length === 0 &&
-                selectedWalletAddress &&
                 !fetchAttempted[selectedWalletAddress]
             ) {
                 setFetchAttempted((prev) => ({ ...prev, [selectedWalletAddress]: true }));
-                fetchPortfolioData(selectedWalletAddress, wallets[0].chainId, isManaged).catch(
-                    () => {
-                        toast({
-                            variant: "destructive",
-                            title: "Error",
-                            description: "Failed to fetch token data",
-                        });
-                    }
-                );
+                fetchPortfolioData(selectedWalletAddress, wallets[0].chainId, isManaged).catch(() => {
+                    toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: "Failed to fetch token data",
+                    });
+                });
             }
         }
     }, [selectedWalletAddress, fetchPortfolioData, walletReady]);
@@ -193,8 +188,6 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
     };
 
     const handlePortfolioRefresh = async () => {
-        if (!selectedWalletAddress) return;
-
         await fetchPortfolioData(
             selectedWalletAddress,
             wallets[0].chainId,
@@ -208,11 +201,11 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
 
     return (
         <div
-            className={cn("max-w-full mx-auto h-screen overflow-hidden", className)}
+            className={cn("max-w-5xl mx-auto h-screen overflow-hidden", className)}
             onFocus={() => {
                 onFocus?.();
             }}
-            onBlur={() => {}}
+            onBlur={() => { }}
             tabIndex={0}
         >
             <div
@@ -255,9 +248,9 @@ export function PortfolioContainer({ className, onFocus, lastFocus }: PortfolioC
                             >
                                 {selectedWalletAddress
                                     ? `${selectedWalletAddress.slice(
-                                          0,
-                                          6
-                                      )}...${selectedWalletAddress.slice(-4)}`
+                                        0,
+                                        6
+                                    )}...${selectedWalletAddress.slice(-4)}`
                                     : "Not Connected"}
                                 {selectedWalletAddress &&
                                     (isCopied ? (

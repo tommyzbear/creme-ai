@@ -81,7 +81,6 @@ const config: Config = {
                 "6xl": "3rem",
                 "7xl": "4rem",
                 "8xl": "5rem",
-                "9xl": "6rem",
             },
             borderRadius: {
                 lg: "var(--radius)",
@@ -120,10 +119,6 @@ const config: Config = {
                 "b-sm": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
                 "b-md": "0 2px 4px -1px rgb(0 0 0 / 0.1)",
                 "b-lg": "0 4px 6px -2px rgb(0 0 0 / 0.1)",
-            },
-            screens: {
-                "3xl": "1920px", // 120rem
-                "4xl": "2560px", // 160rem
             },
         },
     },

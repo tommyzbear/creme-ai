@@ -40,7 +40,7 @@ export default async function Layout({
             <GradientBackground />
             <PageTransition delay={0.5}>
                 <div className="flex gap-3 px-2 py-3 w-screen h-screen relative">
-                    <LeftAside className="w-[21rem] 4xl:w-[30rem] max-h-full h-full transition-[width] duration-700 ease-out" />
+                    <LeftAside />
                     <main className="flex w-full h-full">{children}</main>
                 </div>
             </PageTransition>

@@ -33,8 +33,7 @@ export interface TokenData {
     price: string
     value: string
     contractAddress: string
-    logo: string,
-    type?: string
+    logo: string
 }
 
 export interface Transfer {

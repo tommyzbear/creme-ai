@@ -40,7 +40,7 @@ export function TransactionsTable({
             <TableCell
                 className={cn(
                     "overflow-hidden transition-[width] duration-200",
-                    isExpanded ? "w-[110px] 4xl:w-[300px]" : "4xl:w-[300px] w-0 p-0"
+                    isExpanded ? "w-[110px]" : "w-0 p-0"
                 )}
             >
                 <Skeleton className="h-4 w-full" />
@@ -65,7 +65,7 @@ export function TransactionsTable({
                         <TableHead
                             className={cn(
                                 "overflow-hidden transition-[width] duration-200",
-                                isExpanded ? "w-[110px] 4xl:w-[300px]" : "4xl:w-[300px] w-0 p-0"
+                                isExpanded ? "w-[110px]" : "w-0 p-0"
                             )}
                         >
                             Txn
@@ -97,9 +97,7 @@ export function TransactionsTable({
                                 <TableCell
                                     className={cn(
                                         "overflow-hidden transition-[width] duration-200",
-                                        isExpanded
-                                            ? "w-[110px] 4xl:w-[300px]"
-                                            : "4xl:w-[300px] w-0 p-0"
+                                        isExpanded ? "w-[110px]" : "w-0 p-0"
                                     )}
                                 >
                                     <div className="">

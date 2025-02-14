@@ -1,10 +1,22 @@
-import { privy } from '@/lib/privy';
+import { privyClient } from '@/lib/privy';
+import { cookies } from 'next/headers';
 import { safeService } from '@/lib/services/safe';
 import { arbitrum, base, mainnet, optimism } from 'viem/chains';
 
 export async function POST(req: Request) {
     try {
-        await privy.getClaims();
+        const cookieStore = await cookies();
+        const cookieAuthToken = cookieStore.get("privy-token");
+
+        if (!cookieAuthToken) {
+            throw new Error('Unauthorized');
+        }
+
+        const claims = await privyClient.verifyAuthToken(cookieAuthToken.value);
+
+        if (!claims) {
+            throw new Error('Unauthorized');
+        }
 
         const { chainId, inputAmount, safeAddress } = await req.json();
 

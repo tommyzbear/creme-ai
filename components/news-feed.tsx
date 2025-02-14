@@ -7,7 +7,7 @@ type NewsFeedProps = {
 };
 
 export function NewsFeed({ news, isLoading }: NewsFeedProps) {
-    if (isLoading || !news) {
+    if (isLoading) {
         return (
             <div className="h-full overflow-y-auto">
                 <div className="space-y-2 p-4">

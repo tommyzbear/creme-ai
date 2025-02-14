@@ -13,6 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { parseEther } from "viem";
 import { WethToStethSwap } from "@/components/WethToStethSwap";
 import { StakeKitDefi } from "@/components/StakeKitDefi";
+import { SafePositions } from "@/components/SafePositions";
+
 export default function SafePage() {
     const { user } = usePrivy();
     const { wallets } = useWallets();
@@ -214,48 +216,55 @@ export default function SafePage() {
                 </Card>
             </div>
 
-            {safeAddress && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Safe Details</CardTitle>
-                        <CardDescription>
-                            Your newly created Safe wallet details
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-2">
-                            <div>
-                                <Label>Safe Address</Label>
-                                <p className="font-mono text-sm mt-1">{safeAddress}</p>
-                            </div>
-                            <Separator />
-                            <div>
-                                <Label>Chain</Label>
-                                <p className="text-sm mt-1">
-                                    {selectedChain === "eip155:1" && "Ethereum"}
-                                    {selectedChain === "eip155:10" && "Optimism"}
-                                    {selectedChain === "eip155:42161" && "Arbitrum"}
-                                    {selectedChain === "eip155:8453" && "Base"}
-                                </p>
-                            </div>
-                            <Separator />
-                            <div>
-                                <Label>Owners</Label>
-                                <div className="space-y-1 mt-1">
-                                    <p className="font-mono text-sm">{user?.wallet?.address}</p>
-                                    <p className="font-mono text-sm">{managedWallet?.address}</p>
+            {1 && (
+                <div className="grid gap-8 md:grid-cols-2">
+                    <div>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Safe Details</CardTitle>
+                                <CardDescription>
+                                    Your newly created Safe wallet details
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-2">
+                                    <div>
+                                        <Label>Safe Address</Label>
+                                        <p className="font-mono text-sm mt-1">{safeAddress}</p>
+                                    </div>
+                                    <Separator />
+                                    <div>
+                                        <Label>Chain</Label>
+                                        <p className="text-sm mt-1">
+                                            {selectedChain === "eip155:1" && "Ethereum"}
+                                            {selectedChain === "eip155:10" && "Optimism"}
+                                            {selectedChain === "eip155:42161" && "Arbitrum"}
+                                            {selectedChain === "eip155:8453" && "Base"}
+                                        </p>
+                                    </div>
+                                    <Separator />
+                                    <div>
+                                        <Label>Owners</Label>
+                                        <div className="space-y-1 mt-1">
+                                            <p className="font-mono text-sm">{user?.wallet?.address}</p>
+                                            <p className="font-mono text-sm">{managedWallet?.address}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                            </CardContent>
+                        </Card>
+                        <div className="space-y-8"  >
+                        <StakeKitDefi />
+                    </div>
+                    </div>
+                    <div className="space-y-8">
+                        <SafePositions chainId={selectedChain} />
+                        <WethToStethSwap />
+                        
+                    </div>
+                    
+                </div>
             )}
-            <div className="grid gap-8 md:grid-cols-2">
-                <WethToStethSwap />
-            </div>            
-            <div className="grid gap-8 md:grid-cols-2">
-                <StakeKitDefi />
-            </div>
         </div>
     );
 } 

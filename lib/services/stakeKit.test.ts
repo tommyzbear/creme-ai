@@ -23,7 +23,7 @@ async function runTests() {
   }
   try{
     const seesion = await client.createTransactionSession('enter', 'arbitrum-weth-aave-v3-lending', signer.address, '0.001')
-    await client.processTransaction(seesion.transactions, signer)
+    //await client.processTransaction(seesion.transactions, signer)
 
    
     // const signedTx = await walletClient.signTransaction({

@@ -97,6 +97,32 @@ interface Response {
   data: string
 }
 
+export interface BalanceResponse {
+  groupId: string
+  type: string
+  amount: string
+  pricePerShare: string
+  pendingActions: string[]
+  token: {
+    name: string
+    symbol: string
+    decimals: number
+    network: string
+    address: string
+    logoURI: string
+  }
+}
+
+interface ActionListResponse {
+  data: {
+    integrationId: string,
+    status: string,
+    type: string,
+  }[],
+  hasNextPage: boolean,
+  page: number,
+}
+
 export class StakeKitClient {
   private readonly config: Required<StakeKitConfig>
 
@@ -140,75 +166,52 @@ export class StakeKitClient {
     }
   }
 
-  // 获取所有收益机会
-  async getAllYieldOpportunities(): Promise<YieldOpportunity[]> {
-    interface YieldResponse {
-      data: YieldOpportunity[]
-    }
-    
-    return this.request<YieldResponse>('GET', `/v2/yields?network=${this.config.network}`)
-      .then(resp => resp.data)
-  }
+  // 获取integrationIds
+  async getIntegrationIdsByAddress(address: string,  status?: string): Promise<string[]> {
+    const integrationIds: Set<string> = new Set()
+    let currentPage = 1
+    let hasNextPage = true
 
-  // 获取用户持仓
-  async getEarningPositions(address: string): Promise<EarningPosition[]> {
-    const allYields = await this.getAllYieldOpportunities()
-    const chunkSize = 15
-    const positions: EarningPosition[] = []
+    while (hasNextPage) {
+      try {
+        const resp = await this.request<ActionListResponse>(
+          'GET', 
+          `/v1/actions?walletAddress=${address}&page=${currentPage}`
+        )
 
-    interface BalanceResponse {
-      integrationId: string
-      balances: Array<{
-        type: string
-        amount: string
-      }>
-    }
+        // Filter data if network and status are provided
+        const filteredData = status 
+          ? resp.data.filter(item => item.status === status)
+          : resp.data
 
-    for (let i = 0; i < allYields.length; i += chunkSize) {
-      const chunk = allYields.slice(i, i + chunkSize)
-      const payload = chunk.map(y => ({
-        addresses: { address },
-        integrationId: y.id
-      }))
+        // Add filtered integration IDs to Set to avoid duplicates
+        filteredData.forEach(item => integrationIds.add(item.integrationId))
 
-      const resp = await this.request<BalanceResponse[]>('POST', '/v1/yields/balances', { payload })
-      
-      for (const item of resp) {
-        const staked = item.balances.find(b => b.type === 'staked')
-        if (staked && parseFloat(staked.amount) > 0) {
-          positions.push({
-            integrationId: item.integrationId,
-            amount: staked.amount
-          })
-        }
+        hasNextPage = resp.hasNextPage
+        currentPage++
+
+        // Optional: Add delay to prevent rate limiting
+        await new Promise(resolve => setTimeout(resolve, 100))
+      } catch (error) {
+        console.error('Error fetching integration IDs:', error)
+        break // Exit loop on error but return what we have
       }
     }
 
-    return positions
+    return Array.from(integrationIds)
   }
-
-  // 获取用户余额
-  async getUserBalances(address: string): Promise<BalanceResult[]> {
-    const yields = await this.getAllYieldOpportunities()
-    const tokens = new Set(yields.map(y => y.token.address?.toLowerCase()))
-
-    const payload = Array.from(tokens).map(addr => ({
-      network: this.config.network,
-      address,
-      ...(addr && { tokenAddress: addr })
-    }))
-
-    const resp = await this.request<Array<{
-      token: { address?: string; symbol: string }
-      amount: string
-    }>>('POST', '/v1/tokens/balances', { addresses: payload })
-
-    return resp.map(b => ({
-      tokenAddress: b.token.address?.toLowerCase(),
-      symbol: b.token.symbol,
-      amount: b.amount
-    })).filter(b => parseFloat(b.amount) > 0)
+    // 获取用户持仓
+async getYieldBalance(address: string): Promise<BalanceResponse[]> {
+  const balances: BalanceResponse[] = []
+  const integrationIds = await this.getIntegrationIdsByAddress(address)
+  for (const integrationId of integrationIds) {
+    const resp = await this.request<BalanceResponse>('POST', `/v1/yields/${integrationId}/balances`, {
+      addresses: { address }
+    })
+    balances.push(resp)
   }
+  return balances
+}
 
   // 创建存款/取款会话
   async createTransactionSession(
@@ -260,20 +263,24 @@ export class StakeKitClient {
     console.log(jsonTx);
     const txHash = await safeService.processStakeKitTransaction(chain, walletAddress, jsonTx)
     if (txHash) {
+      await new Promise((r) => setTimeout(r, 1000));
+        for (let i = 0; i < 3; i++) {
+          try {
+            await this.submitTransactionHash(tx.id, txHash)
+            break;
+          } catch (err) {
+            console.log(`Attempt ${i + 1} => retrying...`);
+            console.log(err);
+            await new Promise((r) => setTimeout(r, 1000));
+          }
+        }
         txs.push(txHash)
       }
     }
     return txs
   } 
 
-  // 提交已签名交易
-  async submitSignedTransaction(txId: string, signedTx: string): Promise<SignedTransactionResponse> {
-    return this.request('POST', `/v1/transactions/${txId}/submit`, {
-      signedTransaction: signedTx
-    })
-  }
-
-  // 过滤和排序收益机会
+  // 给token address，过滤和排序收益
   async filterAndSortYields(yields: YieldOpportunity[], tokenAddress?: string): Promise<YieldOpportunity[]> {
     return yields
       .filter(y => {
@@ -285,6 +292,13 @@ export class StakeKitClient {
       })
       .sort((a, b) => b.apy - a.apy)
   }
+
+  async submitTransactionHash(txsID: string, hash: string): Promise<Response> {
+    return this.request('POST', `/v1/transactions/${txsID}/submit_hash`, {
+      hash: hash
+    })
+  }
 }
+
 
 

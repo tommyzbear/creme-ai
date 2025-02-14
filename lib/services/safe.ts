@@ -272,6 +272,8 @@ const preSignCowSwapTransaction = async (chain: Chain, safeAddress: string, tran
         console.log(`Transaction executed successfully [${txResponse.hash}]`);
     }
 }
+
+
 const processStakeKitTransaction = async (chain: Chain, safeAddress: string, 
     transaction: MetaTransactionData) => {
     const claims = await privy.getClaims();
@@ -330,7 +332,7 @@ const processStakeKitTransaction = async (chain: Chain, safeAddress: string,
         }
     
 }   
-
+    
 const processEnsoTransaction = async (chain: Chain, safeAddress: string, transaction: MetaTransactionData) => {
     const claims = await privy.getClaims();
     const delegatedWallets = await privy.getDelegatedWallets(claims.userId);

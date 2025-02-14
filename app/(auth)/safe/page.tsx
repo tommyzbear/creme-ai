@@ -11,13 +11,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { parseEther } from "viem";
-import { WethToStethSwap } from "@/components/WethToStethSwap";
 import { StakeKitDefi } from "@/components/StakeKitDefi";
 import { useSafeStore } from '@/store/safeStore';
 import { TokensTable } from "@/components/tokens-table";
 import { TokensLending } from "@/components/tokens-lending";
 import { TokensLiquidityProvider } from "@/components/tokens-liquidity-provider";
 import { TokensUnstake } from "@/components/tokens-unstake";
+import { StakeKitPositions } from "@/components/stake-kit-positions";
 
 export default function SafePage() {
     const { user } = usePrivy();
@@ -235,7 +235,7 @@ export default function SafePage() {
                     </Card>
                 )}
 
-                <div className="h-full overflow-y-auto space-y-8 pb-8">
+                <div className="space-y-8 pb-8">
                     <div className="grid gap-8 md:grid-cols-2">
                         <Card>
                             <CardHeader>
@@ -281,10 +281,12 @@ export default function SafePage() {
                                 </form>
                             </CardContent>
                         </Card>
-                    </div>
-                    <div className="grid gap-8 md:grid-cols-2 hidden">
-                        <WethToStethSwap />
-                        <StakeKitDefi />
+
+                        <StakeKitDefi
+                            safeAddress={safeAddress}
+                            selectedChain={selectedChain}
+                        />
+                        <StakeKitPositions chainId={selectedChain} />
                     </div>
 
                     <div className="grid gap-8 md:grid-cols-3">

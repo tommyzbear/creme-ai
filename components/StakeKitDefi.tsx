@@ -3,24 +3,89 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { parseEther } from "viem";
 
-const DEFI_OPTIONS = [
-    { id: "arbitrum-weth-aave-v3-lending", name: "Aave V3 Lending" },
-    { id: "arbitrum-weth-compound-v3", name: "Compound V3" },
-    { id: "arbitrum-weth-radiant-v2", name: "Radiant V2" },
-];
+interface YieldOption {
+    id: string;
+    name: string;
+    apy: number;
+    token: {
+        symbol: string;
+        address: string;
+    };
+}
 
-export function StakeKitDefi() {
+interface StakeKitDefiProps {
+    safeAddress: string;
+    selectedChain: string;
+}
+
+export function StakeKitDefi({ safeAddress, selectedChain }: StakeKitDefiProps) {
     const [isStaking, setIsStaking] = useState(false);
-    const [selectedChain, setSelectedChain] = useState("eip155:42161"); // Default to Arbitrum
-    const [safeAddress, setSafeAddress] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const [amount, setAmount] = useState("");
-    const [selectedDeFi, setSelectedDeFi] = useState(DEFI_OPTIONS[0].id);
+    const [yieldOptions, setYieldOptions] = useState<YieldOption[]>([]);
+    const [selectedDeFi, setSelectedDeFi] = useState("");
     const { toast } = useToast();
+
+    // Fetch yield opportunities when safe address or chain changes
+    useEffect(() => {
+        const fetchYieldOpportunities = async () => {
+            if (!safeAddress) return;
+
+            setIsLoading(true);
+            try {
+                console.log('Fetching tokens for safe:', safeAddress, 'on chain:', selectedChain);
+
+                // First get the safe's tokens
+                const response = await fetch(`/api/safe/tokens?address=${safeAddress}&chainId=${selectedChain}`);
+                const tokens = await response.json();
+                console.log('Tokens found:', tokens);
+
+                // Then get yield opportunities for these tokens
+                const tokenPayload = tokens.map((token: any) => ({
+                    address: token.contractAddress,
+                    symbol: token.symbol,
+                    network: selectedChain.split(':')[1]
+                }));
+                console.log('Requesting yield opportunities for tokens:', tokenPayload);
+
+                const yieldsResponse = await fetch('/api/safe/yield-opportunities', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chainId: selectedChain,
+                        tokens: tokenPayload
+                    })
+                });
+
+                const yields = await yieldsResponse.json();
+                console.log('Yield opportunities received:', yields);
+
+                setYieldOptions(yields);
+
+                if (yields.length > 0) {
+                    console.log('Setting default yield option:', yields[0].id);
+                    setSelectedDeFi(yields[0].id);
+                }
+            } catch (error) {
+                console.error('Error in fetchYieldOpportunities:', error);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Failed to fetch yield opportunities",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchYieldOpportunities();
+    }, [safeAddress, selectedChain, toast]);
 
     const handleStake = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,46 +143,23 @@ export function StakeKitDefi() {
             <CardContent>
                 <form onSubmit={handleStake} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="chain">Chain</Label>
-                        <Select
-                            value={selectedChain}
-                            onValueChange={setSelectedChain}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select chain" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="eip155:1">Ethereum</SelectItem>
-                                <SelectItem value="eip155:10">Optimism</SelectItem>
-                                <SelectItem value="eip155:42161">Arbitrum</SelectItem>
-                                <SelectItem value="eip155:8453">Base</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="safeAddress">Safe Address</Label>
-                        <Input
-                            id="safeAddress"
-                            value={safeAddress}
-                            onChange={(e) => setSafeAddress(e.target.value)}
-                            placeholder="0x..."
-                        />
-                    </div>
-
-                    <div className="space-y-2">
                         <Label htmlFor="defiOption">DeFi Protocol</Label>
                         <Select
                             value={selectedDeFi}
                             onValueChange={setSelectedDeFi}
+                            disabled={isLoading || yieldOptions.length === 0}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Select DeFi protocol" />
+                                {isLoading ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <SelectValue placeholder="Select DeFi protocol" />
+                                )}
                             </SelectTrigger>
                             <SelectContent>
-                                {DEFI_OPTIONS.map((option) => (
+                                {yieldOptions.map((option) => (
                                     <SelectItem key={option.id} value={option.id}>
-                                        {option.name}
+                                        {option.metadata.name} - {option.token.symbol} ({(option.apy * 100).toFixed(2)} % APY)
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -136,7 +178,7 @@ export function StakeKitDefi() {
                         />
                     </div>
 
-                    <Button type="submit" disabled={isStaking} className="w-full">
+                    <Button type="submit" disabled={isStaking || isLoading} className="w-full">
                         {isStaking ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

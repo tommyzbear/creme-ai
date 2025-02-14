@@ -24,7 +24,7 @@ export async function GET(request: Request) {
             .select('*')
             .eq('user_id', claims.userId)
             .single();
-        console.log('safeWallet:', safeWallet);
+
         if (safeError || !safeWallet) {
             return NextResponse.json(
                 { error: 'No safe wallet found for this user' },
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
         console.log('safeWallet.address:', safeWallet.address);
 
         const positions = await stakeKitClient.getYieldBalance(safeWallet.address);
-        
+
         console.log('positions:', positions);
         return NextResponse.json({ positions });
     } catch (error) {

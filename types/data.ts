@@ -204,3 +204,76 @@ export interface SafeWallet {
     deployment_tx: string;
     user_id: string;
 }
+
+export interface UserPreferences {
+    id?: number;
+    preferences: Preference;
+    user_id: string;
+}
+
+export interface Preference {
+    userProfile: UserProfile;
+    investmentGoals: InvestmentGoals;
+    preferredStrategies: PreferredStrategies;
+    web3Engagement: Web3Engagement;
+    aiCustomizationPreferences: AiCustomizationPreferences;
+}
+
+interface AssetsHeld {
+    bitcoin: boolean;
+    ethereum: boolean;
+    altcoins: boolean;
+    stablecoins: boolean;
+    defiTokens: boolean;
+    other?: string;
+}
+
+interface UserProfile {
+    experienceLevel: 'Beginner' | 'Intermediate' | 'Advanced';
+    portfolioManagementFrequency: 'Daily' | 'Weekly' | 'Monthly' | 'Rarely';
+    assetsHeld: AssetsHeld;
+}
+
+interface InvestmentGoals {
+    goals: ('Long-term wealth accumulation' |
+        'Passive income through staking/yield farming' |
+        'High-risk, high-reward investing' |
+        'Portfolio diversification' |
+        'Other')[];
+    otherGoal?: string;
+    riskLevel: 1 | 2 | 3 | 4 | 5;
+}
+
+interface PreferredStrategies {
+    strategies: ('HODLing' |
+        'Active rebalancing' |
+        'Yield farming & liquidity provision' |
+        'Staking for passive income' |
+        'Other')[];
+    otherStrategy?: string;
+    diversificationImportance: 'Very important' | 'Somewhat important' | 'Not important';
+}
+
+interface ActiveBlockchainEcosystems {
+    ethereum: boolean;
+    solana: boolean;
+    binanceSmartChain: boolean;
+    arbitrumOptimismBase: boolean;
+    other?: string;
+}
+
+interface Web3Engagement {
+    usingDeFiPlatforms: boolean;
+    crossChainInvestments: boolean;
+    activeBlockchainEcosystems: ActiveBlockchainEcosystems;
+}
+
+interface AiCustomizationPreferences {
+    aiRecommendations: ('Market trends & analysis' |
+        'Portfolio rebalancing suggestions' |
+        'Yield optimization opportunities' |
+        'Indicator signals')[];
+    automatedExecutions: 'Yes' | 'Mixed' | 'No';
+    marketMovementAlerts: boolean;
+    additionalFeatures?: string;
+}

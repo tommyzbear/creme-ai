@@ -15,22 +15,25 @@ export default function HomePage() {
     const { ready, authenticated } = usePrivy();
     const [lastFocusedSection, setLastFocusedSection] = useState<"chat" | "portfolio" | null>(null);
     const { sessionName, setSessionName, startNewChat, fetchSessions } = useChatStore();
-    const { news, fetchNews } = useNewsStore();
+    // const { fetchNews, news } = useNewsStore();
     const { toast } = useToast();
 
     if (ready && !authenticated) {
         redirect("/login");
     }
 
-    useEffect(() => {
-        fetchNews().catch((error) => {
-            toast({
-                title: "Error fetching news",
-                description: "Please try again later",
-                variant: "destructive",
-            });
-        });
-    }, [fetchNews, toast]);
+    // useEffect(() => {
+    //     if (!news.length) {
+    //         fetchNews()
+    //             .catch(() => {
+    //                 toast({
+    //                     title: "Error fetching news",
+    //                     description: "Please try again later",
+    //                     variant: "destructive",
+    //                 });
+    //             });
+    //     }
+    // }, [fetchNews, toast, news.length]);
 
     useEffect(() => {
         fetchSessions();

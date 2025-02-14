@@ -12,6 +12,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^1.1.5",
     "@cowprotocol/cow-sdk": "^5.10.0",
+    "@ensofinance/sdk": "^1.0.13",
     "@ethersproject/abstract-signer": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
     "@hookform/resolvers": "^3.10.0",
@@ -32,8 +33,8 @@
     "@radix-ui/react-toast": "^1.2.5",
     "@radix-ui/react-tooltip": "^1.1.7",
     "@radix-ui/react-visually-hidden": "^1.1.2",
-    "@safe-global/api-kit": "^2.5.8",
-    "@safe-global/protocol-kit": "^5.2.1",
+    "@safe-global/api-kit": "^2.5.9",
+    "@safe-global/protocol-kit": "^5.2.2",
     "@safe-global/types-kit": "^1.0.2",
     "@supabase/supabase-js": "^2.48.1",
     "@tailwindcss/postcss": "^4.0.3",
@@ -86,5 +87,6 @@
     "postcss-nesting": "^13.0.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
-  }
+  },
+  "type": "module"
 }

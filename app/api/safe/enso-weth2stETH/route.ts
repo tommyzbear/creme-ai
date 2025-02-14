@@ -1,6 +1,7 @@
 import { privy } from '@/lib/privy';
 import { safeService } from '@/lib/services/safe';
 import { arbitrum, base, mainnet, optimism } from 'viem/chains';
+import { enso } from '@/lib/services/enso';
 
 export async function POST(req: Request) {
     try {
@@ -26,21 +27,41 @@ export async function POST(req: Request) {
                 throw new Error(`Unsupported chain: ${chainId}`);
         }
 
-        await safeService.wrapETHAndApprove(
+        // Get route data from Enso
+        const routeRequest = {
+            fromAddress: safeAddress,
+            receiver: safeAddress,
+            spender: safeAddress,
+            chainId: chain.id,
+            amountIn: inputAmount,
+            tokenIn: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1" as `0x${string}`, // WETH on arbitrum
+            tokenOut: "0x5979D7b546E38E414F7E9822514be443A4800529" as `0x${string}`, // wstETH on arbitrum
+            routingStrategy: "delegate" as const,
+        };
+
+        const routeData = await enso.getRouterData(routeRequest);
+
+        if (!routeData || !routeData.tx) {
+            throw new Error('Failed to get route data from Enso');
+        }
+
+        // Create and sign transaction using Safe
+        const txHash = await safeService.processEnsoTransaction(
             chain,
-            inputAmount,
-            safeAddress
+            safeAddress,
+            routeData.tx
         );
 
         return Response.json({
-            success: true
+            success: true,
+            txHash
         });
     } catch (error) {
-        console.error('Failed to wrap ETH:', error);
+        console.error('Failed to swap WETH to stETH:', error);
         return new Response(
             JSON.stringify({
                 success: false,
-                error: error instanceof Error ? error.message : 'Failed to wrap ETH'
+                error: error instanceof Error ? error.message : 'Failed to swap WETH to stETH'
             }),
             {
                 status: 500,

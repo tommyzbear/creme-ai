@@ -17,17 +17,14 @@ interface YieldOption {
     };
 }
 
-const DEFI_OPTIONS = [
-    { id: "arbitrum-weth-aave-v3-lending", name: "Aave V3 Lending" },
-    { id: "arbitrum-weth-fweth-0x45df0656f8adf017590009d2f1898eeca4f0a205-4626-vault", name: "WETH Fluid Lender" },
-    { id: "arbitrum-weth-dwethv3-0x04419d3509f13054f60d253e0c79491d9e683399-4626-vault", name: "WETH Main WETH v3 Gearbox Vault" },
-];
+interface StakeKitDefiProps {
+    safeAddress: string;
+    selectedChain: string;
+}
 
-export function StakeKitDefi() {
+export function StakeKitDefi({ safeAddress, selectedChain }: StakeKitDefiProps) {
     const [isStaking, setIsStaking] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedChain, setSelectedChain] = useState("eip155:42161");
-    const [safeAddress, setSafeAddress] = useState("");
     const [amount, setAmount] = useState("");
     const [yieldOptions, setYieldOptions] = useState<YieldOption[]>([]);
     const [selectedDeFi, setSelectedDeFi] = useState("");
@@ -37,11 +34,11 @@ export function StakeKitDefi() {
     useEffect(() => {
         const fetchYieldOpportunities = async () => {
             if (!safeAddress) return;
-            
+
             setIsLoading(true);
             try {
                 console.log('Fetching tokens for safe:', safeAddress, 'on chain:', selectedChain);
-                
+
                 // First get the safe's tokens
                 const response = await fetch(`/api/safe/tokens?address=${safeAddress}&chainId=${selectedChain}`);
                 const tokens = await response.json();
@@ -68,9 +65,9 @@ export function StakeKitDefi() {
 
                 const yields = await yieldsResponse.json();
                 console.log('Yield opportunities received:', yields);
-                
+
                 setYieldOptions(yields);
-                
+
                 if (yields.length > 0) {
                     console.log('Setting default yield option:', yields[0].id);
                     setSelectedDeFi(yields[0].id);
@@ -146,34 +143,6 @@ export function StakeKitDefi() {
             <CardContent>
                 <form onSubmit={handleStake} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="chain">Chain</Label>
-                        <Select
-                            value={selectedChain}
-                            onValueChange={setSelectedChain}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select chain" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="eip155:1">Ethereum</SelectItem>
-                                <SelectItem value="eip155:10">Optimism</SelectItem>
-                                <SelectItem value="eip155:42161">Arbitrum</SelectItem>
-                                <SelectItem value="eip155:8453">Base</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="safeAddress">Safe Address</Label>
-                        <Input
-                            id="safeAddress"
-                            value={safeAddress}
-                            onChange={(e) => setSafeAddress(e.target.value)}
-                            placeholder="0x..."
-                        />
-                    </div>
-
-                    <div className="space-y-2">
                         <Label htmlFor="defiOption">DeFi Protocol</Label>
                         <Select
                             value={selectedDeFi}
@@ -190,7 +159,7 @@ export function StakeKitDefi() {
                             <SelectContent>
                                 {yieldOptions.map((option) => (
                                     <SelectItem key={option.id} value={option.id}>
-                                        {option.metadata.name} - {option.token.symbol} ({(option.apy*100).toFixed(2)} % APY)
+                                        {option.metadata.name} - {option.token.symbol} ({(option.apy * 100).toFixed(2)} % APY)
                                     </SelectItem>
                                 ))}
                             </SelectContent>

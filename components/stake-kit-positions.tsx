@@ -5,11 +5,11 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
-interface SafePositionsProps {
+interface StakeKitPositionsProps {
   chainId: string;
 }
 
-export function SafePositions({ chainId }: SafePositionsProps) {
+export function StakeKitPositions({ chainId }: StakeKitPositionsProps) {
   const [positions, setPositions] = useState<BalanceResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [exitingPositions, setExitingPositions] = useState<Set<string>>(new Set());
@@ -24,9 +24,9 @@ export function SafePositions({ chainId }: SafePositionsProps) {
         );
         const data = await response.json();
         console.log("Fetched positions data:", data);
-        
+
         if (!response.ok) throw new Error(data.error);
-        
+
         // Ensure each position has integrationId
         const flattenedPositions = data.positions.flat();
         console.log("Processed positions:", flattenedPositions);
@@ -58,7 +58,7 @@ export function SafePositions({ chainId }: SafePositionsProps) {
 
     try {
       setExitingPositions(prev => new Set(prev).add(position.groupId));
-      
+
       const response = await fetch('/api/safe/exit-position', {
         method: 'POST',
         headers: {
@@ -78,13 +78,13 @@ export function SafePositions({ chainId }: SafePositionsProps) {
         title: "Success",
         description: "Exit request created successfully",
       });
-      
+
       // Refresh positions after successful exit
       const updatedResponse = await fetch(`/api/safe/positions?chainId=${chainId}`);
       const updatedData = await updatedResponse.json();
       const updatedPositions = updatedData.positions.flat();
       setPositions(updatedPositions);
-      
+
     } catch (error) {
       toast({
         variant: "destructive",

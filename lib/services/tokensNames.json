@@ -1,0 +1,450 @@
+[
+  {
+    "tokenName": "DAI Stablecoin",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "ChainLink Token",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Bridged USD Coin",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Wrapped BTC",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Wrapped Ether",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Tether",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Arbitrum AAVE",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "STASIS EURS",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Wrapped liquid staked Ether 2.0",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Mai Stablecoin",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Rocket Pool ETH",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "LUSD Stablecoin",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "USD Coin",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Frax",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Arbitrum",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Wrapped eETH",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "GHO Token",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "The Graph",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Ethereum",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "EURA",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "USDA",
+    "network": "arbitrum"
+  },
+  {
+    "tokenName": "Wrapped Ether",
+    "network": "base"
+  },
+  {
+    "tokenName": "Coinbase Wrapped Staked ETH",
+    "network": "base"
+  },
+  {
+    "tokenName": "USD Base Coin",
+    "network": "base"
+  },
+  {
+    "tokenName": "Wrapped liquid staked Ether 2.0",
+    "network": "base"
+  },
+  {
+    "tokenName": "USD Coin",
+    "network": "base"
+  },
+  {
+    "tokenName": "Wrapped eETH",
+    "network": "base"
+  },
+  {
+    "tokenName": "Coinbase Wrapped BTC",
+    "network": "base"
+  },
+  {
+    "tokenName": "ETH",
+    "network": "base"
+  },
+  {
+    "tokenName": "USDA",
+    "network": "base"
+  },
+  {
+    "tokenName": "EURC",
+    "network": "base"
+  },
+  {
+    "tokenName": "Mai Stablecoin",
+    "network": "base"
+  },
+  {
+    "tokenName": "Verified USDC",
+    "network": "base"
+  },
+  {
+    "tokenName": "Degen",
+    "network": "base"
+  },
+  {
+    "tokenName": "EURA",
+    "network": "base"
+  },
+  {
+    "tokenName": "Wrapped Mountain Protocol USD",
+    "network": "base"
+  },
+  {
+    "tokenName": "Electronic Dollar",
+    "network": "base"
+  },
+  {
+    "tokenName": "Dai",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Chainlink",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Bridged USD Coin",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Wrapped BTC",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Wrapped Ether",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Tether",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Aave Token",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Synthetix USD",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Optimism",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Wrapped liquid staked Ether 2.0",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "LUSD Stablecoin",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Mai Stablecoin",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Rocket Pool ETH",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "USD Coin",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Ethereum",
+    "network": "optimism"
+  },
+  {
+    "tokenName": "Ethereum",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "The Graph",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Polygon Ecosystem Token",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Polygon",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Sushi",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Ape Coin",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Dai Stablecoin",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Wrapped Ether",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "USD Coin",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Tether USD",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Wrapped BTC",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Lido Staked Ether",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Curve DAO",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Compound",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Fei USD",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Uniswap",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Wrapped liquid staked Ether 2.0",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "ChainLink Token",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Aave Token",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Coinbase Wrapped Staked ETH",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Rocket Pool ETH",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "LUSD Stablecoin",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Maker",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Synthetix Network Token",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Balancer",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Lido DAO Token",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Ethereum Name Service",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "1INCH Token",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Frax",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Gho Token",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Rocket Pool Protocol",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Savings Dai",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "StargateToken",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Kyber Network Crystal v2",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Frax Share",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Curve.Fi USD Stablecoin",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "PayPal USD",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Wrapped eETH",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Staked ETH",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "USDe",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Stader Staked Ether",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "sUSDe",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "tBTC v2",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Coinbase Wrapped BTC",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "USDS Stablecoin",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Wrapped Binance Beacon ETH",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Yearn-Ajna DAI Vault (3.0.1)",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Prisma mkUSD",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Frax Staked Ether",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "EURA",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "USDA",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Angle Governance Token",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "AUSD",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Paxos Gold",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Usual USD",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Monerium EUR emoney",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Euro Coin",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Wrapped Mountain Protocol USD",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Electronic Dollar",
+    "network": "ethereum"
+  },
+  {
+    "tokenName": "Savings USDS",
+    "network": "ethereum"
+  }
+]

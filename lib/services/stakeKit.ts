@@ -357,6 +357,33 @@ async getAvailableYields(network:string, type?:string): Promise<YieldOpportunity
       hash: hash
     })
   }
+// given a network list, return all enabled tokens
+async getEnabledTokens(networks: string[]): Promise<TokenInfo[]> {
+  const tokens: TokenInfo[] = []
+  for (const network of networks) { 
+    console.log(`Getting enabled tokens for network: ${network}`)
+    try {
+      // The response is already parsed by this.request
+      const resp = await this.request('GET', `/v1/tokens?network=${network}`);
+      console.log('Token response:', resp); // Add this log to see the response structure
+      
+      // No need to JSON.parse here, just use the response directly
+      for (const token of resp) {
+        const item = {
+          tokenName: token.token.name,
+          address: token.token.address,
+          symbol: token.token.symbol,
+          network: token.token.network,
+        }
+        tokens.push(item)
+      }
+    } catch (error) {
+      console.error('Error in getEnabledTokens:', error);
+      throw error;
+    }
+  }
+  return tokens
+}
 
   async getTokenYieldOpportunities(
     network: string,

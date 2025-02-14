@@ -45,3 +45,6 @@ next-env.d.ts
 
 # data files
 data/
+
+# y files
+/design

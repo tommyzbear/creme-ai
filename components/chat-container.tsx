@@ -59,7 +59,7 @@ export function ChatContainer({
         },
         onToolCall: (toolCall) => {
             console.log("toolCall", toolCall);
-        }
+        },
     });
 
     useEffect(() => {
@@ -120,8 +120,8 @@ export function ChatContainer({
             const isScrolledToBottom =
                 Math.abs(
                     messagesContainer.scrollHeight -
-                    messagesContainer.scrollTop -
-                    messagesContainer.clientHeight
+                        messagesContainer.scrollTop -
+                        messagesContainer.clientHeight
                 ) < 10;
 
             if (isScrolledToBottom) {
@@ -184,14 +184,14 @@ export function ChatContainer({
             <div className="bottom-fade z-[-5]" />
 
             <div className="px-6 pt-2 pb-6 relative">
-                <div className="flex flex-row gap-5 justify-center items-center min-h-[40px]">
+                <div className="flex flex-row gap-2 justify-center items-center min-h-[40px]">
                     <TooltipProvider>
                         <Tooltip delayDuration={200}>
                             <TooltipTrigger asChild>
                                 <Button
                                     variant="outline"
                                     onClick={startNewChat}
-                                    className="rounded-full h-10 w-12 hover:bg-ai"
+                                    className="rounded-full h-10 w-11 hover:bg-ai"
                                 >
                                     <Plus className="w-5 h-5" />
                                 </Button>

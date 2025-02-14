@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { PrivyProvider } from '@privy-io/react-auth';
-import { arbitrum, base, mainnet, optimism } from 'viem/chains';
+import { PrivyProvider } from "@privy-io/react-auth";
+import { arbitrum, base, mainnet, optimism } from "viem/chains";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     return (
@@ -12,13 +12,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 supportedChains: [arbitrum, mainnet, base, optimism],
                 // Customize Privy's appearance in your app
                 appearance: {
-                    theme: 'light',
-                    accentColor: '#676FFF',
-                    logo: '/logo.png',
+                    theme: "light",
+                    accentColor: "#676FFF",
+                    logo: "/icon.png",
                 },
                 // Create embedded wallets for users who don't have a wallet
                 embeddedWallets: {
-                    createOnLogin: 'all-users',
+                    createOnLogin: "all-users",
                 },
             }}
         >

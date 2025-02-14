@@ -68,7 +68,7 @@ const config: Config = {
                 },
             },
             fontSize: {
-                xs: ".5rem",
+                xs: ".52rem",
                 sm: ".75rem",
                 tiny: ".75rem",
                 base: ".875rem",
@@ -99,18 +99,19 @@ const config: Config = {
                     "0%, 100%": { transform: "translateY(0)" },
                     "50%": { transform: "translateY(-10px)" },
                 },
-                "float-fast": {
-                    "0%": { transform: "translate(70%, 20%)" },
-                    "20%": { transform: "translate(20%, 60%)" },
-                    "40%": { transform: "translate(70%, 80%)" },
-                    "60%": { transform: "translate(80%, 30%)" },
-                    "80%": { transform: "translate(20%, 20%)" },
-                    "100%": { transform: "translate(70%, 20%)" },
+                roam: {
+                    "0%": { transform: "translate(60%, 10%)" },
+                    "20%": { transform: "translate(20%, 50%)" },
+                    "40%": { transform: "translate(50%, 0%)" },
+                    "60%": { transform: "translate(70%, 30%)" },
+                    "80%": { transform: "translate(30%, 40%)" },
+                    "100%": { transform: "translate(60%, 10%)" },
                 },
             },
             animation: {
                 float: "float 3s ease-in-out infinite",
-                "float-fast": "float-fast 20s ease-in-out infinite",
+                roam: "roam 25s ease-in-out infinite",
+                "roam-fast": "roam 20s ease-in-out infinite reverse",
             },
             fontFamily: {
                 ibm: ["var(--font-ibm)"],

@@ -8,6 +8,10 @@ import BlurredCursor from "@/components/ui/blurred-cursor";
 import GradientBackground from "@/components/gradient-background";
 import LeftAside from "@/components/left-aside";
 
+export const metadata = {
+    title: "Home",
+};
+
 async function checkAuth() {
     const cookieStore = await cookies();
     const cookieAuthToken = cookieStore.get("privy-token");

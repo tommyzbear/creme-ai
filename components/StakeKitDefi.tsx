@@ -10,8 +10,8 @@ import { parseEther } from "viem";
 
 const DEFI_OPTIONS = [
     { id: "arbitrum-weth-aave-v3-lending", name: "Aave V3 Lending" },
-    { id: "arbitrum-weth-compound-v3", name: "Compound V3" },
-    { id: "arbitrum-weth-radiant-v2", name: "Radiant V2" },
+    { id: "arbitrum-weth-fweth-0x45df0656f8adf017590009d2f1898eeca4f0a205-4626-vault", name: "WETH Fluid Lender" },
+    { id: "arbitrum-weth-dwethv3-0x04419d3509f13054f60d253e0c79491d9e683399-4626-vault", name: "WETH Main WETH v3 Gearbox Vault" },
 ];
 
 export function StakeKitDefi() {

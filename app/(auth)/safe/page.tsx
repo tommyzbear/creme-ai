@@ -18,6 +18,7 @@ import { TokensTable } from "@/components/tokens-table";
 import { TokensLending } from "@/components/tokens-lending";
 import { TokensLiquidityProvider } from "@/components/tokens-liquidity-provider";
 import { TokensUnstake } from "@/components/tokens-unstake";
+import { SafePositions } from "@/components/SafePositions";
 
 export default function SafePage() {
     const { user } = usePrivy();
@@ -282,10 +283,55 @@ export default function SafePage() {
                             </CardContent>
                         </Card>
                     </div>
-                    <div className="grid gap-8 md:grid-cols-2 hidden">
-                        <WethToStethSwap />
-                        <StakeKitDefi />
-                    </div>
+                    {1 && (
+                        <div className="grid gap-8 md:grid-cols-2">
+                            <div>
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Safe Details</CardTitle>
+                                        <CardDescription>
+                                            Your newly created Safe wallet details
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-2">
+                                            <div>
+                                                <Label>Safe Address</Label>
+                                                <p className="font-mono text-sm mt-1">{safeAddress}</p>
+                                            </div>
+                                            <Separator />
+                                            <div>
+                                                <Label>Chain</Label>
+                                                <p className="text-sm mt-1">
+                                                    {selectedChain === "eip155:1" && "Ethereum"}
+                                                    {selectedChain === "eip155:10" && "Optimism"}
+                                                    {selectedChain === "eip155:42161" && "Arbitrum"}
+                                                    {selectedChain === "eip155:8453" && "Base"}
+                                                </p>
+                                            </div>
+                                            <Separator />
+                                            <div>
+                                                <Label>Owners</Label>
+                                                <div className="space-y-1 mt-1">
+                                                    <p className="font-mono text-sm">{user?.wallet?.address}</p>
+                                                    <p className="font-mono text-sm">{managedWallet?.address}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                                <div className="space-y-8"  >
+                                    <StakeKitDefi />
+                                </div>
+                            </div>
+                            <div className="space-y-8">
+                                <SafePositions chainId={selectedChain} />
+                                <WethToStethSwap />
+
+                            </div>
+
+                        </div>
+                    )}
 
                     <div className="grid gap-8 md:grid-cols-3">
                         <TokensLending

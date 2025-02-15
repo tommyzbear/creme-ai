@@ -206,7 +206,7 @@ export interface SafeWallet {
 }
 
 export interface UserPreferences {
-    id?: number;
+    id: number;
     preferences: Preference;
     user_id: string;
 }
@@ -302,4 +302,21 @@ interface AiCustomizationPreferences {
     automatedExecutions: AutomatedExecutions;
     marketMovementAlerts: boolean;
     additionalFeatures?: string;
+}
+
+export interface EnsoToken {
+    id: number;
+    chain_id: number;
+    address: string;
+    decimals: number;
+    name: string;
+    symbol: string;
+    logos_uri: string[];
+    type: string;
+    protocol_slug: string;
+    underlying_tokens: Omit<
+        EnsoToken,
+        "underlying_tokens" | "primary_address" | "id" | "protocol_slug"
+    >[];
+    primary_address: string;
 }

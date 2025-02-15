@@ -51,9 +51,9 @@ export async function GET(request: Request) {
         console.log('safeWallet.address:', safeWallet.address);
 
         const positions = await stakeKitClient.getYieldBalance(safeWallet.address);
-
-        console.log('positions:', positions);
-        return NextResponse.json({ positions });
+        const filteredPositions = positions.filter((position: { amount: string }) => Number(position.amount) >= 0.000001);
+        console.log('positions:', filteredPositions);
+        return NextResponse.json({ positions: filteredPositions });
     } catch (error) {
         console.error('Error fetching positions:', error);
         return NextResponse.json(

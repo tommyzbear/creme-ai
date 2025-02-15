@@ -13,6 +13,7 @@ export function StakeKitPositions({ chainId }: StakeKitPositionsProps) {
   const [positions, setPositions] = useState<BalanceResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [exitingPositions, setExitingPositions] = useState<Set<string>>(new Set());
+  const [isExitingAll, setIsExitingAll] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -27,8 +28,9 @@ export function StakeKitPositions({ chainId }: StakeKitPositionsProps) {
 
         if (!response.ok) throw new Error(data.error);
 
-        // Ensure each position has integrationId
-        const flattenedPositions = data.positions.flat();
+        // 
+        const flattenedPositions = data.positions.flat()
+        
         console.log("Processed positions:", flattenedPositions);
         setPositions(flattenedPositions);
       } catch (error) {
@@ -100,13 +102,77 @@ export function StakeKitPositions({ chainId }: StakeKitPositionsProps) {
     }
   };
 
+  const handleExitAll = async () => {
+    if (!positions.length) return;
+
+    setIsExitingAll(true);
+    try {
+        const response = await fetch('/api/safe/exit-all-stakeKit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                chainId
+            }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error);
+
+        // Show results
+        if (data.results.failed.length > 0) {
+            toast({
+                variant: "destructive",
+                title: "Partial Success",
+                description: `Failed to exit: ${data.results.failed.join(', ')}`,
+            });
+        } else {
+            toast({
+                title: "Success",
+                description: `Successfully exited all positions`,
+            });
+        }
+
+        // Refresh positions
+        const updatedResponse = await fetch(`/api/safe/positions?chainId=${chainId}`);
+        const updatedData = await updatedResponse.json();
+        const updatedPositions = updatedData.positions.flat();
+        setPositions(updatedPositions);
+
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: error instanceof Error ? error.message : "Failed to exit all positions",
+        });
+    } finally {
+        setIsExitingAll(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Safe Positions</CardTitle>
-        <CardDescription>
-          Your current earning positions
-        </CardDescription>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>Safe Positions</CardTitle>
+            <CardDescription>Your current earning positions</CardDescription>
+          </div>
+          {positions.length > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={isExitingAll}
+              onClick={handleExitAll}
+            >
+              {isExitingAll ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              Exit All
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (

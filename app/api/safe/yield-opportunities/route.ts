@@ -4,8 +4,8 @@ import { StakeKitClient } from '@/lib/services/stakeKit';
 export async function POST(request: Request) {
     try {
         const { chainId, tokens } = await request.json();
-        console.log('Received request:', { chainId, tokens });
-        
+        // console.log('Received request:', { chainId, tokens });
+
         // Convert chainId to network name
         let network;
         switch (chainId) {
@@ -28,15 +28,15 @@ export async function POST(request: Request) {
             default:
                 throw new Error(`Unsupported chain: ${chainId}`);
         }
-        
+
         console.log('Converted network:', network);
-        
+
         // Normalize token network values
         const normalizedTokens = tokens.map((token: any) => ({
             ...token,
             network: network // Use the converted network name
         }));
-        
+
         console.log('Normalized tokens:', normalizedTokens);
 
         const client = new StakeKitClient({
@@ -45,8 +45,8 @@ export async function POST(request: Request) {
         });
 
         const yields = await client.getHighestYieldForTokens(network, normalizedTokens);
-        console.log('Yield opportunities found:', yields);
-        
+        // console.log('Yield opportunities found:', yields);
+
         return NextResponse.json(yields);
     } catch (error) {
         console.error('Error in yield-opportunities:', error);

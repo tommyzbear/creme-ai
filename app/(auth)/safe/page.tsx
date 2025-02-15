@@ -18,9 +18,14 @@ import { TokensLending } from "@/components/tokens-lending";
 import { TokensLiquidityProvider } from "@/components/tokens-liquidity-provider";
 import { TokensUnstake } from "@/components/tokens-unstake";
 import { StakeKitPositions } from "@/components/stake-kit-positions";
+import { SafeChatContainer } from "@/components/safe-chat-container";
+import { cn } from "@/lib/utils";
+import { useSafeChatStore } from "@/stores/safe-chat-store";
+import { SafePortfolioContainer } from "@/components/safe-portfolio-container";
 
 export default function SafePage() {
     const { user } = usePrivy();
+    const [lastFocusedSection, setLastFocusedSection] = useState<"chat" | "portfolio" | null>(null);
     const { wallets } = useWallets();
     const { toast } = useToast();
     const [isCreating, setIsCreating] = useState(false);
@@ -36,8 +41,15 @@ export default function SafePage() {
         fetchBalances,
         isLoading
     } = useSafeStore();
+    const { fetchSessions } = useSafeChatStore();
+
+    const { sessionName, startNewChat, setSessionName } = useSafeChatStore();
 
     const managedWallet = wallets.find(w => w.walletClientType === "privy");
+
+    useEffect(() => {
+        fetchSessions();
+    }, [fetchSessions]);
 
     useEffect(() => {
         if (!safeAddress) {
@@ -148,8 +160,23 @@ export default function SafePage() {
     };
 
     return (
-        <div className="container w-full py-8 space-y-8">
-            <div className="flex justify-between items-center">
+        <div className="flex flex-row w-full h-full gap-2">
+            <SafeChatContainer
+                className={cn(
+                    "frosted-glass h-full rounded-6xl 4xl:rounded-9xl",
+                    lastFocusedSection === "chat" ? "w-2/3" : "w-1/2"
+                )}
+                onFocus={() => setLastFocusedSection("chat")}
+                sessionName={sessionName}
+                setSessionName={setSessionName}
+                startNewChat={startNewChat}
+            />
+            <SafePortfolioContainer
+                className="frosted-glass flex-1 w-full h-full rounded-6xl 4xl:rounded-9xl select-none"
+                onFocus={() => setLastFocusedSection("portfolio")}
+                lastFocus={lastFocusedSection}
+            />
+            <div className="flex justify-between items-center hidden">
                 <h1 className="text-3xl font-bold">Safe Management</h1>
                 <div className="flex items-center gap-4">
                     <div className="w-[200px]">
@@ -183,7 +210,7 @@ export default function SafePage() {
                 </div>
             </div>
 
-            <div className="overflow-y-auto h-full space-y-8">
+            <div className="overflow-y-auto h-full space-y-8 hidden">
                 {safeAddress && (
                     <Card>
                         <CardHeader>
@@ -305,6 +332,78 @@ export default function SafePage() {
                             safeAddress={safeAddress}
                             selectedChain={selectedChain}
                         />
+                    </div>
+
+                    <div className="flex gap-4">
+                        <Button
+                            onClick={async () => {
+                                try {
+                                    const response = await fetch("/api/safe/unstake", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                            chainId: selectedChain,
+                                            safeAddress,
+                                        }),
+                                    });
+
+                                    if (!response.ok) {
+                                        const data = await response.json();
+                                        throw new Error(data.error);
+                                    }
+
+                                    toast({
+                                        title: "Success",
+                                        description: "Unstake request submitted successfully",
+                                    });
+                                } catch (error) {
+                                    toast({
+                                        variant: "destructive",
+                                        title: "Error",
+                                        description: error instanceof Error ? error.message : "Failed to unstake",
+                                    });
+                                }
+                            }}
+                        >
+                            Unstake All
+                        </Button>
+
+                        <Button
+                            onClick={async () => {
+                                try {
+                                    const response = await fetch("/api/safe/swap-to-weth", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                            chainId: selectedChain,
+                                            safeAddress,
+                                        }),
+                                    });
+
+                                    if (!response.ok) {
+                                        const data = await response.json();
+                                        throw new Error(data.error);
+                                    }
+
+                                    toast({
+                                        title: "Success",
+                                        description: "Swap to WETH request submitted successfully",
+                                    });
+                                } catch (error) {
+                                    toast({
+                                        variant: "destructive",
+                                        title: "Error",
+                                        description: error instanceof Error ? error.message : "Failed to swap to WETH",
+                                    });
+                                }
+                            }}
+                        >
+                            Swap All to WETH
+                        </Button>
                     </div>
                 </div>
             </div>

@@ -55,3 +55,17 @@ CREATE TABLE user_preferences (
     preferences JSONB NOT NULL,
     user_id TEXT NOT NULL REFERENCES account(id)
 );
+CREATE TABLE enso_tokens (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    chain_id INTEGER NOT NULL,
+    address TEXT NOT NULL,
+    decimals INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    logos_uri TEXT [] NOT NULL,
+    type TEXT NOT NULL,
+    protocol_slug TEXT,
+    underlying_tokens JSONB [] NOT NULL,
+    primary_address TEXT NOT NULL,
+    CONSTRAINT unique_chain_address UNIQUE (chain_id, address)
+);

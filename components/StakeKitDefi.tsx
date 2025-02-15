@@ -63,6 +63,16 @@ export function StakeKitDefi({ safeAddress, selectedChain }: StakeKitDefiProps) 
                     })
                 });
 
+                if (!yieldsResponse.ok) {
+                    console.error('Failed to fetch yield opportunities:', yieldsResponse);
+                    toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: "Failed to fetch yield opportunities",
+                    });
+                    return;
+                }
+
                 const yields = await yieldsResponse.json();
                 console.log('Yield opportunities received:', yields);
 

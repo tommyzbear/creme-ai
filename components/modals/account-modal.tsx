@@ -183,7 +183,7 @@ export function AccountModal({ open, onOpenChange }: AccountModalProps) {
                             username={dbUser?.username || null}
                             joinedDate={dbUser?.created_at || null}
                             userId={dbUser?.id || null}
-                            walletAddress={user?.wallet?.address || null}
+                            walletAddress={user?.wallet?.address !== managedWallet?.address ? user?.wallet?.address : null}
                             managedWalletAddress={managedWallet?.address || null}
                             profilePicture={dbUser?.profile_img || null}
                             onOpenChange={setDialogOpen}

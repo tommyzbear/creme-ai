@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User } from "@privy-io/react-auth";
+import { ConnectedWallet, User } from "@privy-io/react-auth";
 import { Copy, Mail, Phone, Wallet } from "lucide-react";
 import Image from "next/image";
-import { MouseEvent } from "react";
 
 interface ConnectedAccount {
     user: User | null;
@@ -20,6 +18,7 @@ interface ConnectedAccount {
     unlinkTwitter: (username: string) => Promise<User>;
     unlinkDiscord: (username: string) => Promise<User>;
     copyToClipboard: (text: string) => void;
+    managedWallet: ConnectedWallet | undefined;
 }
 
 export function ConnectedAccounts({
@@ -37,6 +36,7 @@ export function ConnectedAccounts({
     unlinkTwitter,
     unlinkDiscord,
     copyToClipboard,
+    managedWallet,
 }: ConnectedAccount) {
     const getTitle = (type: string) => {
         return type.charAt(0).toUpperCase() + type.slice(1);
@@ -104,11 +104,11 @@ export function ConnectedAccounts({
                                 onClick={() => copyToClipboard(user?.wallet?.address || "")}
                             >
                                 <p className="text-sm font-light text-slate-400">
-                                    {user?.wallet?.address
+                                    {user?.wallet?.address !== managedWallet?.address && user?.wallet?.address
                                         ? `${user?.wallet?.address.slice(
-                                              0,
-                                              6
-                                          )}...${user?.wallet?.address.slice(-4)}`
+                                            0,
+                                            6
+                                        )}...${user?.wallet?.address.slice(-4)}`
                                         : "Not Connected"}
                                 </p>
                                 {user?.wallet?.address && (

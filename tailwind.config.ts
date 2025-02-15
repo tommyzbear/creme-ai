@@ -107,15 +107,41 @@ const config: Config = {
                     "80%": { transform: "translate(30%, 40%)" },
                     "100%": { transform: "translate(60%, 10%)" },
                 },
+                stepExpand: {
+                    from: { width: "50px" },
+                    to: { width: "100%" },
+                },
+                stepCollapse: {
+                    from: { width: "100%" },
+                    to: { width: "50px" },
+                },
+                completionPulse: {
+                    "0%": {
+                        transform: "scale(1) translate(0, 0)",
+                        opacity: "1",
+                    },
+                    "60%": {
+                        transform: "scale(20)",
+                        opacity: "1",
+                    },
+                    "100%": {
+                        transform: "scale(20)",
+                        opacity: "0",
+                    },
+                },
             },
             animation: {
                 float: "float 3s ease-in-out infinite",
                 roam: "roam 25s ease-in-out infinite",
                 "roam-fast": "roam 20s ease-in-out infinite reverse",
+                "step-expand": "stepExpand 0.3s ease-out forwards",
+                "step-collapse": "stepCollapse 0.3s ease-out forwards",
+                "completion-pulse": "completionPulse 0.7s ease-in-out forwards",
             },
             fontFamily: {
                 ibm: ["var(--font-ibm)"],
                 bricolage: ["var(--font-bricolage)"],
+                shrikhand: ["var(--font-shrikhand)"],
             },
             boxShadow: {
                 "b-sm": "0 1px 2px 0 rgb(0 0 0 / 0.05)",

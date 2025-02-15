@@ -113,15 +113,10 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                 </div>
 
                 <DialogFooter className="sm:justify-between">
-                    <Button
-                        variant="outline"
-                        className="bg-slate-700 border-slate-700 text-white hover:bg-slate-800"
-                    >
+                    <Button variant="main" className="bg-slate-300/30 hover:bg-slate-300/50">
                         Use Defaults
                     </Button>
-                    <Button className="bg-white text-black hover:bg-slate-200">
-                        Save Settings
-                    </Button>
+                    <Button variant="main">Save Settings</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

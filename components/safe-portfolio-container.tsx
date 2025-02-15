@@ -233,7 +233,7 @@ export function SafePortfolioContainer({ className, onFocus, lastFocus }: SafePo
                 </header>
 
                 <Separator />
-                {user?.wallet?.address === managedWallet?.address ? (
+                {user?.wallet?.address !== managedWallet?.address ? (
                     <>
                         <div className="pb-4">
                             <h1

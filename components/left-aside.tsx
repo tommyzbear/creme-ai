@@ -68,6 +68,7 @@ export default function LeftAside({ className }: { className?: string }) {
             const response = await fetch("/api/user/preferences");
             if (response.ok) {
                 const preferences = await response.json();
+                console.log("preferences", preferences);
                 setPreferences(preferences);
             } else if (response.status === 404) {
                 setShowPreferences(true);

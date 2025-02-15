@@ -28,10 +28,8 @@ export function StakeKitPositions({ chainId }: StakeKitPositionsProps) {
 
         if (!response.ok) throw new Error(data.error);
 
-        // Filter out dust positions and ensure each position has integrationId
-        const flattenedPositions = data.positions
-          .flat()
-          .filter(position => Number(position.amount) >= 0.000001);
+        // 
+        const flattenedPositions = data.positions.flat()
         
         console.log("Processed positions:", flattenedPositions);
         setPositions(flattenedPositions);

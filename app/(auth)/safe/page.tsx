@@ -306,6 +306,78 @@ export default function SafePage() {
                             selectedChain={selectedChain}
                         />
                     </div>
+
+                    <div className="flex gap-4">
+                        <Button
+                            onClick={async () => {
+                                try {
+                                    const response = await fetch("/api/safe/unstake", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                            chainId: selectedChain,
+                                            safeAddress,
+                                        }),
+                                    });
+
+                                    if (!response.ok) {
+                                        const data = await response.json();
+                                        throw new Error(data.error);
+                                    }
+
+                                    toast({
+                                        title: "Success",
+                                        description: "Unstake request submitted successfully",
+                                    });
+                                } catch (error) {
+                                    toast({
+                                        variant: "destructive",
+                                        title: "Error",
+                                        description: error instanceof Error ? error.message : "Failed to unstake",
+                                    });
+                                }
+                            }}
+                        >
+                            Unstake All
+                        </Button>
+
+                        <Button
+                            onClick={async () => {
+                                try {
+                                    const response = await fetch("/api/safe/swap-to-weth", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                            chainId: selectedChain,
+                                            safeAddress,
+                                        }),
+                                    });
+
+                                    if (!response.ok) {
+                                        const data = await response.json();
+                                        throw new Error(data.error);
+                                    }
+
+                                    toast({
+                                        title: "Success",
+                                        description: "Swap to WETH request submitted successfully",
+                                    });
+                                } catch (error) {
+                                    toast({
+                                        variant: "destructive",
+                                        title: "Error",
+                                        description: error instanceof Error ? error.message : "Failed to swap to WETH",
+                                    });
+                                }
+                            }}
+                        >
+                            Swap All to WETH
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>

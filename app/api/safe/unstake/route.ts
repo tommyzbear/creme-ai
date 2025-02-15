@@ -18,7 +18,7 @@ export async function POST(req: Request) {
             throw new Error('Safe wallet not found');
         }
 
-        const { chainId, safeAddress, tokenIn } = await req.json();
+        const { chainId, safeAddress, tokenIn }: { chainId: string, safeAddress: `0x${string}`, tokenIn: `0x${string}`[] | undefined } = await req.json();
 
         if (safeAddress !== data.address) {
             throw new Error('Please provide your own safe address');
@@ -42,54 +42,72 @@ export async function POST(req: Request) {
                 throw new Error(`Unsupported chain: ${chainId}`);
         }
 
-        const tokenData = await ensoService.getTokenData(chain.id, undefined, tokenIn as `0x${string}`);
+        const safeBalances = await ensoService.getBalances(safeAddress, chain.id, false);
 
-        if (tokenData.length === 0 || tokenData[0].underlyingTokens.length === 0) {
-            throw new Error(`No Defi token found, for ${tokenIn}`);
+        let balances = []
+        if (!tokenIn || tokenIn.length === 0) {
+            balances = safeBalances
+        } else {
+            balances = safeBalances.filter((balance) => tokenIn.includes(balance.token));
         }
 
-        const underlyingToken = tokenData[0].underlyingTokens.find((token) => token.type === "base");
-
-        if (!underlyingToken) {
-            throw new Error(`No underlying token found, for ${tokenIn}`)
-        };
-
-        const balances = await ensoService.getBalances(safeAddress, chain.id, false);
-
-        const balance = balances.find((balance) => balance.token === tokenIn);
-
-        if (!balance) {
+        if (!balances || balances.length === 0) {
             throw new Error(`No balance found for ${tokenIn}`);
         }
 
-        // Get route data from Enso
-        const routeRequest = {
-            fromAddress: safeAddress,
-            receiver: safeAddress,
-            spender: safeAddress,
-            chainId: chain.id,
-            amountIn: balance.amount,
-            tokenIn: tokenIn as `0x${string}`,
-            tokenOut: underlyingToken.address,
-            routingStrategy: "delegate" as const,
-        };
+        const tokenData = await ensoService
+            .getTokenData(chain.id, undefined, !tokenIn || tokenIn.length === 0 ? balances.filter((b) => b.token.length === 42).map((b) => b.token) : tokenIn);
 
-        const routeData = await enso.getRouterData(routeRequest);
-
-        if (!routeData || !routeData.tx) {
-            throw new Error('Failed to get route data from Enso');
+        if (tokenData.length === 0 || !tokenData.find((token) => token.underlyingTokens && token.underlyingTokens.length > 0)) {
+            throw new Error(`No Defi token found, for ${tokenIn}`);
         }
 
-        // Create and sign transaction using Safe
-        const txHash = await safeService.processEnsoTransaction(
-            chain,
-            safeAddress,
-            routeData.tx
-        );
+        const defiTokens = tokenData.filter((token) => token.underlyingTokens && token.underlyingTokens.length > 0);
+        const txHashes = []
+        console.log(defiTokens)
+        for (const token of defiTokens) {
+            const underlyingToken = token.underlyingTokens.find((t) => t.type === "base");
+
+            if (!underlyingToken) {
+                console.error(`No underlying token found, for ${token.address}`);
+                continue;
+            };
+
+            // Get route data from Enso
+            const routeRequest = {
+                fromAddress: safeAddress,
+                receiver: safeAddress,
+                spender: safeAddress,
+                chainId: chain.id,
+                amountIn: balances.find((b) => b.token.toLowerCase() === token.address.toLowerCase())?.amount,
+                tokenIn: token.address,
+                tokenOut: underlyingToken.address,
+                routingStrategy: "delegate" as const,
+            };
+
+            try {
+                const routeData = await enso.getRouterData(routeRequest);
+
+                if (!routeData || !routeData.tx) {
+                    throw new Error('Failed to get route data from Enso');
+                }
+
+                // Create and sign transaction using Safe
+                const txHash = await safeService.processEnsoTransaction(
+                    chain,
+                    safeAddress,
+                    routeData.tx
+                );
+
+                txHashes.push(txHash);
+            } catch (error) {
+                console.error(`Failed to unstake ${token.address}:`, error);
+            }
+        }
 
         return Response.json({
             success: true,
-            txHash
+            txHashes
         });
     } catch (error) {
         console.error('Failed to lend tokens:', error);

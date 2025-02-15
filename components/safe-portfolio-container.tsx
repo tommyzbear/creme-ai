@@ -12,6 +12,8 @@ import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { HoldingsDashboard } from "./holdings-dashboard";
+import { ChainSelector } from "@/components/chain-selector";
+import { NetworkIcon } from "@/components/ui/network-icon";
 
 interface SafePortfolioContainerProps {
     className?: string;
@@ -19,7 +21,11 @@ interface SafePortfolioContainerProps {
     lastFocus: "chat" | "portfolio" | null;
 }
 
-export function SafePortfolioContainer({ className, onFocus, lastFocus }: SafePortfolioContainerProps) {
+export function SafePortfolioContainer({
+    className,
+    onFocus,
+    lastFocus,
+}: SafePortfolioContainerProps) {
     const {
         safeAddress,
         setSafeAddress,
@@ -28,7 +34,7 @@ export function SafePortfolioContainer({ className, onFocus, lastFocus }: SafePo
         setSelectedChain,
         balances,
         fetchBalances,
-        isLoading
+        isLoading,
     } = useSafeStore();
 
     const { user } = usePrivy();
@@ -40,7 +46,7 @@ export function SafePortfolioContainer({ className, onFocus, lastFocus }: SafePo
     const [scrollOpacity, setScrollOpacity] = useState(0);
     const portfolioContainerRef = useRef<HTMLDivElement>(null);
 
-    const managedWallet = wallets.find(w => w.walletClientType === "privy");
+    const managedWallet = wallets.find((w) => w.walletClientType === "privy");
 
     const isPortfolioFocused = (lastFocus: "chat" | "portfolio" | null): boolean => {
         if (lastFocus === null) return true;
@@ -183,7 +189,7 @@ export function SafePortfolioContainer({ className, onFocus, lastFocus }: SafePo
             onFocus={() => {
                 onFocus?.();
             }}
-            onBlur={() => { }}
+            onBlur={() => {}}
             tabIndex={0}
         >
             <div
@@ -212,23 +218,25 @@ export function SafePortfolioContainer({ className, onFocus, lastFocus }: SafePo
                         `}
                         onClick={scrollToTop}
                     >
-                        Safe Details
+                        Safe Wallet Details
                     </h1>
                     <div className="flex items-center gap-2 h-6">
                         {isLoading ? (
                             <Skeleton className="h-4 w-28" />
                         ) : (
                             <button
-                                className="text-sm text-muted-foreground pl-3 hover:text-primary transition-colors flex items-center gap-1 cursor-pointer pointer-events-auto"
+                                className={cn(
+                                    "text-sm text-muted-foreground pl-3",
+                                    "hover:text-primary transition-colors",
+                                    "flex items-center gap-1",
+                                    "cursor-pointer pointer-events-auto"
+                                )}
                                 onClick={() => copyToClipboard(safeAddress || "")}
                                 title="Copy address to clipboard"
                                 disabled={!safeAddress}
                             >
                                 {safeAddress
-                                    ? `${safeAddress.slice(
-                                        0,
-                                        6
-                                    )}...${safeAddress.slice(-4)}`
+                                    ? `${safeAddress.slice(0, 6)}...${safeAddress.slice(-4)}`
                                     : "Not Deployed"}
                                 {safeAddress &&
                                     (isCopied ? (
@@ -244,54 +252,147 @@ export function SafePortfolioContainer({ className, onFocus, lastFocus }: SafePo
                 <Separator />
                 {user?.wallet?.address !== managedWallet?.address ? (
                     <>
-                        <div className="pb-4">
-                            <h1
-                                className={`pt-3 flex flex-col justify-center text-center text-lg font-bold font-bricolage`}
-                            >
-                                Signers
-                            </h1>
-                            <div className="flex flex-col items-center gap-2 h-6 pt-2 pb-8">
-                                <p className="text-sm text-muted-foreground">{user?.wallet?.address}</p>
-                                <p className="text-sm text-muted-foreground">{managedWallet?.address}</p>
+                        <div className="flex flex-col items-center gap-2 w-full px-4">
+                            <div className="flex flex-row items-center gap-10 justify-between">
+                                <div className="shrink-0 hover:rotate-[-12deg] transition-all duration-100 ease-out">
+                                    <img
+                                        src="/logo-b.svg"
+                                        alt="Creme puff"
+                                        className="my-4 w-24 h-24 animate-float opacity-30"
+                                        draggable={false}
+                                    />
+                                </div>
+                                <div className="flex-1 w-full pb-2 justify-start items-start text-left">
+                                    <h1 className={`text-lg font-bold font-bricolage text-left`}>
+                                        Signers
+                                    </h1>
+                                    <div className="flex flex-col items-center gap-2 h-6 pt-2 pb-8 transition-all duration-300">
+                                        <p className="text-sm text-muted-foreground text-left">
+                                            {isPortfolioFocused(lastFocus)
+                                                ? user?.wallet?.address
+                                                : `${user?.wallet?.address.slice(
+                                                      0,
+                                                      10
+                                                  )}...${user?.wallet?.address.slice(-10)}`}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground text-left">
+                                            {isPortfolioFocused(lastFocus)
+                                                ? managedWallet?.address
+                                                : `${managedWallet?.address.slice(
+                                                      0,
+                                                      10
+                                                  )}...${managedWallet?.address.slice(-10)}`}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex flex-col items-center gap-2">
-                            <h1 className="text-center text-lg font-bold font-bricolage">
-                                Chain
-                            </h1>
-                            <div className="w-[200px]">
-                                <Select
-                                    value={selectedChain}
-                                    onValueChange={setSelectedChain}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select chain" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="eip155:1" disabled>Ethereum (soon)</SelectItem>
-                                        <SelectItem value="eip155:10" disabled>Optimism (soon)</SelectItem>
-                                        <SelectItem value="eip155:42161" >Arbitrum</SelectItem>
-                                        <SelectItem value="eip155:8453" disabled>Base (soon)</SelectItem>
-                                    </SelectContent>
-                                </Select>
+
+                            <div className="flex flex-col items-center gap-2 w-full">
+                                {/* <h1 className="text-center text-lg font-bold font-bricolage">Chain</h1> */}
+                                <div className="flex flex-row items-center gap-2 w-full">
+                                    <div className="w-full">
+                                        <Select
+                                            value={selectedChain}
+                                            onValueChange={setSelectedChain}
+                                        >
+                                            <SelectTrigger className="frosted-glass bg-background/40 rounded-3xl border-0 transition-colors duration-200 focus:ring-0 focus:outline-none outline-none hover:bg-accent hover:text-accent-foreground">
+                                                <SelectValue placeholder="Select chain" />
+                                            </SelectTrigger>
+                                            <SelectContent
+                                                position="popper"
+                                                className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] rounded-3xl"
+                                            >
+                                                {" "}
+                                                <SelectItem
+                                                    value="eip155:42161"
+                                                    className="rounded-3xl"
+                                                >
+                                                    <div className="flex items-center space-x-3">
+                                                        <NetworkIcon
+                                                            chain={"Arbitrum One"}
+                                                            className="w-6 h-6"
+                                                        />
+                                                        <div>
+                                                            <p className="font-medium">Arbitrum</p>
+                                                        </div>
+                                                    </div>
+                                                </SelectItem>
+                                                <SelectItem
+                                                    value="eip155:1"
+                                                    disabled
+                                                    className="rounded-3xl"
+                                                >
+                                                    <div className="flex items-center space-x-3">
+                                                        <NetworkIcon
+                                                            chain={"Ethereum"}
+                                                            className="w-6 h-6"
+                                                        />
+                                                        <div>
+                                                            <p className="font-medium">
+                                                                Ethereum (soon)
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </SelectItem>
+                                                <SelectItem
+                                                    value="eip155:10"
+                                                    disabled
+                                                    className="rounded-3xl"
+                                                >
+                                                    <div className="flex items-center space-x-3">
+                                                        <NetworkIcon
+                                                            chain={"OP Mainnet"}
+                                                            className="w-6 h-6"
+                                                        />
+                                                        <div>
+                                                            <p className="font-medium">
+                                                                Optimism (soon)
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </SelectItem>
+                                                <SelectItem
+                                                    value="eip155:8453"
+                                                    disabled
+                                                    className="rounded-3xl"
+                                                >
+                                                    <div className="flex items-center space-x-3">
+                                                        <NetworkIcon
+                                                            chain={"Base"}
+                                                            className="w-6 h-6"
+                                                        />
+                                                        <div>
+                                                            <p className="font-medium">
+                                                                Base (soon)
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    {!safeAddress && (
+                                        <Button
+                                            onClick={handleCreateSafe}
+                                            disabled={isCreating}
+                                            variant="main"
+                                            className="w-full rounded-3xl text-background"
+                                        >
+                                            {isCreating ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Creating...
+                                                </>
+                                            ) : (
+                                                "Deploy Safe Wallet"
+                                            )}
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            {!safeAddress && (
-                                <Button onClick={handleCreateSafe} disabled={isCreating}>
-                                    {isCreating ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Creating...
-                                        </>
-                                    ) : (
-                                        "Deploy Safe"
-                                    )}
-                                </Button>
-                            )}
-                        </div>
-                        <div>
+                        <div className="mt-8">
                             <HoldingsDashboard
                                 isLoading={isLoading}
                                 totalValue={totalValue}
@@ -300,23 +401,23 @@ export function SafePortfolioContainer({ className, onFocus, lastFocus }: SafePo
                             />
                             <TokensTable
                                 tokens={balances.filter(token => !isDust(token))}
-                                totalValue={totalValue}
+                                totalValue={balances.reduce(
+                                    (acc, token) => acc + Number(token.value),
+                                    0
+                                )}
                                 isLoading={isLoading}
                                 isExpanded={isPortfolioFocused(lastFocus)}
                             />
                         </div>
                     </>
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-full w-full">
-                        <h1
-                            className="flex flex-col justify-center text-center text-lg font-bold font-bricolage"
-                        >
-                            Generating Safe Account require at least 3 signers including AI Agent
+                    <div className="flex mx-auto flex-col items-center justify-center h-full w-80 text-base pb-20">
+                        <h1 className="flex flex-col justify-center text-center text-pretty">
+                            Generating Safe Account requires at least 3 signers, including AI Agent
                         </h1>
-                        <h1
-                            className="pt-3 flex flex-col justify-center text-center text-lg font-bold font-bricolage"
-                        >
-                            Please connect additional wallet by going into Account Settings on top left
+                        <h1 className="pt-3 flex flex-col justify-center text-center text-pretty">
+                            Please connect additional wallet by going into Account Settings on top
+                            left
                         </h1>
                     </div>
                 )}

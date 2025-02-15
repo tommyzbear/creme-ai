@@ -241,8 +241,7 @@ export function SafePortfolioContainer({
                 </header>
 
                 <Separator />
-                {/* {user?.wallet?.address !== managedWallet?.address ? ( */}
-                {1 ? (
+                {user?.wallet?.address !== managedWallet?.address ? (
                     <>
                         <div className="flex flex-col items-center gap-2 w-full px-4">
                             <div className="flex flex-row items-center gap-10 justify-between">
@@ -403,7 +402,7 @@ export function SafePortfolioContainer({
                         </div>
                     </>
                 ) : (
-                    <div className="flex mx-auto flex-col items-center justify-center h-full w-80 text-base">
+                    <div className="flex mx-auto flex-col items-center justify-center h-full w-80 text-base pb-20">
                         <h1 className="flex flex-col justify-center text-center text-pretty">
                             Generating Safe Account requires at least 3 signers, including AI Agent
                         </h1>

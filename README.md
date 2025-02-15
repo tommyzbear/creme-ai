@@ -103,10 +103,10 @@ Deployed at [crème'ai](https://creme-ai.vercel.app)
 
 ## 7. Safe Strategy Screenshots
 
-![Demo Screenshot 3](/public/screen_shot3.png)
+![Demo Screenshot 3](/public/screen_shot_3.png)
 
-![Demo Screenshot 4](/public/screen_shot4.png)
+![Demo Screenshot 4](/public/screen_shot_4.png)
 
-![Demo Screenshot 5](/public/screen_shot5.png)
+![Demo Screenshot 5](/public/screen_shot_5.png)
 
-![Demo Screenshot 6](/public/screen_shot6.png)
+![Demo Screenshot 6](/public/screen_shot_6.png)

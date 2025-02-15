@@ -4,6 +4,11 @@ import { arbitrum, base, mainnet, optimism } from 'viem/chains';
 import { ensoService } from '@/lib/services/enso';
 import { supabase } from '@/lib/supabase';
 import { cowswap } from '@/lib/services/cowswap';
+import { OrderStatus, TransactionParams } from '@cowprotocol/cow-sdk';
+import { odosClient } from '@/lib/services/odos';
+import { Chain, erc20Abi } from 'viem';
+import { encodeFunctionData } from 'viem';
+import { rpcClients } from '@/lib/services/rpcClients';
 
 export async function POST(req: Request) {
     try {
@@ -19,7 +24,7 @@ export async function POST(req: Request) {
             throw new Error('Safe wallet not found');
         }
 
-        const { chainId, safeAddress, tokenIn }: { chainId: string, safeAddress: `0x${string}`, tokenIn: `0x${string}`[] | undefined } = await req.json();
+        const { chainId, safeAddress, tokenIn, viaCowSwap }: { chainId: string, safeAddress: `0x${string}`, tokenIn: `0x${string}`[] | undefined, viaCowSwap: boolean } = await req.json();
 
         if (safeAddress !== data.address) {
             throw new Error('Please provide your own safe address');
@@ -65,23 +70,72 @@ export async function POST(req: Request) {
 
         const baseTokens = tokenData.filter((token) => token.type === "base");
         const txHashes = []
-        for (const token of baseTokens) {
-            try {
-                const preSignTransaction = await cowswap.getSwapPreSignTransaction(
-                    data.address,
-                    token.address,
-                    token.decimals,
-                    cowswap.getWethAddress(chain),
-                    18,
-                    balances.find((b) => b.token.toLowerCase() === token.address.toLowerCase())?.amount || "0",
-                    chain
-                );
+        if (viaCowSwap) {
+            for (const token of baseTokens) {
+                try {
+                    const { preSignTransaction, orderId } = await cowswap.getSwapPreSignTransaction(
+                        data.address,
+                        token.address,
+                        token.decimals,
+                        cowswap.getWethAddress(chain),
+                        18,
+                        balances.find((b) => b.token.toLowerCase() === token.address.toLowerCase())?.amount || "0",
+                        chain
+                    );
 
-                const txHash = await safeService.preSignCowSwapTransaction(chain, data.address, preSignTransaction);
-                txHashes.push(txHash);
-            } catch (error) {
-                console.error(`Failed to swap ${token.address} to WETH:`, error);
+                    const txHash = await safeService.preSignCowSwapTransaction(chain, data.address, preSignTransaction);
+                    txHashes.push(txHash);
+
+                    let orderStatus = OrderStatus.OPEN;
+                    for (let i = 0; i < 3; i++) {
+                        orderStatus = await cowswap.getOrderStatusByOrderId(orderId, chain);
+                        console.log(`Order status: ${orderStatus}`);
+                        if (orderStatus === OrderStatus.FULFILLED || orderStatus === OrderStatus.EXPIRED) {
+                            break;
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 30000));
+                    }
+
+                    // TODO: Cancel order if it is not fulfilled or expired
+                    // if (orderStatus !== OrderStatus.FULFILLED && orderStatus !== OrderStatus.EXPIRED) {
+
+                    // }
+                } catch (error) {
+                    console.error(`Failed to swap ${token.address} to WETH:`, error);
+                }
             }
+        } else {
+            // Swap to WETH using Odos
+            const inputTokens = baseTokens.map((token) => ({
+                tokenAddress: token.address,
+                amount: balances.find((b) => b.token.toLowerCase() === token.address.toLowerCase())?.amount || "0"
+            }))
+
+            const outputTokens = [{
+                tokenAddress: cowswap.getWethAddress(chain),
+                proportion: 1
+            }]
+
+            for (const token of inputTokens) {
+                const approveHash = await approveTokenSpending(chain, data.address, token.tokenAddress, odosClient.routerAddressByChain[chainId], BigInt(token.amount));
+                await rpcClients[chainId].waitForTransactionReceipt({ hash: approveHash as `0x${string}` })
+            }
+
+            const quote = await odosClient.getQuote(chain.id, inputTokens, outputTokens, data.address, 0.5);
+            console.log("quote", quote);
+
+            if (!quote) {
+                throw new Error("Failed to get quote");
+            }
+            const assembledTransaction = await odosClient.assembleTransaction(quote.pathId, data.address);
+            console.log("assembledTransaction", assembledTransaction);
+
+            if (!assembledTransaction || assembledTransaction.simulation.isSuccess === false) {
+                throw new Error("Failed to assemble transaction");
+            }
+
+            const tx = await safeService.initiateTransaction(chain, data.address, assembledTransaction.transaction);
+            txHashes.push(tx);
         }
 
         return Response.json({
@@ -103,4 +157,21 @@ export async function POST(req: Request) {
             }
         );
     }
-} 
+}
+
+
+const approveTokenSpending = async (chain: Chain, safeAddress: `0x${string}`, tokenAddress: `0x${string}`, spenderAddress: `0x${string}`, amount: bigint) => {
+    const data = encodeFunctionData({
+        abi: erc20Abi,
+        functionName: 'approve',
+        args: [spenderAddress, amount]
+    });
+
+    const txHash = await safeService.initiateTransaction(chain, safeAddress, {
+        to: tokenAddress,
+        data,
+        value: `0x0`
+    } as TransactionParams);
+
+    return txHash?.hash;
+}

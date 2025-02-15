@@ -416,8 +416,6 @@ const customConfirmation = async (signature: string, safeTxHash: string, chainId
         })
     })
 
-    console.log("Response:", response)
-
     let jsonResponse: any
     try {
         jsonResponse = response.json()

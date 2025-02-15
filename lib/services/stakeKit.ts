@@ -174,7 +174,7 @@ export class StakeKitClient {
 
       console.log('Response status:', response.status);
       const data = await response.json();
-      console.log('Response data:', data);
+      // console.log('Response data:', data);
 
       if (!response.ok) {
         throw new Error(`API request failed: ${response.status} ${response.statusText} - ${JSON.stringify(data)}`);
@@ -247,14 +247,14 @@ export class StakeKitClient {
 
   async getAvailableYields(network: string, type?: string): Promise<YieldOpportunity[]> {
     try {
-      console.log('Fetching yields for network:', network);
+      // console.log('Fetching yields for network:', network);
       let endpoint = `/v1/yields/enabled?network=${network}`;
       if (type) {
         endpoint += `&type=${type}`;
       }
 
       const resp = await this.request('GET', endpoint);
-      console.log('Raw API response:', resp);
+      // console.log('Raw API response:', resp);
 
       // Ensure we're accessing the correct data structure
       const yields = resp.data || [];
@@ -264,7 +264,7 @@ export class StakeKitClient {
         item.status.enter && item.status.exit
       );
 
-      console.log('Active yields:', activeYields);
+      // console.log('Active yields:', activeYields);
       return activeYields;
     } catch (error) {
       console.error('Error in getAvailableYields:', error);
@@ -362,11 +362,11 @@ export class StakeKitClient {
     tokens: TokenInfo[]
   ): Promise<FilteredYieldOpportunity[]> {
     try {
-      console.log('Getting yields for network:', network);
+      // console.log('Getting yields for network:', network);
 
       // Get all available yields for the network
       const allYields = await this.getAvailableYields(network);
-      console.log('All available yields:', allYields);
+      // console.log('All available yields:', allYields);
 
       // Convert network names for comparison
       const normalizedNetwork = this.normalizeNetwork(network);
@@ -401,7 +401,7 @@ export class StakeKitClient {
         return isActive && matchingToken;
       });
 
-      console.log('Filtered yields:', filteredYields);
+      // console.log('Filtered yields:', filteredYields);
 
       // Transform to simplified format
       const transformedYields = filteredYields.map(yieldOpportunity => ({
@@ -421,7 +421,7 @@ export class StakeKitClient {
         }
       }));
 
-      console.log('Transformed yields:', transformedYields);
+      // console.log('Transformed yields:', transformedYields);
       return transformedYields;
     } catch (error) {
       console.error('Error in getTokenYieldOpportunities:', error);
@@ -451,18 +451,18 @@ export class StakeKitClient {
     tokens: TokenInfo[],
     type?: string
   ): Promise<FilteredYieldOpportunity[]> {
-    console.log('Getting highest yields for:', { network, tokens, type });
+    // console.log('Getting highest yields for:', { network, tokens, type });
 
     try {
       const yields = await this.getTokenYieldOpportunities(network, tokens);
-      console.log('All yields before filtering:', yields);
+      // console.log('All yields before filtering:', yields);
 
       // Filter by type if specified
       const filteredYields = type
         ? yields.filter(y => y.metadata.type === type)
         : yields;
 
-      console.log('Yields after type filtering:', filteredYields);
+      // console.log('Yields after type filtering:', filteredYields);
 
       // Sort by APY in descending order
       const sortedYields = filteredYields.sort((a, b) => b.apy - a.apy);

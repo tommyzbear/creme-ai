@@ -1,4 +1,4 @@
-import { TradingSdk, TradeParameters, OrderKind, SigningScheme, SwapAdvancedSettings } from '@cowprotocol/cow-sdk'
+import { TradingSdk, TradeParameters, OrderKind, SigningScheme, SwapAdvancedSettings, OrderBookApi, OrderSigningUtils, OrderStatus } from '@cowprotocol/cow-sdk'
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { VoidSigner } from "@ethersproject/abstract-signer";
 import { Chain } from 'viem';
@@ -53,8 +53,31 @@ const getSwapPreSignTransaction = async (
         account: smartContractWalletAddress,
     });
 
-    return preSignTransaction
+    return { preSignTransaction, orderId }
 }
+
+const getOrderStatusByOrderId = async (orderId: string, chain: Chain) => {
+    const orderBookApi = new OrderBookApi({ chainId: chain.id })
+
+    const order = await orderBookApi.getOrder(orderId)
+
+    if (!order) {
+        throw new Error('Order not found')
+    }
+
+    return order.status
+}
+
+// const cancelOrderById = async (orderId: string, chain: Chain) => {
+//     const orderSigningUtils = new OrderSigningUtils()
+
+//     const orderCancellationSigningResult = await OrderSigningUtils.signOrderCancellations([orderId], chain.id, signer)
+
+//     const orderCancellationTransaction = await OrderSigningUtils.getOrderCancellationTransaction(orderCancellationSigningResult, chain.id)
+
+//     return orderCancellationTransaction
+// }
+
 
 const getWethAddress = (chain: Chain) => {
     switch (chain.id) {
@@ -72,5 +95,6 @@ const getWethAddress = (chain: Chain) => {
 
 export const cowswap = {
     getSwapPreSignTransaction,
-    getWethAddress
+    getWethAddress,
+    getOrderStatusByOrderId
 }

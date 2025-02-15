@@ -42,7 +42,6 @@ export function SafePortfolioContainer({ className, onFocus, lastFocus }: SafePo
 
     const managedWallet = wallets.find(w => w.walletClientType === "privy");
 
-
     const isPortfolioFocused = (lastFocus: "chat" | "portfolio" | null): boolean => {
         if (lastFocus === null) return true;
         return lastFocus === "portfolio";
@@ -234,67 +233,84 @@ export function SafePortfolioContainer({ className, onFocus, lastFocus }: SafePo
                 </header>
 
                 <Separator />
-                <div className="pb-4">
-                    <h1
-                        className={`pt-3 flex flex-col justify-center text-center text-lg font-bold font-bricolage`}
-                    >
-                        Owners
-                    </h1>
-                    <div className="flex flex-col items-center gap-2 h-6 pt-2 pb-8">
-                        <p className="text-sm text-muted-foreground">{user?.wallet?.address}</p>
-                        <p className="text-sm text-muted-foreground">{managedWallet?.address}</p>
-                    </div>
-                </div>
-                <div className="flex flex-col items-center gap-2">
-                    <h1 className="text-center text-lg font-bold font-bricolage">
-                        Chain
-                    </h1>
-                    <div className="w-[200px]">
-                        <Select
-                            value={selectedChain}
-                            onValueChange={setSelectedChain}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select chain" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="eip155:1" disabled>Ethereum (soon)</SelectItem>
-                                <SelectItem value="eip155:10" disabled>Optimism (soon)</SelectItem>
-                                <SelectItem value="eip155:42161" >Arbitrum</SelectItem>
-                                <SelectItem value="eip155:8453" disabled>Base (soon)</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
+                {user?.wallet?.address === managedWallet?.address ? (
+                    <>
+                        <div className="pb-4">
+                            <h1
+                                className={`pt-3 flex flex-col justify-center text-center text-lg font-bold font-bricolage`}
+                            >
+                                Signers
+                            </h1>
+                            <div className="flex flex-col items-center gap-2 h-6 pt-2 pb-8">
+                                <p className="text-sm text-muted-foreground">{user?.wallet?.address}</p>
+                                <p className="text-sm text-muted-foreground">{managedWallet?.address}</p>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-center gap-2">
+                            <h1 className="text-center text-lg font-bold font-bricolage">
+                                Chain
+                            </h1>
+                            <div className="w-[200px]">
+                                <Select
+                                    value={selectedChain}
+                                    onValueChange={setSelectedChain}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select chain" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="eip155:1" disabled>Ethereum (soon)</SelectItem>
+                                        <SelectItem value="eip155:10" disabled>Optimism (soon)</SelectItem>
+                                        <SelectItem value="eip155:42161" >Arbitrum</SelectItem>
+                                        <SelectItem value="eip155:8453" disabled>Base (soon)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
 
-                <div className="flex items-center gap-4">
-                    {!safeAddress && (
-                        <Button onClick={handleCreateSafe} disabled={isCreating}>
-                            {isCreating ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Creating...
-                                </>
-                            ) : (
-                                "Deploy Safe"
+                        <div className="flex items-center gap-4">
+                            {!safeAddress && (
+                                <Button onClick={handleCreateSafe} disabled={isCreating}>
+                                    {isCreating ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Creating...
+                                        </>
+                                    ) : (
+                                        "Deploy Safe"
+                                    )}
+                                </Button>
                             )}
-                        </Button>
-                    )}
-                </div>
-                <div>
-                    <HoldingsDashboard
-                        isLoading={isLoading}
-                        totalValue={totalValue}
-                        tokens={balances}
-                        onRefresh={handlePortfolioRefresh}
-                    />
-                    <TokensTable
-                        tokens={balances}
-                        totalValue={balances.reduce((acc, token) => acc + Number(token.value), 0)}
-                        isLoading={isLoading}
-                        isExpanded={isPortfolioFocused(lastFocus)}
-                    />
-                </div>
+                        </div>
+                        <div>
+                            <HoldingsDashboard
+                                isLoading={isLoading}
+                                totalValue={totalValue}
+                                tokens={balances}
+                                onRefresh={handlePortfolioRefresh}
+                            />
+                            <TokensTable
+                                tokens={balances}
+                                totalValue={balances.reduce((acc, token) => acc + Number(token.value), 0)}
+                                isLoading={isLoading}
+                                isExpanded={isPortfolioFocused(lastFocus)}
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full w-full">
+                        <h1
+                            className="flex flex-col justify-center text-center text-lg font-bold font-bricolage"
+                        >
+                            Generating Safe Account require at least 3 signers including AI Agent
+                        </h1>
+                        <h1
+                            className="pt-3 flex flex-col justify-center text-center text-lg font-bold font-bricolage"
+                        >
+                            Please connect additional wallet by going into Account Settings on top left
+                        </h1>
+                    </div>
+                )}
             </div>
             <div className="bottom-fade z-[-5]" />
         </div>

@@ -13,7 +13,6 @@ import {
     type WalletWithMetadata,
 } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { ProfileCard } from "@/components/profile-card";
 
@@ -27,7 +26,6 @@ export function AccountCard({ onAccountClick }: AccountCardProps) {
     const { user: dbUser, fetchUser } = useUserStore();
     const { ready, user } = usePrivy();
     const { ready: walletReady, wallets } = useWallets();
-    const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
 
     const { fundWallet } = useFundWallet();
@@ -36,22 +34,6 @@ export function AccountCard({ onAccountClick }: AccountCardProps) {
         undefined
     );
 
-    const copyToClipboard = async (text: string) => {
-        try {
-            await navigator.clipboard.writeText(text);
-            toast({
-                description: "Copied to clipboard",
-                duration: 2000,
-            });
-        } catch (error) {
-            console.error("Failed to copy:", error);
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Failed to copy to clipboard",
-            });
-        }
-    };
 
     useEffect(() => {
         if (!ready || !walletReady) return;

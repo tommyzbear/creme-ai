@@ -34,6 +34,10 @@ export const useSafeStore = create<SafeStore>((set, get) => ({
             });
 
             if (!response.ok) {
+                if (response.status === 404) {
+                    set({ safeAddress: '', isLoading: false });
+                    return;
+                }
                 throw new Error('Failed to fetch safe address');
             }
 

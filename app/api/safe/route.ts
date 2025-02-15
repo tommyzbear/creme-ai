@@ -13,6 +13,9 @@ export async function GET() {
             .single();
 
         if (error) {
+            if (error.code === 'PGRST116') {
+                return NextResponse.json({ address: null }, { status: 404 });
+            }
             console.log("Error fetching safe wallet:", error);
             throw new Error(error.message);
         }

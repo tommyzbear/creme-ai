@@ -201,6 +201,7 @@ export function AccountModal({ open, onOpenChange }: AccountModalProps) {
                         />
                         <ConnectedAccounts
                             user={user}
+                            managedWallet={managedWallet}
                             {...{
                                 linkEmail,
                                 linkPhone,

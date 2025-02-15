@@ -98,11 +98,13 @@ export function ProfileSection({
                                 <p className="font-mono text-sm">
                                     {walletAddress
                                         ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(
-                                              -4
-                                          )}`
+                                            -4
+                                        )}`
                                         : ""}
                                 </p>
-                                <Copy className="w-3 h-3 cursor-pointer text-gray-500 hover:text-gray-700" />
+                                {walletAddress !== managedWalletAddress && (
+                                    <Copy className="w-3 h-3 cursor-pointer text-gray-500 hover:text-gray-700" />
+                                )}
                             </button>
                         </div>
 
@@ -118,9 +120,9 @@ export function ProfileSection({
                                     <p className="font-mono text-sm">
                                         {managedWalletAddress
                                             ? `${managedWalletAddress.slice(
-                                                  0,
-                                                  6
-                                              )}...${managedWalletAddress.slice(-4)}`
+                                                0,
+                                                6
+                                            )}...${managedWalletAddress.slice(-4)}`
                                             : ""}
                                     </p>
                                     <Copy className="w-3 h-3 cursor-pointer text-gray-500 hover:text-gray-700" />

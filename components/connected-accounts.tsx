@@ -111,13 +111,13 @@ export function ConnectedAccounts({
                                         )}...${user?.wallet?.address.slice(-4)}`
                                         : "Not Connected"}
                                 </p>
-                                {user?.wallet?.address && (
+                                {user?.wallet?.address !== managedWallet?.address && user?.wallet?.address && (
                                     <Copy className="w-4 h-4 text-gray-500 hover:text-gray-700" />
                                 )}
                             </button>
                         </div>
                     </div>
-                    {!user?.wallet ? (
+                    {user?.wallet?.address === managedWallet?.address ? (
                         <Button variant="main" onClick={() => linkWallet()}>
                             Connect
                         </Button>

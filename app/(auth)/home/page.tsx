@@ -4,9 +4,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { redirect } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { useChatStore } from "@/stores/chat-store";
-import { useNewsStore } from "@/stores/news-store";
 
 import { ChatContainer } from "@/components/chat-container";
 import { PortfolioContainer } from "@/components/portfolio-container";
@@ -15,25 +13,10 @@ export default function HomePage() {
     const { ready, authenticated } = usePrivy();
     const [lastFocusedSection, setLastFocusedSection] = useState<"chat" | "portfolio" | null>(null);
     const { sessionName, setSessionName, startNewChat, fetchSessions } = useChatStore();
-    // const { fetchNews, news } = useNewsStore();
-    const { toast } = useToast();
 
     if (ready && !authenticated) {
         redirect("/login");
     }
-
-    // useEffect(() => {
-    //     if (!news.length) {
-    //         fetchNews()
-    //             .catch(() => {
-    //                 toast({
-    //                     title: "Error fetching news",
-    //                     description: "Please try again later",
-    //                     variant: "destructive",
-    //                 });
-    //             });
-    //     }
-    // }, [fetchNews, toast, news.length]);
 
     useEffect(() => {
         fetchSessions();

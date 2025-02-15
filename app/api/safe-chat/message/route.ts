@@ -25,7 +25,7 @@ export async function POST(req: Request) {
             session_id: session_id,
             role: role,
             content,
-            chat_type: 'individual'
+            chat_type: 'safe'
         });
 
         return new Response('Message saved', { status: 201 });

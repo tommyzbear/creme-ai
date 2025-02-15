@@ -41,10 +41,15 @@ export default function SafePage() {
         fetchBalances,
         isLoading
     } = useSafeStore();
+    const { fetchSessions } = useSafeChatStore();
 
     const { sessionName, startNewChat, setSessionName } = useSafeChatStore();
 
     const managedWallet = wallets.find(w => w.walletClientType === "privy");
+
+    useEffect(() => {
+        fetchSessions();
+    }, [fetchSessions]);
 
     useEffect(() => {
         if (!safeAddress) {

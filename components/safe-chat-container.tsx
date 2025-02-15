@@ -5,10 +5,10 @@ import { useEffect, useRef, useState } from "react";
 import { ChatMessage } from "@/components/chat-message";
 import { ChatInput } from "@/components/chat-input";
 import { useToast } from "@/hooks/use-toast";
-import { useChatStore } from "@/stores/chat-store";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useSafeChatStore } from "@/stores/safe-chat-store";
 
 export function SafeChatContainer({
     className,
@@ -25,15 +25,15 @@ export function SafeChatContainer({
 }) {
     const { toast } = useToast();
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const { sessionId, addSession } = useChatStore();
+    const { sessionId, addSession } = useSafeChatStore();
 
     const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useChat({
-        api: "/api/chat",
+        api: "/api/safe-chat",
         maxSteps: 5,
         id: sessionId,
         onFinish: async (message) => {
             try {
-                await fetch("/api/chat/message", {
+                await fetch("/api/safe-chat/message", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -66,7 +66,7 @@ export function SafeChatContainer({
         const fetchMessages = async () => {
             console.log("sessionId", sessionId);
             try {
-                const response = await fetch(`/api/chat/sessions/${sessionId}`);
+                const response = await fetch(`/api/safe-chat/sessions/${sessionId}`);
                 if (!response.ok) throw new Error("Failed to fetch session messages");
                 const messages = await response.json();
                 setMessages(messages);
@@ -91,7 +91,7 @@ export function SafeChatContainer({
         }
 
         try {
-            await fetch("/api/chat/message", {
+            await fetch("/api/safe-chat/message", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

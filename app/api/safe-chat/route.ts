@@ -1,4 +1,4 @@
-import { systemPrompt } from '@/lib/systemPrompt';
+import { safeSystemPrompt } from '@/lib/systemPrompt';
 import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { privy } from '@/lib/privy';
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
             messages: [
                 {
                     role: 'system',
-                    content: systemPrompt,
+                    content: safeSystemPrompt,
                 },
                 ...messages
             ],

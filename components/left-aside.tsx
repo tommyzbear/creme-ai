@@ -14,23 +14,23 @@ export default function LeftAside({ className }: { className?: string }) {
     const { toast } = useToast();
     const [preferences, setPreferences] = useState<Partial<Preference>>({
         userProfile: {
-            experienceLevel: "Beginner",
-            portfolioManagementFrequency: "Monthly",
+            experienceLevel: "",
+            portfolioManagementFrequency: "",
             assetsHeld: {
                 bitcoin: false,
                 ethereum: false,
                 altcoins: false,
                 stablecoins: false,
-                defiTokens: false
-            }
+                defiTokens: false,
+            },
         },
         investmentGoals: {
             goals: [],
-            riskLevel: 3
+            riskLevel: "",
         },
         preferredStrategies: {
             strategies: [],
-            diversificationImportance: "Somewhat important"
+            diversificationImportance: "",
         },
         web3Engagement: {
             usingDeFiPlatforms: false,
@@ -39,28 +39,27 @@ export default function LeftAside({ className }: { className?: string }) {
                 ethereum: false,
                 solana: false,
                 binanceSmartChain: false,
-                arbitrumOptimismBase: false
-            }
+                arbitrumOptimismBase: false,
+            },
         },
         aiCustomizationPreferences: {
             aiRecommendations: [],
-            automatedExecutions: "Mixed",
-            marketMovementAlerts: false
-        }
+            automatedExecutions: "",
+            marketMovementAlerts: false,
+        },
     });
 
     const [showPreferences, setShowPreferences] = useState(false);
 
     useEffect(() => {
         if (!news.length) {
-            fetchNews()
-                .catch(() => {
-                    toast({
-                        title: "Error fetching news",
-                        description: "Please try again later",
-                        variant: "destructive",
-                    });
+            fetchNews().catch(() => {
+                toast({
+                    title: "Error fetching news",
+                    description: "Please try again later",
+                    variant: "destructive",
                 });
+            });
         }
     }, [fetchNews, toast, news.length]);
 
@@ -87,7 +86,13 @@ export default function LeftAside({ className }: { className?: string }) {
         <>
             <aside className={cn("flex flex-row gap-2", className)}>
                 <SidebarProvider className="!min-h-fit !h-full !max-w-12 4xl:!max-w-16">
-                    <SideNav className="h-full max-w-full" preferences={preferences} setPreferences={setPreferences} setShowPreferences={setShowPreferences} showPreferences={showPreferences} />
+                    <SideNav
+                        className="h-full max-w-full"
+                        preferences={preferences}
+                        setPreferences={setPreferences}
+                        setShowPreferences={setShowPreferences}
+                        showPreferences={showPreferences}
+                    />
                 </SidebarProvider>
 
                 <SideContent className="flex-1 h-full w-[calc(21rem-3.5rem)] 4xl:max-w-[calc(30rem-4rem)]" />

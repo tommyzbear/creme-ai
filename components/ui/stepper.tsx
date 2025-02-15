@@ -6,23 +6,27 @@ interface StepperProps {
     activeStep: number;
     progress: number;
     className?: string;
+    onStepClick?: (step: number) => void;
 }
 
-export function Stepper({ steps, activeStep, progress, className }: StepperProps) {
+export function Stepper({ steps, activeStep, progress, className, onStepClick }: StepperProps) {
     return (
         <div className="flex flex-col gap-0 mt-4">
             <div className={cn("flex w-full gap-2", className)}>
                 {steps.map((step, index) => (
-                    <div
+                    <button
                         key={step}
+                        onClick={() => index < activeStep && onStepClick?.(index)}
                         className={cn(
                             "h-2 rounded-full transition-all duration-300 ease-out relative border-0 focus:outline-none focus:ring-0 antialiased",
                             index === activeStep
                                 ? "flex-1 bg-neutral-300/30 overflow-hidden"
                                 : index < activeStep
-                                ? "w-8 bg-white"
+                                ? "w-8 bg-white hover:opacity-80 cursor-pointer"
                                 : "w-8 bg-neutral-300/30"
                         )}
+                        disabled={index >= activeStep}
+                        title={index < activeStep ? `Go back to "${step}"` : undefined}
                     >
                         {index === activeStep && (
                             <div
@@ -30,7 +34,7 @@ export function Stepper({ steps, activeStep, progress, className }: StepperProps
                                 style={{ transform: `scaleX(${progress})` }}
                             />
                         )}
-                    </div>
+                    </button>
                 ))}
             </div>
             <div className="flex justify-start items-center gap-2">

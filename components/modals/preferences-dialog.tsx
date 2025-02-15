@@ -26,6 +26,47 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Stepper } from "@/components/ui/stepper";
+import { Rocket, PartyPopper } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useChatStore } from "@/stores/chat-store";
+import { Message, useChat } from "ai/react";
+
+const defaultPreferences: Preference = {
+    userProfile: {
+        experienceLevel: "Beginner",
+        portfolioManagementFrequency: "Monthly",
+        assetsHeld: {
+            bitcoin: false,
+            ethereum: false,
+            altcoins: false,
+            stablecoins: false,
+            defiTokens: false,
+        },
+    },
+    investmentGoals: {
+        goals: [],
+        riskLevel: 3,
+    },
+    preferredStrategies: {
+        strategies: [],
+        diversificationImportance: "Somewhat important",
+    },
+    web3Engagement: {
+        usingDeFiPlatforms: false,
+        crossChainInvestments: false,
+        activeBlockchainEcosystems: {
+            ethereum: false,
+            solana: false,
+            binanceSmartChain: false,
+            arbitrumOptimismBase: false,
+        },
+    },
+    aiCustomizationPreferences: {
+        aiRecommendations: [],
+        automatedExecutions: "Mixed",
+        marketMovementAlerts: false,
+    },
+};
 
 interface PreferencesDialogProps {
     open: boolean;
@@ -35,6 +76,8 @@ interface PreferencesDialogProps {
         preferences: Partial<Preference> | ((prev: Partial<Preference>) => Partial<Preference>)
     ) => void;
 }
+
+type DialogState = "welcome" | "form" | "completion" | "closed";
 
 const steps = [
     "User Profile & Experience",
@@ -51,7 +94,45 @@ export function PreferencesDialog({
     setPreferences,
 }: PreferencesDialogProps) {
     const [activeStep, setActiveStep] = useState(0);
+    const [dialogState, setDialogState] = useState<DialogState>("welcome");
     const { toast } = useToast();
+    const router = useRouter();
+    const { startNewChat, sessionId, addSession, setSessionName } = useChatStore();
+    // const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
+    const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useChat({
+        api: "/api/chat",
+        maxSteps: 5,
+        id: sessionId,
+        onFinish: (message: Message) => {
+            try {
+                fetch("/api/chat/message", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        session_name: "Portfolio Building",
+                        role: "assistant",
+                        content: message.content,
+                    }),
+                });
+            } catch (error) {
+                console.error(`Failed to save assistant message:`, error);
+            }
+        },
+        onError: (error) => {
+            console.error("Chat error:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error.message || "Failed to process your request",
+            });
+        },
+        onToolCall: (toolCall) => {
+            console.log("toolCall", toolCall);
+        },
+    });
 
     const resetPreferences = () => {
         setPreferences({
@@ -94,8 +175,10 @@ export function PreferencesDialog({
 
     useEffect(() => {
         if (open) {
-            resetPreferences();
             setActiveStep(0);
+            setDialogState("welcome");
+        } else {
+            setDialogState("closed");
         }
     }, [open]);
 
@@ -166,25 +249,22 @@ export function PreferencesDialog({
     const handleNext = async () => {
         setActiveStep((prev) => prev + 1);
 
-        // Only save if the step has actual selections (not skipping)
-        if (calculateStepCompletion(activeStep) > 0.05) {
-            const response = await fetch("/api/user/preferences", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(preferences),
-            });
+        const response = await fetch("/api/user/preferences", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(preferences),
+        });
 
-            if (!response.ok) {
-                console.error("Failed to save preferences:", response.statusText);
-                toast({
-                    title: "Error saving preferences",
-                    description: response.statusText,
-                    variant: "destructive",
-                });
-                return;
-            }
+        if (!response.ok) {
+            console.error("Failed to save preferences:", response.statusText);
+            toast({
+                title: "Error saving preferences",
+                description: response.statusText,
+                variant: "destructive",
+            });
+            return;
         }
     };
 
@@ -192,7 +272,7 @@ export function PreferencesDialog({
         setActiveStep((prev) => prev - 1);
     };
 
-    const handleSubmit = async () => {
+    const handlePreferencesSubmit = async () => {
         try {
             const response = await fetch("/api/user/preferences", {
                 method: "POST",
@@ -211,10 +291,24 @@ export function PreferencesDialog({
                 });
                 return;
             }
-            onOpenChange(false);
+            setDialogState("completion");
         } catch (error) {
             console.error("Error saving preferences:", error);
         }
+    };
+
+    const handleStepClick = (step: number) => {
+        setActiveStep(step);
+    };
+
+    const handleStartPortfolio = async () => {
+        onOpenChange(false);
+        startNewChat();
+        // setSessionName("Portfolio Building");
+        handleInputChange({ target: { value: "Build me a crypto portfolio!" } } as any);
+        setTimeout(() => {
+            handleSubmit(new Event("submit") as any);
+        }, 500);
     };
 
     type InvestmentGoal =
@@ -233,7 +327,7 @@ export function PreferencesDialog({
         | "Yield optimization opportunities"
         | "Indicator signals";
 
-    const renderStepContent = (step: number) => {
+    const renderFormContent = (step: number) => {
         switch (step) {
             case 0:
                 return (
@@ -256,15 +350,21 @@ export function PreferencesDialog({
                             >
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="Beginner" id="beginner" />
-                                    <Label htmlFor="beginner">Beginner</Label>
+                                    <Label htmlFor="beginner" className="cursor-pointer">
+                                        Beginner
+                                    </Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="Intermediate" id="intermediate" />
-                                    <Label htmlFor="intermediate">Intermediate</Label>
+                                    <Label htmlFor="intermediate" className="cursor-pointer">
+                                        Intermediate
+                                    </Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="Advanced" id="advanced" />
-                                    <Label htmlFor="advanced">Advanced</Label>
+                                    <Label htmlFor="advanced" className="cursor-pointer">
+                                        Advanced
+                                    </Label>
                                 </div>
                             </RadioGroup>
                         </div>
@@ -289,7 +389,12 @@ export function PreferencesDialog({
                                             value={frequency}
                                             id={frequency.toLowerCase()}
                                         />
-                                        <Label htmlFor={frequency.toLowerCase()}>{frequency}</Label>
+                                        <Label
+                                            htmlFor={frequency.toLowerCase()}
+                                            className="cursor-pointer"
+                                        >
+                                            {frequency}
+                                        </Label>
                                     </div>
                                 ))}
                             </RadioGroup>
@@ -303,6 +408,7 @@ export function PreferencesDialog({
                                         key !== "other" && (
                                             <div key={key} className="flex items-center space-x-2">
                                                 <Checkbox
+                                                    className=""
                                                     id={key}
                                                     checked={value}
                                                     onCheckedChange={(checked: boolean) =>
@@ -321,7 +427,10 @@ export function PreferencesDialog({
                                                         )
                                                     }
                                                 />
-                                                <Label htmlFor={key} className="capitalize">
+                                                <Label
+                                                    htmlFor={key}
+                                                    className="capitalize cursor-pointer"
+                                                >
                                                     {key.replace(/([A-Z])/g, " $1").trim()}
                                                 </Label>
                                             </div>
@@ -373,7 +482,9 @@ export function PreferencesDialog({
                                                 }))
                                             }
                                         />
-                                        <Label htmlFor={goal}>{goal}</Label>
+                                        <Label htmlFor={goal} className="cursor-pointer">
+                                            {goal}
+                                        </Label>
                                     </div>
                                 ))}
                             </div>
@@ -391,12 +502,12 @@ export function PreferencesDialog({
                                         ...prev,
                                         investmentGoals: {
                                             ...prev.investmentGoals!,
-                                            riskLevel: value as 1 | 2 | 3 | 4 | 5,
+                                            riskLevel: value as RiskLevel,
                                         },
                                     }))
                                 }
                             />
-                            <div className="flex justify-between text-sm text-muted-foreground">
+                            <div className="flex justify-between text-sm text-slate-300/50">
                                 <span>Very Low</span>
                                 <span>Very High</span>
                             </div>
@@ -440,7 +551,9 @@ export function PreferencesDialog({
                                                 }))
                                             }
                                         />
-                                        <Label htmlFor={strategy}>{strategy}</Label>
+                                        <Label htmlFor={strategy} className="cursor-pointer">
+                                            {strategy}
+                                        </Label>
                                     </div>
                                 ))}
                             </div>
@@ -478,8 +591,10 @@ export function PreferencesDialog({
                                     <div key={value} className="flex items-center space-x-2">
                                         <RadioGroupItem value={value} id={value} />
                                         <div className="flex flex-col">
-                                            <Label htmlFor={value}>{value}</Label>
-                                            <span className="text-sm text-muted-foreground">
+                                            <Label htmlFor={value} className="cursor-pointer">
+                                                {value}
+                                            </Label>
+                                            <span className="text-sm text-slate-300/50">
                                                 {description}
                                             </span>
                                         </div>
@@ -510,7 +625,7 @@ export function PreferencesDialog({
                                             }))
                                         }
                                     />
-                                    <Label htmlFor="usingDeFiPlatforms">
+                                    <Label htmlFor="usingDeFiPlatforms" className="cursor-pointer">
                                         Currently using DeFi platforms
                                     </Label>
                                 </div>
@@ -528,7 +643,10 @@ export function PreferencesDialog({
                                             }))
                                         }
                                     />
-                                    <Label htmlFor="crossChainInvestments">
+                                    <Label
+                                        htmlFor="crossChainInvestments"
+                                        className="cursor-pointer"
+                                    >
                                         Interested in cross-chain investments
                                     </Label>
                                 </div>
@@ -563,7 +681,10 @@ export function PreferencesDialog({
                                                         )
                                                     }
                                                 />
-                                                <Label htmlFor={key} className="capitalize">
+                                                <Label
+                                                    htmlFor={key}
+                                                    className="capitalize cursor-pointer"
+                                                >
                                                     {key === "arbitrumOptimismBase"
                                                         ? "L2s (Arbitrum/Optimism/Base)"
                                                         : key.replace(/([A-Z])/g, " $1").trim()}
@@ -615,7 +736,9 @@ export function PreferencesDialog({
                                                 }))
                                             }
                                         />
-                                        <Label htmlFor={recommendation}>{recommendation}</Label>
+                                        <Label htmlFor={recommendation} className="cursor-pointer">
+                                            {recommendation}
+                                        </Label>
                                     </div>
                                 ))}
                             </div>
@@ -645,13 +768,15 @@ export function PreferencesDialog({
                                 ].map(([value, description]) => (
                                     <div key={value} className="flex items-center space-x-2">
                                         <RadioGroupItem value={value} id={value} />
-                                        <Label htmlFor={value}>{description}</Label>
+                                        <Label htmlFor={value} className="cursor-pointer">
+                                            {description}
+                                        </Label>
                                     </div>
                                 ))}
                             </RadioGroup>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="pt-4 space-y-4">
                             <div className="flex items-center space-x-2">
                                 <Checkbox
                                     id="marketMovementAlerts"
@@ -668,7 +793,7 @@ export function PreferencesDialog({
                                         }))
                                     }
                                 />
-                                <Label htmlFor="marketMovementAlerts">
+                                <Label htmlFor="marketMovementAlerts" className="cursor-pointer">
                                     Receive alerts for major market movements
                                 </Label>
                             </div>
@@ -687,13 +812,13 @@ export function PreferencesDialog({
             <DialogContent
                 className={cn(
                     "sm:max-w-[500px]",
+                    dialogState === "completion" && "animate-completion-pulse",
                     "max-h-[calc(100vh-5rem)]",
                     "bg-neutral-900/70",
                     "text-white",
                     "overflow-hidden",
                     "!rounded-3xl",
                     "flex flex-col",
-                    "antialiased",
                     "antialiased",
                     "mt-[5vh]",
                     "translate-y-0",
@@ -707,44 +832,144 @@ export function PreferencesDialog({
                     "focus-within:border-0",
                     "focus-visible:outline-none",
                     "focus-visible:ring-0",
-                    "focus-visible:border-0"
+                    "focus-visible:border-0",
+                    "select-none",
+                    "transition-all duration-300 ease-out"
                 )}
             >
-                <div className="flex-none">
-                    <DialogHeader>
-                        <DialogTitle className="">Investor Preferences</DialogTitle>
-                    </DialogHeader>
-                    <Stepper
-                        steps={steps}
-                        activeStep={activeStep}
-                        progress={calculateStepCompletion(activeStep)}
-                        className="px-0 py-2"
-                    />
-                </div>
-                <div className="space-y-8 overflow-y-auto flex-1">
-                    <div className="mt-2">{renderStepContent(activeStep)}</div>
-
-                    <div className="flex justify-between mt-8">
-                        {activeStep > 0 && (
-                            <Button
-                                variant="outline"
-                                onClick={handleBack}
-                                disabled={activeStep === 0}
-                            >
-                                Back
-                            </Button>
+                {dialogState === "completion" && (
+                    <div
+                        className={cn(
+                            "absolute bottom-8 right-6",
+                            "w-[100px] h-[40px]",
+                            "bg-accent",
+                            "origin-center",
+                            "animate-completion-pulse",
+                            "rounded-full",
+                            "blur-md",
+                            "z-[-10]"
                         )}
-                        <Button
-                            onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext}
-                        >
-                            {activeStep === steps.length - 1
-                                ? "Submit"
-                                : calculateStepCompletion(activeStep) <= 0.05
-                                ? "Skip"
-                                : "Next"}
-                        </Button>
-                    </div>
-                </div>
+                    />
+                )}
+
+                {dialogState === "welcome" && (
+                    <>
+                        <DialogHeader className="flex items-center gap-4">
+                            <div className="hover:rotate-[-12deg] transition-all duration-100 ease-out">
+                                <img
+                                    src="/logo-w.svg"
+                                    alt="Welcome"
+                                    className="my-4 w-24 h-24 animate-float "
+                                    draggable={false}
+                                />
+                            </div>
+
+                            <DialogTitle className="flex items-center gap-2 font-semibold font-bricolage">
+                                Hi there!
+                            </DialogTitle>
+                            <DialogDescription className="text-base text-neutral-300 text-center text-pretty">
+                                Let's customize your investment experience.
+                                <br />
+                                This quick questionnaire will help Crème'ai understand your:
+                            </DialogDescription>
+                            <ul className="text-base list-disc list-inside mt-2 space-y-1 text-neutral-300">
+                                <li>Investment experience and goals</li>
+                                <li>Risk tolerance and preferences</li>
+                                <li>DeFi engagement level</li>
+                                <li>AI assistance preferences</li>
+                            </ul>
+                        </DialogHeader>
+                        <DialogFooter className="mt-8">
+                            <Button
+                                variant="main"
+                                onClick={() => setDialogState("form")}
+                                className="w-full"
+                            >
+                                Let's Get Started
+                            </Button>
+                        </DialogFooter>
+                    </>
+                )}
+
+                {dialogState === "completion" && (
+                    <>
+                        <DialogHeader className="flex items-center gap-4">
+                            <div className="hover:rotate-[-12deg] transition-all duration-100 ease-out">
+                                <img
+                                    src="/logo-w.svg"
+                                    alt="Welcome"
+                                    className="my-4 w-24 h-24 animate-float "
+                                    draggable={false}
+                                />
+                            </div>
+                            <DialogTitle className="flex items-center gap-2">All Set!</DialogTitle>
+                            <DialogDescription className="text-base text-neutral-300">
+                                Thanks for completing your investor profile!
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="mt-4">
+                            <Button
+                                variant="main"
+                                onClick={() => {
+                                    setDialogState("closed");
+                                    onOpenChange(false);
+                                }}
+                                className="w-full"
+                            >
+                                Let's start building your portfolio!
+                            </Button>
+                        </DialogFooter>
+                    </>
+                )}
+
+                {dialogState === "form" && (
+                    <>
+                        <div className="flex-none">
+                            <DialogHeader>
+                                <DialogTitle className="">Investor Preferences</DialogTitle>
+                            </DialogHeader>
+                            <Stepper
+                                steps={steps}
+                                activeStep={activeStep}
+                                progress={calculateStepCompletion(activeStep)}
+                                className="px-0 py-2"
+                                onStepClick={handleStepClick}
+                            />
+                        </div>
+                        <div className="space-y-8 overflow-y-auto flex-1">
+                            <div className="mt-4">{renderFormContent(activeStep)}</div>
+
+                            <div className="flex justify-between mt-8">
+                                {activeStep > 0 ? (
+                                    <Button
+                                        variant="main"
+                                        onClick={handleBack}
+                                        disabled={activeStep === 0}
+                                        className="bg-slate-300/30 hover:bg-slate-300/50"
+                                    >
+                                        Back
+                                    </Button>
+                                ) : (
+                                    <div />
+                                )}
+                                <Button
+                                    variant="main"
+                                    onClick={
+                                        activeStep === steps.length - 1
+                                            ? handlePreferencesSubmit
+                                            : handleNext
+                                    }
+                                >
+                                    {activeStep === steps.length - 1
+                                        ? "Submit"
+                                        : calculateStepCompletion(activeStep) <= 0.05
+                                        ? "Skip"
+                                        : "Next"}
+                                </Button>
+                            </div>
+                        </div>
+                    </>
+                )}
             </DialogContent>
         </Dialog>
     );

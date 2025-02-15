@@ -69,3 +69,11 @@ CREATE TABLE enso_tokens (
     primary_address TEXT NOT NULL,
     CONSTRAINT unique_chain_address UNIQUE (chain_id, address)
 );
+CREATE TABLE safe_portfolio (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    user_id TEXT NOT NULL REFERENCES account(id),
+    portfolio JSONB NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    chain_id integer,
+    active BOOLEAN DEFAULT FALSE
+);

@@ -2,7 +2,7 @@ import { safeSystemPrompt } from '@/lib/systemPrompt';
 import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { privy } from '@/lib/privy';
-import { createPortfolio } from '@/lib/tools/safe/createPortfolio';
+import { createPortfolio, deployStrategy } from '@/lib/tools/safe';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -24,7 +24,8 @@ export async function POST(req: Request) {
             ],
             temperature: 0.1,
             tools: {
-                createPortfolio
+                createPortfolio,
+                deployStrategy
             },
             toolCallStreaming: true,
         });

@@ -71,8 +71,11 @@ export function getNetworkByChainId(chainId: string) {
 
 export function getAlchemyChainByChainId(chainId: string) {
   const caip2 = extractCAIP2(chainId);
-  if (!caip2) return "Unknown";
-  if (caip2.namespace === "eip155") {
+  let chain = "Unknown";
+  if (!caip2) {
+    chain = chainId;
+  }
+  if (caip2 && caip2.namespace === "eip155" || !caip2 && chain !== "Unknown") {
     switch (Number(caip2?.chainId)) {
       case base.id:
         return "base-mainnet";
@@ -86,7 +89,7 @@ export function getAlchemyChainByChainId(chainId: string) {
         return "Unknown";
     }
   }
-  else if (caip2.namespace === "solana") {
+  else if (caip2 && caip2.namespace === "solana") {
     return "Solana";
   }
   return "Unknown";

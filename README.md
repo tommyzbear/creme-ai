@@ -13,6 +13,7 @@ Deployed at [crème'ai](https://creme-ai.vercel.app)
 -   [AI chat interface I](https://drive.google.com/file/d/18K4_e1fPBkw7CNu9LPnPqW0JsJHsjM8C/view?usp=drive_link)
 -   [AI chat interface II & Overall App Review](https://drive.google.com/file/d/1cqCOAsxGJ7Zg70z_nKI7Jisq8XYcBScy/view?usp=drive_link)
 -   [User Settings and embedded wallet access](https://drive.google.com/file/d/1kbAwETS-0V4MkA2UPnqZr9GXOjGrnemc/view?usp=sharing)
+-   [Deploying a strategy](https://drive.google.com/file/d/1sPPYbzzy0nxuPChfLFJzjHEvsA20SaSt/view?usp=sharing)
 
 ## 1. Frontend Framework
 

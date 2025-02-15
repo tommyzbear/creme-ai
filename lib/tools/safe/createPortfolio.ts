@@ -1,4 +1,6 @@
+import { privy } from '@/lib/privy';
 import { indexService } from '@/lib/services/safe/indexService';
+import { supabase } from '@/lib/supabase';
 import { z } from 'zod';
 
 export const createPortfolio = {
@@ -8,6 +10,7 @@ export const createPortfolio = {
     }),
     execute: async ({ chain }: { chain: string }) => {
         try {
+            const claims = await privy.getClaims();
             console.log(`Creating portfolio for chain ${chain}`);
             let chainId = "";
             switch (chain) {
@@ -32,9 +35,29 @@ export const createPortfolio = {
 
             console.log(`Fetching token allocation for chain ${chainId}`);
 
-
             const tokenAllocation = await indexService.getMcWeightedByChain(chainId);
-            return tokenAllocation;
+
+            const { data: portfolio, error: portfolioError } = await supabase
+                .from('safe_portfolio')
+                .upsert({
+                    user_id: claims.userId,
+                    portfolio: tokenAllocation,
+                    chain_id: Number(chainId),
+                }, {
+                    onConflict: 'user_id,chain_id'
+                })
+                .select()
+                .single();
+
+            if (portfolioError) {
+                console.error('Portfolio creation error:', portfolioError);
+                return {
+                    error: portfolioError,
+                    message: 'Failed to create portfolio'
+                };
+            }
+
+            return portfolio;
         } catch (error) {
             console.error('Portfolio creation error:', error);
             return {

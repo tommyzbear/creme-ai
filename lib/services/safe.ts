@@ -220,6 +220,8 @@ const preSignCowSwapTransaction = async (chain: Chain, safeAddress: string, tran
         onlyCalls: true,
     });
 
+    console.log('safeTx', safeTx)
+
     const safeTxHash = await safe.getTransactionHash(safeTx)
     const signature = await safe.signHash(safeTxHash)
 

@@ -320,3 +320,12 @@ export interface EnsoToken {
     >[];
     primary_address: string;
 }
+
+export interface SafePortfolio {
+    id: number;
+    user_id: string;
+    portfolio: AllocationEntry[];
+    created_at: string;
+    chain_id: number;
+    active: boolean;
+}

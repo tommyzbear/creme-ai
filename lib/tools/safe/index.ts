@@ -1,3 +1,7 @@
 import { createPortfolio } from './createPortfolio';
+import { deployStrategy } from './deployStrategy';
 
-export const tools = [createPortfolio];
+export {
+    createPortfolio,
+    deployStrategy
+}

@@ -75,7 +75,16 @@ export function SafePortfolioContainer({ className, onFocus, lastFocus }: SafePo
         }
     }, []);
 
-    const totalValue = balances.reduce((sum, token) => sum + Number(token.value), 0);
+    const isDust = (token: { value: string; quantity: string }) => {
+        console.log(token);
+        const value = Number(token.value);
+        const quantity = Number(token.quantity);
+        return value < 0.01 || quantity < 0.00001; // Ignore tiny values and quantities
+    };
+
+    const totalValue = balances
+        .filter(token => !isDust(token))
+        .reduce((sum, token) => sum + Number(token.value), 0);
 
     const copyToClipboard = async (text: string) => {
         try {
@@ -286,12 +295,12 @@ export function SafePortfolioContainer({ className, onFocus, lastFocus }: SafePo
                             <HoldingsDashboard
                                 isLoading={isLoading}
                                 totalValue={totalValue}
-                                tokens={balances}
+                                tokens={balances.filter(token => !isDust(token))}
                                 onRefresh={handlePortfolioRefresh}
                             />
                             <TokensTable
-                                tokens={balances}
-                                totalValue={balances.reduce((acc, token) => acc + Number(token.value), 0)}
+                                tokens={balances.filter(token => !isDust(token))}
+                                totalValue={totalValue}
                                 isLoading={isLoading}
                                 isExpanded={isPortfolioFocused(lastFocus)}
                             />

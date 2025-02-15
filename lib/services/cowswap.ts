@@ -35,6 +35,7 @@ const getSwapPreSignTransaction = async (
         buyToken,
         buyTokenDecimals,
         amount,
+        slippageBps: 100, // 1% to ensure execution
     };
 
     const advancedParameters: SwapAdvancedSettings = {

@@ -1,8 +1,9 @@
 import { privy } from '@/lib/privy';
 import { safeService } from '@/lib/services/safe';
 import { arbitrum, base, mainnet, optimism } from 'viem/chains';
-import { enso, ensoService } from '@/lib/services/enso';
+import { ensoService } from '@/lib/services/enso';
 import { supabase } from '@/lib/supabase';
+import { cowswap } from '@/lib/services/cowswap';
 
 export async function POST(req: Request) {
     try {
@@ -58,50 +59,28 @@ export async function POST(req: Request) {
         const tokenData = await ensoService
             .getTokenData(chain.id, undefined, !tokenIn || tokenIn.length === 0 ? balances.filter((b) => b.token.length === 42).map((b) => b.token) : tokenIn);
 
-        if (tokenData.length === 0 || !tokenData.find((token) => token.underlyingTokens && token.underlyingTokens.length > 0)) {
-            throw new Error(`No Defi token found, for ${tokenIn}`);
+        if (tokenData.length === 0 || !tokenData.find((token) => token.type === "base")) {
+            throw new Error(`No base token found, for ${tokenIn}`);
         }
 
-        const defiTokens = tokenData.filter((token) => token.underlyingTokens && token.underlyingTokens.length > 0);
+        const baseTokens = tokenData.filter((token) => token.type === "base");
         const txHashes = []
-        console.log(defiTokens)
-        for (const token of defiTokens) {
-            const underlyingToken = token.underlyingTokens.find((t) => t.type === "base");
-
-            if (!underlyingToken) {
-                console.error(`No underlying token found, for ${token.address}`);
-                continue;
-            };
-
-            // Get route data from Enso
-            const routeRequest = {
-                fromAddress: safeAddress,
-                receiver: safeAddress,
-                spender: safeAddress,
-                chainId: chain.id,
-                amountIn: balances.find((b) => b.token.toLowerCase() === token.address.toLowerCase())?.amount,
-                tokenIn: token.address,
-                tokenOut: underlyingToken.address,
-                routingStrategy: "delegate" as const,
-            };
-
+        for (const token of baseTokens) {
             try {
-                const routeData = await enso.getRouterData(routeRequest);
-
-                if (!routeData || !routeData.tx) {
-                    throw new Error('Failed to get route data from Enso');
-                }
-
-                // Create and sign transaction using Safe
-                const txHash = await safeService.processEnsoTransaction(
-                    chain,
-                    safeAddress,
-                    routeData.tx
+                const preSignTransaction = await cowswap.getSwapPreSignTransaction(
+                    data.address,
+                    token.address,
+                    token.decimals,
+                    cowswap.getWethAddress(chain),
+                    18,
+                    balances.find((b) => b.token.toLowerCase() === token.address.toLowerCase())?.amount || "0",
+                    chain
                 );
 
+                const txHash = await safeService.preSignCowSwapTransaction(chain, data.address, preSignTransaction);
                 txHashes.push(txHash);
             } catch (error) {
-                console.error(`Failed to unstake ${token.address}:`, error);
+                console.error(`Failed to swap ${token.address} to WETH:`, error);
             }
         }
 

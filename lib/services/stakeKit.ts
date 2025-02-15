@@ -388,13 +388,13 @@ export class StakeKitClient {
           const match = tokenAddr === yieldAddr &&
             tokenNetwork === normalizedNetwork;
 
-          console.log('Token match check:', {
-            tokenAddress: tokenAddr,
-            yieldAddress: yieldAddr,
-            tokenNetwork: tokenNetwork,
-            yieldNetwork: normalizedNetwork,
-            isMatch: match
-          });
+          // console.log('Token match check:', {
+          //   tokenAddress: tokenAddr,
+          //   yieldAddress: yieldAddr,
+          //   tokenNetwork: tokenNetwork,
+          //   yieldNetwork: normalizedNetwork,
+          //   isMatch: match
+          // });
           return match;
         });
 
@@ -466,7 +466,7 @@ export class StakeKitClient {
 
       // Sort by APY in descending order
       const sortedYields = filteredYields.sort((a, b) => b.apy - a.apy);
-      console.log('Final sorted yields:', sortedYields);
+      // console.log('Final sorted yields:', sortedYields);
 
       return sortedYields;
     } catch (error) {

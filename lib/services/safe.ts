@@ -244,7 +244,9 @@ const preSignCowSwapTransaction = async (chain: Chain, safeAddress: string, tran
         const safeTransaction = await apiKit.getTransaction(safeTxHash)
         const txResponse = await safe.executeTransaction(safeTransaction);
         console.log(`Transaction executed successfully [${txResponse.hash}]`);
+        return txResponse.hash;
     }
+    return safeTxHash;
 }
 
 

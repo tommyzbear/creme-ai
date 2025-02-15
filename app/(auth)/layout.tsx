@@ -5,7 +5,6 @@ import PageTransition from "@/components/page-transition";
 import BlurredCursor from "@/components/ui/blurred-cursor";
 import GradientBackground from "@/components/gradient-background";
 import LeftAside from "@/components/left-aside";
-import { useNewsStore } from "@/stores/news-store";
 
 export const metadata = {
     title: "Home",

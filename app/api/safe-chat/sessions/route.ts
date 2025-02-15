@@ -21,7 +21,7 @@ export async function GET() {
             .from('chat_sessions')
             .select('session_id, session_name, timestamp')
             .eq('user_id', claims.userId)
-            .eq('chat_type', 'individual')
+            .eq('chat_type', 'safe')
             .order('timestamp', { ascending: false })
 
         if (error) throw error;

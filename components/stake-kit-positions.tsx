@@ -26,7 +26,10 @@ export function StakeKitPositions({ chainId }: StakeKitPositionsProps) {
         const data = await response.json();
         console.log("Fetched positions data:", data);
 
-        if (!response.ok) throw new Error(data.error);
+        if (!response.ok) 
+        {
+          return;
+        }
 
         // 
         const flattenedPositions = data.positions.flat()
